@@ -1,5 +1,14 @@
 module Canvas
 
-# package code goes here
+using Patchwork
+using Reactive
 
-end # module
+# style helpers
+style(elem::Elem, key, val)  = elem & [:style => [key => val]]
+
+include("length.jl")
+include("layout.jl")
+include("looks.jl")
+include("poetry.jl")
+
+end

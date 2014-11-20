@@ -1,0 +1,47 @@
+/* The Box model
+ *
+ * - Each box has 4 edges: the margin edge, the border edge, padding edge and the content edge
+ */
+
+/* Flow */
+
+.rendered_html .flow > *, .flow > * {
+   /* Make these things take exactly as much space as they need */
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    flex: initial;
+}
+
+.flow {
+    display: flex;
+    flex-wrap: nowrap;
+    align-content: flex-start;
+}
+
+.flow.direction-down {
+    flex-direction: column;
+}
+
+.flow.direction-up {
+    flex-direction: column-reverse;
+}
+
+.flow.direction-right {
+    flex-direction: row;
+}
+
+.flow.direction-left {
+    flex-direction: row-reverse;
+}
+
+.flow.direction-inward {
+}
+
+.flow.direction-outward {
+}
+
+.container {
+}
