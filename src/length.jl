@@ -1,5 +1,7 @@
 # Length
 
+using JSON
+
 export mm, inch, pt, px
 
 immutable Length{unit}
@@ -18,4 +20,4 @@ const px = Length{:px}(1.0)
 -{T <: Length}(l::T, r::T) = T(l.value - r.value)
 
 Base.string{unit}(x::Length{unit}) = string(x.value, unit)
-
+JSON._print(io::IO, ::JSON.State, x::Length) = Base.print(io, "\"", string(x), "\"")

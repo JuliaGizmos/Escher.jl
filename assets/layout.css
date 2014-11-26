@@ -10,38 +10,35 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    flex: initial;
 }
 
 .flow {
-    display: flex;
-    flex-wrap: nowrap;
-    align-content: flex-start;
+    display: inline-flex;
 }
 
-.flow.direction-down {
-    flex-direction: column;
-}
-
-.flow.direction-up {
-    flex-direction: column-reverse;
-}
-
-.flow.direction-right {
+.flow-right {
     flex-direction: row;
 }
 
-.flow.direction-left {
+.flow-left {
     flex-direction: row-reverse;
 }
 
-.flow.direction-inward {
+.flow-down {
+    flex-direction: column;
 }
 
-.flow.direction-outward {
+.flow-up {
+    flex-direction: column-reverse;
 }
 
-.container {
+.padding-box {
+    display: inherit;
+    flex: inherit;
+}
+
+.flow-inward {
+}
+
+.flow-outward {
 }
