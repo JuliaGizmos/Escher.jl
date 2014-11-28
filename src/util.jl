@@ -1,3 +1,5 @@
+export cycle
+
 immutable ClassSet
     classes::Set{String}
 end
@@ -16,3 +18,26 @@ function addclass(el::Elem, cls)
         el & [:className => ClassSet(cls)]
     end
 end
+
+immutable CyclingIterator{T} <: AbstractVector{T}
+    array::AbstractVector{T}
+end
+
+cycle(itr) = CyclingIterator(itr)
+function take_n(n::Int, c::CyclingIterator)
+    l = length(c.array)
+    if l >= n
+        return c.array[1:n]
+    else
+        return [c.array, take_n(n-l, c)]
+    end
+end
+
+Base.map(f::Union(Function, Type), xs::AbstractArray, itr::CyclingIterator) =
+    map(f, xs, take_n(itr, length(xs)))
+
+# Utility functions for Elem
+
+boolattr(x::Union(Symbol, String)) = [:attributes => [x => x]]
+boolattr(xs::AbstractVector) =
+    [:attributes => [x => x for x in xs]]

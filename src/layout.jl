@@ -1,4 +1,5 @@
 import Patchwork.div
+import Base: convert
 
 export Offset,
        place,
@@ -11,6 +12,8 @@ export Offset,
        Down,
        Inward,
        Outward,
+       flow,
+       flex,
        pad,
        padcontent
 
@@ -23,14 +26,9 @@ immutable Leaf <: Tile
     element::Elem
 end
 
-convert(::Type{Tile}, x::Elem) = Leaf(x)
+convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
 
-abstract Axis
-
-immutable XAxis <: Axis end
-immutable YAxis <: Axis end
-immutable ZAxis <: Axis end
-
+# 1. Placing a Tile inside another
 abstract Position
 
 immutable Corner{X, Y} <: Position end
@@ -54,9 +52,33 @@ immutable Relative{T <: Corner}
     # z::Length
 end
 
-# 1. place an element inside another
+immutable Positioned <: Tile
+    contained_elem::Tile
+    containing_elem::Tile
+    position::Relative
+end
 
-immutable Direction{T <: Axis, direction} end
+place(a, b, pos::Relative) =
+    Place(a, b, pos)
+
+# 2. Axes, Directions and Flow
+
+abstract Axis
+
+abstract CartesianAxis <: Axis
+
+immutable XAxis <: CartesianAxis end
+immutable YAxis <: CartesianAxis end
+immutable ZAxis <: CartesianAxis end
+
+abstract FlowRelativeAxis <: Axis
+
+immutable MainAxis  <: FlowRelativeAxis end
+immutable CrossAxis <: FlowRelativeAxis end
+
+abstract DirectionAlong{T <: Axis}
+
+immutable Direction{T <: Axis, direction} <: DirectionAlong{T} end
 
 const Right   = Direction{XAxis, +1}
 const Left    = Direction{XAxis, -1}
@@ -65,26 +87,86 @@ const Down    = Direction{YAxis, -1}
 const Outward = Direction{ZAxis, +1}
 const Inward  = Direction{ZAxis, -1}
 
-string(d::Right)   = "right"
-string(d::Left)    = "left"
-string(d::Down)    = "down"
-string(d::Up)      = "up"
-string(d::Outward) = "outward"
-string(d::Inward)  = "inward"
+const MainStart  = Direction{MainAxis,  -1}
+const MainEnd    = Direction{MainAxis,  +1}
+const CrossStart = Direction{CrossAxis, -1}
+const CrossEnd   = Direction{CrossAxis, +1}
 
-# 2. pad content
+reverse{T <: Axis}(::Direction{T, -1}) = Direction{T, +1}()
+reverse{T <: Axis}(::Direction{T, +1}) = Direction{T, -1}()
+
+immutable Flow{Stack <: Union(Axis, Direction),
+               Wrap <: Union(Direction, Nothing)}
+    tiles::AbstractVector{Tile}
+end
+
+flow{T <: Direction}(tiles, direction::T) =
+    Flow{T, Nothing}(tiles)
+
+flow{Dir <: Direction, Wrap <: Direction}(
+    tiles,
+    stack::Dir,
+    wrap::Wrap) = Fill{Dir, Wrap}(tiles)
+
+# 3. Flexeding and alignment
+
+immutable Flexed <: Tile
+    tile::Tile
+    factor::Float64
+end
+
+flex(t, factor::Real) = Flexed(t, factor)
+flex(t) = Flexed(t, 1.0)
+flex{T <: Real}(t, factor::AbstractVector{T}) =
+    map(flex, t, factor)
+
+@vectorize_1arg Any flex
+
+abstract AlignContext
+immutable Items <: AlignContext end
+immutable Content <: AlignContext end
+immutable Self <: AlignContext end
+
+immutable Aligned{Ctx <: AlignContext,
+                  To <: Union(Direction, Axis)} <: Tile
+    tile::Tile
+end
+
+align(flow::Flow, d::Union(Direction, Axis)) =
+    align(flow, Items(), d)
+
+align(flow::Flow, ::Items, d::Union(Direction, Axis)) =
+    Aligned{Items}(flow, d)
+
+align(anything, ::Items, d::Union(Direction, Axis)) =
+    error("You can only align items inside a Flow")
+
+align(tile, d::Union(Direction, Axis)) =
+    Aligned{Self}(tile, d)
+
+align{T <: AlignContext}(tile, ctx::T, d::Union(Direction, Axis)) =
+    Aligned{T}(tile, d)
+
+# 4. Pad content
+
+# we show the finger to CSS's margins, they are far from simple
+# to reason about and have special meanings in different contexts
+# (auto margin, margin collapsing etc), if you want to
+# give a fixed space around a tile, you can pad it. `pad` in
+# Canvas wraps the tile in another tile and adds padding.
+# to pad an element like you would in CSS, use `padcontent`.
+
 immutable Padded{T <: Union(Axis, Direction, Nothing)} <: Tile
     tile::Tile
     len::Length
 end
 
 padcontent(tile, len::Length) =
-    Padded{nothing}(tile, len)
+    Padded{Nothing}(tile, len)
 
 padcontent{T <: Union(Axis, Direction)}(
     tile, axis::T,
     len::Length) = Padded{T}(tile, len)
-
 
 immutable Wrap <: Tile
     tile::Tile
@@ -92,37 +174,3 @@ end
 
 pad(tile, args...) =
     padcontent(Wrap(tile), args...)
-
-# 3. flow / fill
-
-immutable Flow{Stack <: Direction, Wrap <: Union(Direction, Nothing)}
-    tiles::AbstractVector{Tile}
-end
-
-flow{T <: Direction}(tiles, direction::T) =
-    Flow{T, nothing}(tiles)
-
-flow{Dir <: Direction, Wrap <: Direction}(
-    tiles,
-    stack::Direction,
-    wrap::Wrap) = Fill{Dir, Wrap}(tiles)
-
-abstract AlignContext
-
-immutable Outer{T <: Direction} <: AlignContext end
-immutable Content <: AlignContext end
-
-######################################################################
-
-# CSS Setup
-function load_layout_css()
-    layoutcss = joinpath(Pkg.dir("Canvas"), "assets", "layout.css")
-    display(MIME("text/html"), "<style>$(
-        readall(open(layoutcss))
-    )</style>")
-end
-
-try
-    load_layout_css()
-catch
-end
