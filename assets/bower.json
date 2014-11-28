@@ -1,0 +1,34 @@
+{
+  "name": "Canvas",
+  "version": "0.0.0",
+  "homepage": "https://github.com/shashi/Canvas.jl",
+  "authors": [
+    "Shashi Gowda <shashigowda91@gmail.com>"
+  ],
+  "description": "Web bits for Canvas.jl",
+  "moduleType": [
+    "es6",
+    "globals"
+  ],
+  "keywords": [
+    "web",
+    "components",
+    "scientific",
+    "visualizations",
+    "julia",
+    "explorable",
+    "explanations"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "core-component-page": "Polymer/core-component-page#^0.5.0"
+  }
+}
