@@ -96,7 +96,7 @@ reverse{T <: Axis}(::Direction{T, -1}) = Direction{T, +1}()
 reverse{T <: Axis}(::Direction{T, +1}) = Direction{T, -1}()
 
 immutable Flow{Stack <: Union(Axis, Direction),
-               Wrap <: Union(Direction, Nothing)}
+               Wrap <: Union(Direction, Nothing)} <: Tile
     tiles::AbstractVector{Tile}
 end
 
