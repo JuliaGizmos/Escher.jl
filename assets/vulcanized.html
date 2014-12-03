@@ -15491,6 +15491,31 @@ that it uses one color only.
 
 
 
+
+
+<script>// IJulia setup
+if (IPython && window) {
+    window.addEventListener('polymer-ready', function () {
+        var commMgr = IPython.notebook.kernel.comm_manager,
+            comms = {}
+        window.addEventListener("signal-setup", function (ev) {
+            comms[ev.detail.signalId] =
+                commMgr.new_comm("canvas_to_jl", {"signalId": ev.detail.signalId})
+        })
+
+        window.addEventListener("signal-updated", function (ev) {
+            var comm = comms[ev.detail.signalId]
+            console.log("signal-updated", ev.detail)
+            if (!comm) {
+                console.log("Could not send message to comm, ", ev.detail)
+            } else {
+                comm.send(ev.detail.value)
+            }
+        })
+    })
+}
+
+</script>
 </head><body><div hidden="">
 <polymer-element name="paper-ripple" attributes="initialOpacity opacityDecayVelocity" assetpath="bower_components/paper-ripple/">
 <template>
@@ -23397,4 +23422,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 </script>
 </polymer-element>
+
+<polymer-element name="reactive-signal" attributes="signalId value" assetpath="">
+    <template>
+        <core-localstorage name="reactive-signal-{{signalId}}" value="{{value}}">
+        </core-localstorage>
+    </template>
+    <script>
+        Polymer('reactive-signal',{
+            queue: [], // TODO
+            domReady: function () {
+                this.fire("signal-setup", { signalId: this.signalId, value: this.value })
+            },
+            fireUpdate: function () {
+                this.fire("signal-updated", { signalId: this.signalId, value: this.value })
+            },
+            valueChanged: function () {
+                this.fireUpdate()
+            }
+        })
+    </script>
+</polymer-element>
+
+<!-- signal attribute value upon trigger -->
+<polymer-element name="attribute-signal" attributes="signalId trigger name" extends="reactive-signal" assetpath="">
+
+    <template></template>
+    <script>
+        Polymer('attribute-signal',{
+            trigger: "change",
+            name: "value",
+            domReady: function () {
+                var self = this
+                this.parentNode.addEventListener(this.trigger, function (ev) {
+                    self.value = this[self.name]
+                    return true
+                })
+                this.super()
+            }
+        })
+    </script>
+</polymer-element>
+
+<!-- more elements:
+
+    signal-absorb signalId
+    signal-sampleon signalId1 signalId2
+-->
 </div></body></html>

@@ -1,0 +1,50 @@
+<!-- generic signal -->
+<polymer-element name="reactive-signal" attributes="signalId value">
+    <template>
+        <core-localstorage name="reactive-signal-{{signalId}}" value="{{value}}">
+        </core-localstorage>
+    </template>
+    <script>
+        Polymer({
+            queue: [], // TODO
+            domReady: function () {
+                this.fire("signal-setup", { signalId: this.signalId, value: this.value })
+            },
+            fireUpdate: function () {
+                this.fire("signal-updated", { signalId: this.signalId, value: this.value })
+            },
+            valueChanged: function () {
+                this.fireUpdate()
+            }
+        })
+    </script>
+</polymer-element>
+
+<!-- signal attribute value upon trigger -->
+<polymer-element
+    name="attribute-signal"
+    attributes="signalId trigger name"
+    extends="reactive-signal">
+
+    <template></template>
+    <script>
+        Polymer({
+            trigger: "change",
+            name: "value",
+            domReady: function () {
+                var self = this
+                this.parentNode.addEventListener(this.trigger, function (ev) {
+                    self.value = this[self.name]
+                    return true
+                })
+                this.super()
+            }
+        })
+    </script>
+</polymer-element>
+
+<!-- more elements:
+
+    signal-absorb signalId
+    signal-sampleon signalId1 signalId2
+-->
