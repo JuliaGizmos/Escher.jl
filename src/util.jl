@@ -33,11 +33,10 @@ function take_n(n::Int, c::CyclingIterator)
     end
 end
 
-Base.map(f::Union(Function, Type), xs::AbstractArray, itr::CyclingIterator) =
-    map(f, xs, take_n(itr, length(xs)))
-
 # Utility functions for Elem
 
 boolattr(x::Union(Symbol, String)) = [:attributes => [x => x]]
 boolattr(xs::AbstractVector) =
     [:attributes => [x => x for x in xs]]
+
+genid(prefix) = prefix * string(gensym(), "#", "")

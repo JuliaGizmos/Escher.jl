@@ -4,45 +4,34 @@
 using Morsel
 using Canvas
 
-using Patchwork
+using Patchwork, Patchwork.HTML5
 using WebSockets
 using Morsel
-using CSP
+
+include("setup.jl")
 
 app = Morsel.app()
 
-route(app, GET | POST | PUT, "/") do req, res
-    render("home.tpl", list_of_canvases)
+route(app, GET, "/") do req, res
+    flow(map(x -> pad(x, 5mm), [div("Hello, World")]),
+            Right())
 end
 
-route(app, GET | POST | PUT, "/canvas/(.*)+") do req, res
-    render("canvas.tpl", canvas_object)
+route(app, GET, "/canvas/(.*)+") do req, res
+    p(string(req))
 end
 
-@async wsloop(pwd())
-start(app, 8000)
+@async start(app, 8080)
 
-export wsloop, zmqloop, handle
+using HttpServer
+using WebSockets
 
-abstract Request
-
-type Canvas
-    title::String
-    root::Elem
-end
-
-const canvases = CanvasIO[] # Canvases currently active
-
-function new_canvas(title::String, elem=nothing)
-    @async begin
-        pids = addprocs(1)
-        pid = pids[1]
-        remotecall(pid, init_canvas)
+wsh = WebSocketHandler() do req,client
+    while true
+        msg = read(client)
+        write(client, msg)
     end
-end
+  end
 
-function wsloop(directory)
-    @async while true
-    end
-end
-
+server = Server(wsh)
+run(server,8081)

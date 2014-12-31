@@ -3,16 +3,23 @@ module Canvas
 using Patchwork
 using Reactive
 
+export Elem
+
 # style helpers
 style(elem::Elem, key, val)  = elem & [:style => [key => val]]
 
-# CSS Setup
+# Polymer Setup
+const include_file = joinpath(Pkg.dir("Canvas"), "assets", "vulcanized.html")
+const custom_elements_html = readall(open(include_file))
+
 function load_custom_elements()
-    layoutcss = joinpath(Pkg.dir("Canvas"), "assets", "vulcanized.html")
-    display(MIME("text/html"), readall(open(layoutcss)))
+    display(MIME("text/html"), custom_elements_html)
 end
 
-load_custom_elements()
+try
+    load_custom_elements()
+catch
+end
 
 include("length.jl")
 include("util.jl")
