@@ -2,30 +2,40 @@ module Canvas
 
 using Patchwork
 using Reactive
+using Requires
+
+import Base: writemime
 
 export Elem
 
-# style helpers
-style(elem::Elem, key, val)  = elem & [:style => [key => val]]
-
 # Polymer Setup
-const include_file = joinpath(Pkg.dir("Canvas"), "assets", "vulcanized.html")
-const custom_elements_html = readall(open(include_file))
-
-function load_custom_elements()
-    display(MIME("text/html"), custom_elements_html)
-end
-
-try
-    load_custom_elements()
-catch
-end
+const custom_elements = readall(Pkg.dir("Canvas", "assets", "vulcanized.html"))
 
 include("length.jl")
 include("util.jl")
-include("tiles.jl")
 include("layout.jl")
 include("looks.jl")
+include("signals.jl")
+include("widgets.jl")
 include("render.jl")
+
+# Fallback to Patchwork writemime
+writemime(io::IO, m::MIME"text/html", x::Tile) =
+    writemime(io, m, Canvas.render(x))
+
+@require IJulia begin
+    include("ijulia.jl")
+end
+
+@require Blink begin
+    # This is still defunct though
+    import BlinkDisplay, Graphics
+
+    Blink.windowinit() do w
+        Blink.head(w, custom_elements_html)
+    end
+
+    Graphics.media(Tile, Graphics.Media.Graphical)
+end
 
 end

@@ -1,5 +1,8 @@
 export render
 
+# style helpers
+style(elem::Elem, key, val)  = elem & [:style => [key => val]]
+
 # render function takes a tile and creates an Elem
 
 render(x::Elem) = x
@@ -102,5 +105,22 @@ _padding(pad::Padded{Up}) =
 _padding(pad::Padded{Down}) =
     [:paddingBottom => pad.len]
 
-render(padded) =
+render(padded::Padded) =
     render(padded.tile) & [:style => _padding(padded)]
+
+render(t::AttrSignal) =
+    render(t.tile) << Elem("attribute-signal",
+        attributes=[:name=>t.name, :attr=>t.attr, :trigger=>t.trigger])
+
+render(tile::StopSignal) =
+    Elem("stop-signal", render(tile.tile),
+        attributes=[:name=>tile.name])
+
+function render(sig::InboundSignal)
+    id = setup_transport(sig.signal)
+    elem = Elem("signal-transport",
+        render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
+end
+
+render{elem}(pape::Paper{elem}) =
+    Elem("paper-$elem", attributes=pape.attributes)
