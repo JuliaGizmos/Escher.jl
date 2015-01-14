@@ -1,8 +1,10 @@
 using Reactive
 
+export statesignal, stoppropagation, pipe
+
 immutable InboundSignal <: Tile
     tile::Tile
-    name::String
+    name::Symbol
     signal::Input
 end
 
@@ -13,31 +15,38 @@ setup_transport(x::Input) =
     error("Looks like there is no trasport set up for signals")
 
 # Don't allow a signal to propagate outward
-immutable StopSignal <: Tile
+immutable StopPropagation <: Tile
     tile::Tile
-    name::String
+    name::Symbol
 end
-stopsignal(tile::Tile, name::String) =
-    StopSignal(tile, name)
+stoppropagation(tile::Tile, name::Symbol) =
+    StopPropagation(tile, name)
 
 # A low level type representing drawing a signal from a Patchwork level attribute
 # This is ideally not part of user-facing API
-immutable AttrSignal <: Tile
+immutable StateSignal <: Tile
     tile::Tile
-    name::String
+    name::Symbol
     attr::String
     trigger::String
 end
 
-attrsignal(tile::Tile, name::String, attr="value", trigger="change") =
-    AttrSignal(tile, name, attr, trigger)
+statesignal(tile::Tile, name; attr="value", trigger="change") =
+    StateSignal(tile, name, attr, trigger)
 
-attrsignal(tile::Tile, sig::Signal, attr="value", trigger="change", absorb=true) =
-    pipe(attrsignal(tile, "val", attr, trigger), "val", sig) |>
-    x -> absorb ? stopsignal(x, "val") : x
+statesignal(w::Tile, x::Input; tag=:val, attr="value", trigger="change", absorb=true) =
+    pipe(statesignal(w, tag, attr=attr, trigger=trigger), tag, x) |>
+       (x -> absorb ? stoppropagation(x, tag) : x)
 
 # Utility functions for transports
-decodeJSON{T}(sig::Signal{T}, msg) = msg
+decodeJSON(sig::Input, val) = val
+
+istruthy(::Nothing) = false
+istruthy(b::Bool) = b
+istruthy(::None) = false
+istruthy(x) = !isempty(x)
+
+decodeJSON(sig::Input{Bool}, val) = istruthy(val)
 
 import Base.Random: UUID, uuid4
 

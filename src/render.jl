@@ -108,12 +108,12 @@ _padding(pad::Padded{Down}) =
 render(padded::Padded) =
     render(padded.tile) & [:style => _padding(padded)]
 
-render(t::AttrSignal) =
-    render(t.tile) << Elem("attribute-signal",
+render(t::StateSignal) =
+    render(t.tile) << Elem("state-signal",
         attributes=[:name=>t.name, :attr=>t.attr, :trigger=>t.trigger])
 
 render(tile::StopSignal) =
-    Elem("stop-signal", render(tile.tile),
+    Elem("stop-propagation", render(tile.tile),
         attributes=[:name=>tile.name])
 
 function render(sig::InboundSignal)
@@ -122,5 +122,21 @@ function render(sig::InboundSignal)
         render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
 end
 
-render{elem}(pape::Paper{elem}) =
-    Elem("paper-$elem", attributes=pape.attributes)
+### Widgets
+
+custom(name, attrs) = Elem(name, attributes=Dict(attrs))
+custom(name; attrs...) = Elem(name, attributes=Dict(attrs))
+
+render(s::Slider) =
+    custom("paper-slider", min=first(s.range), max=last(s.range), id=s.tag,
+           step=step(s.range), value=s.value, editable=s.editable,
+           disabled=s.disabled, secondaryProgress=s.secondaryprogress)
+
+render(c::BoolWidget{:checkbox}) =
+    custom("paper-checkbox", checked=c.value, id=c.tag, disabled=c.disabled)
+
+render(t::BoolWidget{:toggle}) =
+    custom("paper-toggle-button", checked=t.value, id=t.tag, disabled=t.disabled)
+
+render(l::Label) =
+    custom("core-label"; [:for => l.target]...) << render(l.label)

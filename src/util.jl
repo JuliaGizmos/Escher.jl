@@ -40,3 +40,10 @@ boolattr(xs::AbstractVector) =
     [:attributes => [x => x for x in xs]]
 
 genid(prefix) = prefix * string(gensym(), "#", "")
+
+const counters = Dict()
+function nexttag(prefix)
+    idx = get(counters, prefix, 1)
+    counters[prefix] = idx + 1
+    symbol(string(prefix, idx))
+end
