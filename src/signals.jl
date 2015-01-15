@@ -40,6 +40,8 @@ statesignal(w::Tile, x::Input; tag=:val, attr="value", trigger="change", absorb=
 
 # Utility functions for transports
 decodeJSON(sig::Input, val) = val
+decodeJSON{T <: String}(sig::Input{T}, ::Nothing) = ""
+decodeJSON{T <: String}(sig::Input{T}, val) = string(val)
 
 istruthy(::Nothing) = false
 istruthy(b::Bool) = b

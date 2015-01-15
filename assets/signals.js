@@ -17,7 +17,7 @@ if (IPython && window) {
             } else {
 
                 console.log("sending over", comm)
-                comm.send(ev.detail.value)
+                comm.send({value: ev.detail.value})
             }
         })
     })

@@ -7,8 +7,6 @@ export bind,
        dropdown,
        labelfor
 
-include("nullable.jl")
-
 # A widget
 abstract Widget <: Tile
 
@@ -80,17 +78,20 @@ immutable TextInput <: SignalWidget
     disabled::Bool
 end
 
-textinput(value::String=""; tag=nexttag("text"), floatinglabel=false, disabled=false) =
+textinput(value::String="";
+          tag=nexttag("text"),
+          label="",
+          floatinglabel=false,
+          disabled=false) =
     TextInput(tag, value, label, floatinglabel, disabled)
 
 bind(t::TextInput, x::Input) =
-    statesignal(c, x)
-
+   statesignal(t, x, tag=tag(t), attr="value", trigger="keyup")
 
 ## Dropdown
 
 immutable SelectionItem{T} <: Tile
-    key::T
+    value::T
     item::Tile
 end
 
@@ -99,6 +100,7 @@ immutable Dropdown <: SignalWidget
     value::String
     label::String
     items::Vector{SelectionItem}
+    disabled::Bool
 end
 
 makeitems(xs) =
@@ -115,6 +117,8 @@ immutable Label <: Widget
     target::Symbol
     label::Tile
 end
+
+# TODO: toolbar
 
 # FIXME
 labelfor(w::Widget, tile) = Label(w.tag, tile)

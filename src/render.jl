@@ -112,13 +112,13 @@ render(t::StateSignal) =
     render(t.tile) << Elem("state-signal",
         attributes=[:name=>t.name, :attr=>t.attr, :trigger=>t.trigger])
 
-render(tile::StopSignal) =
+render(tile::StopPropagation) =
     Elem("stop-propagation", render(tile.tile),
         attributes=[:name=>tile.name])
 
 function render(sig::InboundSignal)
     id = setup_transport(sig.signal)
-    elem = Elem("signal-transport",
+    Elem("signal-transport",
         render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
 end
 
@@ -127,16 +127,38 @@ end
 custom(name, attrs) = Elem(name, attributes=Dict(attrs))
 custom(name; attrs...) = Elem(name, attributes=Dict(attrs))
 
+_bool(a, name) = a ? name : nothing
+
 render(s::Slider) =
     custom("paper-slider", min=first(s.range), max=last(s.range), id=s.tag,
            step=step(s.range), value=s.value, editable=s.editable,
            disabled=s.disabled, secondaryProgress=s.secondaryprogress)
 
 render(c::BoolWidget{:checkbox}) =
-    custom("paper-checkbox", checked=c.value, id=c.tag, disabled=c.disabled)
+    custom("paper-checkbox", checked=c.value, id=c.tag, disabled=_bool(c.disabled, "disabled"))
 
 render(t::BoolWidget{:toggle}) =
-    custom("paper-toggle-button", checked=t.value, id=t.tag, disabled=t.disabled)
+    custom("paper-toggle-button",
+           checked=t.value,
+           id=t.tag,
+           disabled=_bool(t.disabled, "disabled"))
+
+render(t::TextInput) =
+    custom("paper-input") &
+           [ :id=>t.tag, :label=>t.label,
+             :floatingLabel=>_bool(t.floatinglabel, "floatingLabel"), :disabled=>_bool(t.disabled, "disabled")]
+
+render(t::SelectionItem) =
+    custom("paper-item", value=t.value) << render(t.tile)
+
+render(d::Dropdown) =
+    custom("paper-dropdown-menu",
+           id=d.tag,
+           value=d.value,
+           label=d.label,
+           floatingLabel=_bool(d.floatinglabel, "floatingLabel"),
+           disabled=_bool(d.disabled, "disabled")) |>
+    (wrap -> reduce(<<, wrap, map(render, d.items)))
 
 render(l::Label) =
     custom("core-label"; [:for => l.target]...) << render(l.label)

@@ -15512,7 +15512,7 @@ if (IPython && window) {
             } else {
 
                 console.log("sending over", comm)
-                comm.send(ev.detail.value)
+                comm.send({value: ev.detail.value})
             }
         })
     })
@@ -23450,10 +23450,10 @@ Polymer('reactive-signal',{
 </tempmlate></polymer-element>
 
 
-<polymer-element name="stop-signal" attributes="name" assetpath="">
+<polymer-element name="stop-propagation" attributes="name" assetpath="">
 
 <script>
-    Polymer('stop-signal',{
+    Polymer('stop-propagation',{
         names: [],
         domReady: function () {
             this.addEventListener("signal-updated", function (ev) {
@@ -23494,12 +23494,12 @@ Polymer('reactive-signal',{
 </polymer-element>
 
 
-<polymer-element name="attribute-signal" attributes="attr trigger" extends="reactive-signal" assetpath="">
+<polymer-element name="state-signal" attributes="attr trigger" extends="reactive-signal" assetpath="">
 <template></template>
 
 <script>
 
-Polymer('attribute-signal',{
+Polymer('state-signal',{
     attr: "value",
     trigger: "change",
     elem: null,
