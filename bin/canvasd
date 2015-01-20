@@ -12,26 +12,41 @@ include("setup.jl")
 
 app = Morsel.app()
 
+function renderfile(filename)
+    if isfile(filename)
+        include(filename)
+        return main
+    else
+        return p(string(
+            filename, " could not be found"
+        ))
+    end
+end
+
 route(app, GET, "/") do req, res
-    flow(map(x -> pad(x, 5mm), [div("Hello, World")]),
-            Right())
+    renderfile("index.jl")
 end
 
-route(app, GET, "/canvas/(.*)+") do req, res
-    p(string(req))
+route(app, GET, "/<file>") do req, res
+    filename = abspath(req.params[:file])
+    renderfile(filename)
 end
 
-@async start(app, 8080)
-
-using HttpServer
-using WebSockets
-
-wsh = WebSocketHandler() do req,client
+wsock = WebSocketHandler() do req, client
     while true
         msg = read(client)
         write(client, msg)
     end
-  end
+end
 
-server = Server(wsh)
-run(server,8081)
+#function Canvas.setup_transport(sig::Input)
+#    id = makeid(sig)
+#    # add_channel
+#    # 
+#    comm = Comm(:CanvasSignal, data=[:signalId => id])
+#    comm.on_msg = (msg) -> push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
+#    return id
+#end
+
+
+start(app, 8080, wsock=wsock)
