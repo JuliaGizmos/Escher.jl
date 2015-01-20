@@ -11,30 +11,37 @@ render(x::Leaf) = x.element
 ########## Layouts ##########
 
 # 1. Placed
-_offset(axis::XAxis, position::Relative{Corner{-1}}) =
-    [:left => position.x]
-_offset(axis::XAxis, position::Relative{Corner{1}}) =
-    [:right => position.x]
-_offset{X}(axis::YAxis, position::Relative{Corner{X, 1}}) =
-    [:top => position.y]
-_offset{X}(axis::YAxis, position::Relative{Corner{X, -1}}) =
-    [:bottom => position.y]
-_offset(axis::XAxis, position::Corner{-1}) =
-    [:left => 0]
-_offset(axis::XAxis, position::Corner{1}) =
-    [:right => 0]
-_offset{X}(axis::YAxis, position::Corner{X, 1}) =
-    [:top => 0]
-_offset{X}(axis::YAxis, position::Corner{X, -1}) =
-    [:bottom => 0]
+
+render(p::TopLeft, x, y) =
+    [:top => y, :left => x]
+render(p::MidTop, x, y) =
+    [:left =>  50pc, :top => y, :transform => "translate(-50%)", :marginLeft => x]
+render(p::TopRight, x, y) =
+    [:top => x, :right => y]
+render(p::MidLeft, x, y) =
+    [:top => 50pc, :marginTop => y, :left => x, :transform => "translate(0, -50%)"]
+render(p::Middle, x, y) =
+    [:top => 50pc, :left=>50pc, :marginLeft => x, :marginTop => y, :transform => "translate(-50%, -50%)"]
+render(p::MidRight, x, y) =
+    [:top => 50pc, :transform => "translate(0, -50%)", :marginTop => y, :right => x]
+render(p::BottomLeft, x, y) =
+    [:bottom => y, :left => x]
+render(p::MidBottom, x, y) =
+    [:left => 50pc, :marginLeft => x, :bottom => y, :transform => "translate(-50%)"]
+render(p::BottomRight, x, y) =
+    [:bottom => y, :right => x]
+
+render(c::Corner) = [:style => render(c, 0, 0)]
+render{C <: Corner}(p::Relative{C}) = [:style => render(C(), p.x, p.y)]
 
 function render(tile::Positioned)
-    outer = render(tile.containing_elem) & [:style => [:position => :relative]]
-    inner = render(tile.contained_elem)
-    style = merge(merge(_offset(XAxis(), el.position),
-                               _offset(YAxis(), el.position)),
-                        [:position => :absolute])
-    outer << (inner & style)
+    outer = render(tile.containing)
+    inner = render(tile.contained)
+
+    outer &= [:style => [:position => :relative]]
+    inner &= [:style => [:position => :absolute]]
+
+    outer << (inner & render(tile.position))
 end
 
 # 2. Flow
@@ -94,11 +101,11 @@ render(wrap::Wrap) = div(render(wrap.tile),
 
 _padding(pad::Padded{Nothing}) =
     [:padding => pad.len]
-_padding(pad::Padded{XAxis}) =
+_padding(pad::Padded{Horizontal}) =
     [:paddingRight => pad.len, :paddingLeft => pad.len]
-_padding(pad::Padded{YAxis}) =
+_padding(pad::Padded{Vertical}) =
     [:paddingTop => pad.len, :paddingBottom => pad.len]
-_padding(pad::Padded{YAxis}) =
+_padding(pad::Padded{Vertical}) =
     [:paddingTop => pad.len, :paddingBottom => pad.len]
 _padding(pad::Padded{Up}) =
     [:paddingTop => pad.len]
