@@ -38,4 +38,13 @@ end
     Graphics.media(Tile, Graphics.Media.Graphical)
 end
 
+@require Gadfly begin
+    function convert(::Type{Tile}, p::Gadfly.Plot)
+        backend = Compose.Patchable(
+                     Compose.default_graphic_width,
+                     Compose.default_graphic_height)
+        convert(Tile, Compose.draw(backend, p))
+    end
+end
+
 end

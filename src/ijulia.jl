@@ -1,9 +1,5 @@
 
 # Load custom element definitions
-try
-    display(MIME"text/html"(), custom_elements)
-catch
-end
 
 using IJulia.CommManager
 import Base.Random: UUID, uuid4
