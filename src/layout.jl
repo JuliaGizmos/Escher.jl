@@ -61,6 +61,9 @@ end
 width(w, t) = Width(w, t)
 height(h, t) = Height(h, t)
 
+width(w) = t -> width(w, t)
+height(h) = t -> height(h, t)
+
 container(w, h) = width(w, height(h, empty))
 
 # 1. Placing a Tile inside another
@@ -151,14 +154,23 @@ end
 flow{T <: Direction}(direction::T, tiles) =
     Flow{T}(tiles)
 
+flow{T <: Direction}(direction::T) =
+    tiles -> Flow{T}(tiles)
+
 immutable Wrap{D <: Direction, T <: Direction} <: Tile
     tile::Flow{T}
 end
 wrap{T <: Direction, U <: Direction}(d::T, f::Flow{U}) =
     Wrap{T, U}(f)
 
+wrap{T <: Direction}(d::T) =
+    tiles -> wrap(d, tiles)
+
 flow{T <: Direction, U <: Direction}(stack::T, wrap_::U, tiles) =
     wrap(wrap_, flow(stack, tiles))
+
+flow(stack::Direction, wrap::Direction) =
+   tiles -> flow(stack, wrap, tiles)
 
 # 3. Flexing and alignment
 
@@ -176,11 +188,14 @@ grow(t) = grow(1.0, t)
 grow(t::AbstractVector) =
     map(grow, t)
 
+grow(factor::Real) = t -> grow(factor, t)
+
 immutable Shrink <: Tile
     factor::Float64
     tile::Tile
 end
 shrink(factor::Real, t) = Shrink(factor, t)
+shrink(factor::Real) = t -> shrink(factor, t)
 
 # TODO: make a macro for this
 shrink{T <: Real}(factor::AbstractVector{T}, t) =
@@ -203,6 +218,9 @@ flex{T <: Real}(factor::AbstractVector{T}, t) =
     map(flex, factor, t)
 flex(t::AbstractVector) =
     map(flex, t)
+
+flex(factor::Real) = t -> flex(factor, t)
+flex{T <: Real}(factor::AbstractVector{T}) = t -> flex(factor, t)
 
 # 4. Pad content
 
@@ -229,5 +247,8 @@ padcontent{T <: Union(Axis, Direction)}(
     axis::T,
     len::Length, tile) = Padded{T}(len, tile)
 
-pad(len, tile) =
+pad(len::Length, tile) =
     padcontent(Container(tile), args...)
+
+pad(len::Length) =
+    t -> pad(len, t)
