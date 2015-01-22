@@ -54,11 +54,6 @@ make_term(term, typ, parent) =
 
 macro terms(parent, terms)
     args = filter(x -> x.head != :line, terms.args)
-    println(
-    Expr(:block,
-        reduce(vcat, [make_term(arg.args[1], arg.args[2], parent)
-            for arg in args])...)
-            )
     Expr(:block,
         reduce(vcat, [make_term(arg.args[1], arg.args[2], parent)
             for arg in args])...)

@@ -4,6 +4,8 @@ import Base: convert
 
 export place,
        offset,
+       width,
+       height,
        topleft,
        midtop,
        topright,

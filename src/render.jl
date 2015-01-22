@@ -13,8 +13,8 @@ render(x::Leaf) = x.element
 render(t::Empty) = div(style=[:display => :inherit, :position => :inherit])
 
 # 0. height and width
-render(t::Width) = render(t.tile) & [:style => :width => t.w]
-render(t::Height) = render(t.tile) & [:style => :height => t.h]
+render(t::Width) = render(t.tile) & [:style => [:width => t.w]]
+render(t::Height) = render(t.tile) & [:style => [:height => t.h]]
 
 # 1. Positioning
 
