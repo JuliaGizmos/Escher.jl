@@ -47,3 +47,19 @@ function nexttag(prefix)
     counters[prefix] = idx + 1
     symbol(string(prefix, idx))
 end
+
+make_term(term, typ, parent) =
+    [:(immutable $typ <: $parent end),
+     :(const $(esc(term))  = $typ())]
+
+macro terms(parent, terms)
+    args = filter(x -> x.head != :line, terms.args)
+    println(
+    Expr(:block,
+        reduce(vcat, [make_term(arg.args[1], arg.args[2], parent)
+            for arg in args])...)
+            )
+    Expr(:block,
+        reduce(vcat, [make_term(arg.args[1], arg.args[2], parent)
+            for arg in args])...)
+end

@@ -10,7 +10,13 @@ render(x::Leaf) = x.element
 
 ########## Layouts ##########
 
-# 1. Placed
+render(t::Empty) = div(style=[:display => :inherit, :position => :inherit])
+
+# 0. height and width
+render(t::Width) = render(t.tile) & [:style => :width => t.w]
+render(t::Height) = render(t.tile) & [:style => :height => t.h]
+
+# 1. Positioning
 
 render(p::TopLeft, x, y) =
     [:top => y, :left => x]
@@ -46,57 +52,31 @@ end
 
 # 2. Flow
 
-_layout(flow::Flow{Right, Nothing}) =
-    # FIXME: horizontal is right-to-left for arabic e.g.
-    boolattr([:layout, :horizontal])
+render(t::Grow) =
+    render(t.tile) & [:style => [:flexGrow => t.factor]]
 
-_layout(flow::Flow{Left, Nothing}) =
-    boolattr([:layout, :horizontal, :reverse])
+render(t::Shrink) =
+    render(t.tile) & [:style => [:flexShrink => t.factor]]
 
-_layout(flow::Flow{Right, Down}) =
-    boolattr([:layout, :horizontal, :wrap])
+render(t::FlexBasis) =
+    render(t.tile) & [:style => [:flexBasis => t.basis]]
 
-_layout(flow::Flow{Right, Up}) =
-    boolattr([:layout, :horizontal, "wrap-reverse"])
+render_style(f::Flow{Right}) =
+    [:style => [:flexDirection => :row,
+                :display=>:flex]]
 
-_layout(flow::Flow{Left, Down}) =
-    boolattr([:layout, :horizontal, :reverse, :wrap])
+render_style(f::Wrap{Down, Right}) =
+    [:style => [:flexWrap => :wrap,
+                :alignContent => "flex-start"]]
 
-_layout(flow::Flow{Left, Up}) =
-    boolattr([:layout, :horizontal, :reverse, "wrap-reverse"])
+render(f::Flow) =
+    Elem(:div, map(render, f.tiles)) & render_style(f)
 
-_layout(flow::Flow{Down, Nothing}) =
-    boolattr([:layout, :vertical])
-
-_layout(flow::Flow{Up, Nothing}) =
-    boolattr([:layout, :vertical, :reverse])
-
-_layout(flow::Flow{Down, Right}) =
-    boolattr([:layout, :vertical, :wrap])
-
-_layout(flow::Flow{Down, Right}) =
-    boolattr([:layout, :vertical, "wrap-reverse"])
-
-_layout(flow::Flow{Up, Right}) =
-    boolattr([:layout, :vertical, :reverse, :wrap])
-
-_layout(flow::Flow{Up, Left}) =
-    boolattr([:layout, :vertical, :reverse, "wrap-reverse"])
-
-render(flow::Flow) = div(map(render, flow.tiles)) & _layout(flow)
-
-# 3. Flexed and Alignment
-
-render(flex::Flexed) =
-    render(flex.tile) &
-        [:style =>
-            [:MsFlux => flex.factor,
-             :WebkitFlux => flex.factor,
-             :flex => flex.factor]] #TODO: Make a custom element for this
-
+render(f::Wrap) =
+    render(f.tile) & render_style(f)
 # 4. padding
 
-render(wrap::Wrap) = div(render(wrap.tile),
+render(wrap::Container) = div(render(wrap.tile),
                           style=[:display => :inherit, :position => :inherit])
 
 _padding(pad::Padded{Nothing}) =

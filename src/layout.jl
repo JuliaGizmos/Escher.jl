@@ -4,26 +4,30 @@ import Base: convert
 
 export place,
        offset,
-       TopLeft,
-       MidTop,
-       TopRight,
-       MidLeft,
-       Middle,
-       MidRight,
-       BottomLeft,
-       MidBottom,
-       BottomRight,
+       topleft,
+       midtop,
+       topright,
+       midleft,
+       middle,
+       midright,
+       bottomleft,
+       midbottom,
+       bottomright,
        flow,
-       XAxis,
-       YAxis,
-       Left,
-       Right,
-       Up,
-       Down,
-       Inward,
-       Outward,
+       vertical,
+       horizontal,
+       depth,
+       left,
+       right,
+       up,
+       down,
+       inward,
+       outward,
        flow,
+       grow,
+       shrink,
        flex,
+       wrap,
        pad,
        padcontent
 
@@ -36,21 +40,44 @@ immutable Leaf <: Tile
     element::Elem
 end
 
+immutable Empty <: Tile
+end
+const empty = Empty()
+
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
+
+# 0. Width and height
+
+immutable Width <: Tile
+    w::Length
+    tile::Tile
+end
+
+immutable Height <: Tile
+    h::Length
+    tile::Tile
+end
+
+width(w, t) = Width(w, t)
+height(h, t) = Height(h, t)
+
+container(w, h) = width(w, height(h, empty))
 
 # 1. Placing a Tile inside another
 abstract Position
 abstract Corner <: Position
 
-immutable TopLeft     <: Corner end
-immutable MidTop      <: Corner end
-immutable TopRight    <: Corner end
-immutable MidLeft     <: Corner end
-immutable Middle      <: Corner end
-immutable MidRight    <: Corner end
-immutable BottomLeft  <: Corner end
-immutable MidBottom   <: Corner end
-immutable BottomRight <: Corner end
+@terms Corner begin
+    topleft => TopLeft
+    midtop => MidTop
+    topright => TopRight
+    midleft => MidLeft
+    middle => Middle
+    midright => MidRight
+    bottomleft => BottomLeft
+    midbottom => MidBottom
+    bottomright => BottomRight
+end
 
 immutable Relative{T <: Corner} <: Position
     x::Length
@@ -71,51 +98,107 @@ offset(x, y) = offset(TopLeft(), x, y)
 place(pos::Position, a, b) =
     Positioned(pos, a, b)
 
+place(x::Length, y::Length, a, b) =
+    Positioned(offset(x, y), a, b)
+
 # 2. Axes, Directions and Flow
 
 abstract Axis
-immutable Horizontal   <: Axis end
-immutable Vertical     <: Axis end
-immutable Depth        <: Axis end
+@terms Axis begin
+    horizontal => Horizontal
+    vertical => Vertical
+    depth => Depth
+end
 
 abstract FlowRelative <: Axis
-immutable MainAxis     <: FlowRelative end
-immutable CrossAxis    <: FlowRelative end
+
+@terms FlowRelative begin
+    mainaxis => MainAxis
+    crossaxis => CrossAxis
+end
 
 abstract  Direction{T <: Axis}
-immutable Left       <: Direction{Horizontal} end
-immutable Right      <: Direction{Horizontal} end
-immutable Up         <: Direction{Vertical} end
-immutable Down       <: Direction{Vertical} end
-immutable Outward    <: Direction{Depth} end
-immutable Inward     <: Direction{Depth} end
-immutable MainStart  <: Direction{MainAxis} end
-immutable MainEnd    <: Direction{MainAxis} end
-immutable CrossStart <: Direction{CrossAxis} end
-immutable CrossEnd   <: Direction{CrossAxis} end
 
-immutable Flow{Stack <: Union(Axis, Direction),
-               Wrap <: Union(Direction, Nothing)} <: Tile
+@terms Direction{Horizontal} begin
+    left => Left
+    right => Right
+end
+
+@terms Direction{Vertical} begin
+    up => Up
+    down => Down
+end
+
+@terms Direction{Depth} begin
+    inward => Inward
+    outward => Outward
+end
+
+@terms Direction{MainAxis} begin
+    mainstart => MainStart
+    mainend => MainEnd
+end
+
+@terms Direction{CrossAxis} begin
+    crossstart => CrossStart
+    crossend => CrossEnd
+end
+
+immutable Flow{D <: Direction} <: Tile
     tiles::AbstractVector{Tile}
 end
 
 flow{T <: Direction}(direction::T, tiles) =
-    Flow{T, Nothing}(tiles)
+    Flow{T}(tiles)
 
-flow{Dir <: Direction, Wrap <: Direction}(
-    stack::Dir,
-    wrap::Wrap,
-    tiles) = Fill{Dir, Wrap}(tiles)
+immutable Wrap{D <: Direction, T <: Direction} <: Tile
+    tile::Flow{T}
+end
+wrap{T <: Direction, U <: Direction}(d::T, f::Flow{U}) =
+    Wrap{T, U}(f)
 
-# 3. Flexeding and alignment
+flow{T <: Direction, U <: Direction}(stack::T, wrap_::U, tiles) =
+    wrap(wrap_, flow(stack, tiles))
 
-immutable Flexed <: Tile
-    tile::Tile
+# 3. Flexing and alignment
+
+immutable Grow <: Tile
     factor::Float64
+    tile::Tile
 end
 
-flex(factor::Real, t) = Flexed(factor, t)
-flex(t) = Flexed(1.0, t)
+grow(factor::Real, t) = Grow(factor, t)
+
+# TODO: make a macro for this
+grow{T <: Real}(factor::AbstractVector{T}, t) =
+    map(grow, factor, t)
+grow(t) = grow(1.0, t)
+grow(t::AbstractVector) =
+    map(grow, t)
+
+immutable Shrink <: Tile
+    factor::Float64
+    tile::Tile
+end
+shrink(factor::Real, t) = Shrink(factor, t)
+
+# TODO: make a macro for this
+shrink{T <: Real}(factor::AbstractVector{T}, t) =
+    map(shrink, factor, t)
+shrink(t) = shrink(1.0, t)
+shrink(t::AbstractVector) =
+    map(shrink, t)
+
+immutable FlexBasis <: Tile
+    basis::Union(Length, Symbol)
+    tile::Tile
+end
+flexbasis(basis, tile) = FlexBasis(basis, tile)
+
+# Flex ignores the width and distributes forcefully
+flex(factor::Real, t) =
+    flexbasis(0mm, grow(factor, factor, t))
+flex(t) = flex(1.0, t)
 flex{T <: Real}(factor::AbstractVector{T}, t) =
     map(flex, factor, t)
 flex(t::AbstractVector) =
@@ -135,16 +218,16 @@ immutable Padded{T <: Union(Axis, Direction, Nothing)} <: Tile
     tile::Tile
 end
 
+immutable Container <: Tile
+    tile::Tile
+end
+
 padcontent(len::Length, tile) =
     Padded{Nothing}(len, tile)
 
 padcontent{T <: Union(Axis, Direction)}(
     axis::T,
-    len::Length, tile) = Padded{T}(tile, len)
+    len::Length, tile) = Padded{T}(len, tile)
 
-immutable Wrap <: Tile
-    tile::Tile
-end
-
-pad(tile, args...) =
-    padcontent(Wrap(tile), args...)
+pad(len, tile) =
+    padcontent(Container(tile), args...)
