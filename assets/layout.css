@@ -14,6 +14,8 @@
 
 .flow {
     display: inline-flex;
+    align-content: flex-start;
+    justify-content: flex-start;
 }
 
 .flow-right {
@@ -30,6 +32,13 @@
 
 .flow-up {
     flex-direction: column-reverse;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+.flex-wrap-reverse {
+    flex-wrap: wrap-reverse;
 }
 
 .padding-box {

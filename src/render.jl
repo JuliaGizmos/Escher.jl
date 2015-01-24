@@ -61,39 +61,84 @@ render(t::Shrink) =
 render(t::FlexBasis) =
     render(t.tile) & [:style => [:flexBasis => t.basis]]
 
-render_style(f::Flow{Right}) =
-    [:style => [:flexDirection => :row,
-                :display=>:flex]]
+classes(f::Flow{Right}) =
+    "flow flow-right"
 
-render_style(f::Wrap{Down, Right}) =
-    [:style => [:flexWrap => :wrap,
-                :alignContent => "flex-start"]]
+classes(f::Flow{Left}) =
+    "flow flow-left"
+
+classes(f::Flow{Down}) =
+    "flow flow-down"
+
+classes(f::Flow{Up}) =
+    "flow flow-up"
+
+classes(f::Wrap{Down, Right}) =
+    "flex-wrap"
+
+classes(f::Wrap{Up, Right}) =
+    "flex-wrap-reverse"
+
+classes(f::Wrap{Down, Left}) =
+    "flex-wrap"
+
+classes(f::Wrap{Up, Left}) =
+    "flex-wrap-reverse"
+
+classes(f::Wrap{Left, Up}) =
+    "flex-wrap-reverse"
+
+classes(f::Wrap{Right, Up}) =
+    "flex-wrap-reverse"
+
+classes(f::Wrap{Left, Down}) =
+    "flex-wrap"
+
+classes(f::Wrap{Right, Down}) =
+    "flex-wrap"
 
 render(f::Flow) =
-    Elem(:div, map(render, f.tiles)) & render_style(f)
+    Elem(:div, map(render, f.tiles)) & [:className => classes(f)]
 
 render(f::Wrap) =
-    render(f.tile) & render_style(f)
+    render(f.tile) & [:className => classes(f.tile) * " " * classes(f)]
+
+render(t::FlexSpace{Right}) =
+    render(t.tile) & [:style => ["margin-right" => :auto]]
+
+render(t::FlexSpace{Left}) =
+    render(t.tile) & [:style => ["margin-left" => :auto]]
+
+render(t::FlexSpace{Down}) =
+    render(t.tile) & [:style => ["margin-bottom" => :auto]]
+
+render(t::FlexSpace{Up}) =
+    render(t.tile) & [:style => ["margin-top" => :auto]]
+
+# empty space and packing
+
+
+
 # 4. padding
 
-render(wrap::Container) = div(render(wrap.tile),
+render(cont::Container) = div(render(cont.tile),
                           style=[:display => :inherit, :position => :inherit])
 
-_padding(pad::Padded{Nothing}) =
+render_style(pad::Padded{Nothing}) =
     [:padding => pad.len]
-_padding(pad::Padded{Horizontal}) =
+render_style(pad::Padded{Horizontal}) =
     [:paddingRight => pad.len, :paddingLeft => pad.len]
-_padding(pad::Padded{Vertical}) =
+render_style(pad::Padded{Vertical}) =
     [:paddingTop => pad.len, :paddingBottom => pad.len]
-_padding(pad::Padded{Vertical}) =
+render_style(pad::Padded{Vertical}) =
     [:paddingTop => pad.len, :paddingBottom => pad.len]
-_padding(pad::Padded{Up}) =
+render_style(pad::Padded{Up}) =
     [:paddingTop => pad.len]
-_padding(pad::Padded{Down}) =
+render_style(pad::Padded{Down}) =
     [:paddingBottom => pad.len]
 
 render(padded::Padded) =
-    render(padded.tile) & [:style => _padding(padded)]
+    render(padded.tile) & [:style => render_style(padded)]
 
 render(t::StateSignal) =
     render(t.tile) << Elem("state-signal",

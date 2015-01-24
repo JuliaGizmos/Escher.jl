@@ -15492,6 +15492,60 @@ that it uses one color only.
 
 
 
+<style>/* The Box model
+ *
+ * - Each box has 4 edges: the margin edge, the border edge, padding edge and the content edge
+ */
+
+/* Flow */
+
+.rendered_html .flow > *, .flow > * {
+   /* Make these things take exactly as much space as they need */
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+.flow {
+    display: inline-flex;
+    align-content: flex-start;
+    justify-content: flex-start;
+}
+
+.flow-right {
+    flex-direction: row;
+}
+
+.flow-left {
+    flex-direction: row-reverse;
+}
+
+.flow-down {
+    flex-direction: column;
+}
+
+.flow-up {
+    flex-direction: column-reverse;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+.flex-wrap-reverse {
+    flex-wrap: wrap-reverse;
+}
+
+.padding-box {
+    display: inherit;
+    flex: inherit;
+}
+
+.flow-inward {
+}
+
+.flow-outward {
+}
+</style>
 
 <script>// IJulia setup
 if (IPython && window) {

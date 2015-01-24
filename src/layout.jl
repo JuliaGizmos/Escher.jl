@@ -15,7 +15,6 @@ export place,
        bottomleft,
        midbottom,
        bottomright,
-       flow,
        vertical,
        horizontal,
        depth,
@@ -30,6 +29,15 @@ export place,
        shrink,
        flex,
        wrap,
+       axisstart,
+       axisend,
+       center,
+       spacebetween,
+       spacearound,
+       stretch,
+       packitems,
+       packlines,
+       space,
        pad,
        padcontent
 
@@ -50,6 +58,10 @@ convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
 
 # 0. Width and height
 
+immutable Container <: Tile
+    tile::Tile
+end
+
 immutable Width <: Tile
     w::Length
     tile::Tile
@@ -65,8 +77,6 @@ height(h, t) = Height(h, t)
 
 width(w) = t -> width(w, t)
 height(h) = t -> height(h, t)
-
-container(w, h) = width(w, height(h, empty))
 
 # 1. Placing a Tile inside another
 abstract Position
@@ -224,6 +234,45 @@ flex(t::AbstractVector) =
 flex(factor::Real) = t -> flex(factor, t)
 flex{T <: Real}(factor::AbstractVector{T}) = t -> flex(factor, t)
 
+# Flow alignment
+abstract Packing
+
+@terms Packing begin
+    axisstart => AxisStart
+    axisend => AxisEnd
+    center => AxisCenter
+    spacebetween => SpacedBetween
+    stretch => Stretch
+    spacearound => SpaceAround
+end
+
+immutable LinesPacked{T <: Packing}
+    tile::Union(Wrap, Flow)
+end
+
+packlines{T <: Packing}(packing::T, tile::Wrap) =
+    LinesPacked{T}(w)
+
+immutable ItemsPacked{T <: Packing} <: Tile
+    tile::Union(Wrap, Flow)
+end
+
+packitems{T <: Packing}(packing::T, tile::Union(Wrap, Flow)) =
+    ItemsPacked{T}(tile)
+
+immutable FlexSpace{T <: Direction} <: Tile
+    tile::Tile
+end
+
+space{T <: Direction}(dir::T, tile) =
+    FlexSpace{T}(tile)
+
+space(dir::Direction) =
+    x -> space(dir, x)
+
+space(dir::Direction, tiles::AbstractArray) =
+    map(space(dir), tiles)
+
 # 4. Pad content
 
 # we show the finger to CSS's margins, they are far from simple
@@ -238,10 +287,6 @@ immutable Padded{T <: Union(Axis, Direction, Nothing)} <: Tile
     tile::Tile
 end
 
-immutable Container <: Tile
-    tile::Tile
-end
-
 padcontent(len::Length, tile) =
     Padded{Nothing}(len, tile)
 
@@ -250,7 +295,7 @@ padcontent{T <: Union(Axis, Direction)}(
     len::Length, tile) = Padded{T}(len, tile)
 
 pad(len::Length, tile) =
-    padcontent(Container(tile), args...)
+    padcontent(len, Container(tile))
 
 pad(len::Length) =
     t -> pad(len, t)

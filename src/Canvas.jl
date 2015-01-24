@@ -23,6 +23,9 @@ include("render.jl")
 writemime(io::IO, m::MIME"text/html", x::Tile) =
     writemime(io, m, Canvas.render(x))
 
+writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
+    writemime(io, m, lift(Canvas.render, Patchwork.Elem, x))
+
 @require IJulia begin
     include("ijulia.jl")
 end
