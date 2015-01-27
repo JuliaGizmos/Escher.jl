@@ -36,6 +36,7 @@ export place,
        spacearound,
        stretch,
        packitems,
+       packacross,
        packlines,
        space,
        pad,
@@ -75,7 +76,7 @@ end
 width(w, t) = Width(w, t)
 height(h, t) = Height(h, t)
 
-width(w) = t -> width(w, t)
+width(w)  = t -> width(w, t)
 height(h) = t -> height(h, t)
 
 # 1. Placing a Tile inside another
@@ -224,7 +225,7 @@ flexbasis(basis, tile) = FlexBasis(basis, tile)
 
 # Flex ignores the width and distributes forcefully
 flex(factor::Real, t) =
-    flexbasis(0mm, grow(factor, factor, t))
+    flexbasis(0mm, grow(factor, t))
 flex(t) = flex(1.0, t)
 flex{T <: Real}(factor::AbstractVector{T}, t) =
     map(flex, factor, t)
@@ -241,24 +242,41 @@ abstract Packing
     axisstart => AxisStart
     axisend => AxisEnd
     center => AxisCenter
-    spacebetween => SpacedBetween
     stretch => Stretch
+    baseline => Baseline
+    spacebetween => SpaceBetween
     spacearound => SpaceAround
 end
 
-immutable LinesPacked{T <: Packing}
+immutable PackedLines{T <: Packing}
     tile::Union(Wrap, Flow)
 end
 
 packlines{T <: Packing}(packing::T, tile::Wrap) =
-    LinesPacked{T}(w)
+    PackedLines{T}(w)
 
-immutable ItemsPacked{T <: Packing} <: Tile
+packlines(p::Packing) =
+    t -> packlines(p, t)
+
+immutable PackedItems{T <: Packing} <: Tile
     tile::Union(Wrap, Flow)
 end
 
 packitems{T <: Packing}(packing::T, tile::Union(Wrap, Flow)) =
-    ItemsPacked{T}(tile)
+    PackedItems{T}(tile)
+
+packitems(p::Packing) =
+    t -> packitems(p, t)
+
+immutable PackedAcross{T <: Packing} <: Tile
+    tile::Union(Wrap, Flow)
+end
+
+packacross{T <: Packing}(pack::T, tile::Union(Wrap, Flow)) =
+    PackedAcross{T}(tile)
+
+packacross(p::Packing) =
+    t -> packacross(p, t)
 
 immutable FlexSpace{T <: Direction} <: Tile
     tile::Tile

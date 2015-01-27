@@ -97,26 +97,75 @@ classes(f::Wrap{Left, Down}) =
 classes(f::Wrap{Right, Down}) =
     "flex-wrap"
 
+# Packing
+classes(t::PackedItems{AxisStart}) =
+    "pack-start"
+
+classes(t::PackedItems{AxisEnd}) =
+    "pack-end"
+
+classes(t::PackedItems{AxisCenter}) =
+    "pack-center"
+
+classes(t::PackedItems{SpaceBetween}) =
+    "pack-space-between"
+
+classes(t::PackedItems{SpaceAround}) =
+    "pack-space-around"
+
+classes(t::PackedLines{AxisStart}) =
+    "pack-lines-start"
+
+classes(t::PackedLines{AxisEnd}) =
+    "pack-lines-end"
+
+classes(t::PackedLines{AxisCenter}) =
+    "pack-lines-center"
+
+classes(t::PackedLines{Stretch}) =
+    "pack-lines-stretch"
+
+classes(t::PackedLines{SpaceBetween}) =
+    "pack-lines-space-between"
+
+classes(t::PackedLines{SpaceAround}) =
+    "pack-lines-space-around"
+
+classes(t::PackedAcross{AxisStart}) =
+    "pack-across-start"
+
+classes(t::PackedAcross{AxisEnd}) =
+    "pack-across-end"
+
+classes(t::PackedAcross{AxisCenter}) =
+    "pack-across-center"
+
+classes(t::PackedAcross{Stretch}) =
+    "pack-across-stretch"
+
+classes(t::PackedAcross{Baseline}) =
+    "pack-across-baseline"
+
 render(f::Flow) =
     Elem(:div, map(render, f.tiles)) & [:className => classes(f)]
 
 render(f::Wrap) =
     render(f.tile) & [:className => classes(f.tile) * " " * classes(f)]
 
+render(f::Union(PackedLines, PackedItems, PackedAcross)) =
+    render(f.tile) & [:className => classes(f.tile) * " " * classes(f)]
+
 render(t::FlexSpace{Right}) =
-    render(t.tile) & [:style => ["margin-right" => :auto]]
+    render(t.tile) & [:style => ["marginRight" => :auto]]
 
 render(t::FlexSpace{Left}) =
-    render(t.tile) & [:style => ["margin-left" => :auto]]
+    render(t.tile) & [:style => ["marginLeft" => :auto]]
 
 render(t::FlexSpace{Down}) =
-    render(t.tile) & [:style => ["margin-bottom" => :auto]]
+    render(t.tile) & [:style => ["marginBottom" => :auto]]
 
 render(t::FlexSpace{Up}) =
-    render(t.tile) & [:style => ["margin-top" => :auto]]
-
-# empty space and packing
-
+    render(t.tile) & [:style => ["marginTop" => :auto]]
 
 
 # 4. padding
