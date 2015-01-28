@@ -14,11 +14,23 @@ app = Morsel.app()
 
 function renderfile(filename)
     if isfile(filename)
-        include(filename)
-        return main
+        try
+            include(filename)
+        catch err
+            bt = backtrace()
+            return Elem(:pre, sprint() do io
+                showerror(io, err)
+                Base.show_backtrace(io, bt)
+            end)
+        end
+        try
+            return main
+        catch
+            return p("main not defined")
+        end
     else
         return p(string(
-            filename, " could not be found"
+            filename, " could not be found."
         ))
     end
 end
