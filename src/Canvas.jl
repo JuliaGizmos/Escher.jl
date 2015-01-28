@@ -6,7 +6,8 @@ using Requires
 
 import Base: writemime
 
-export Elem
+# Export from Patchwork
+export Elem, div, h1, h2, h3, h4, h5, p, blockquote, em, strong
 
 # Polymer Setup
 const custom_elements = readall(Pkg.dir("Canvas", "assets", "vulcanized.html"))

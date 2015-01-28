@@ -1,11 +1,15 @@
 
 import Patchwork.div
-import Base: convert
+import Base: convert, size
 
 export place,
+       empty,
+       container,
+       fullbleed,
        offset,
        width,
        height,
+       size,
        topleft,
        midtop,
        topright,
@@ -56,12 +60,9 @@ end
 const empty = Empty()
 
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
+convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
 
 # 0. Width and height
-
-immutable Container <: Tile
-    tile::Tile
-end
 
 immutable Width <: Tile
     w::Length
@@ -78,6 +79,17 @@ height(h, t) = Height(h, t)
 
 width(w)  = t -> width(w, t)
 height(h) = t -> height(h, t)
+
+size(w::Length, h::Length, t::Tile) =
+    t |> width(w) |> height(h)
+size(w::Length, h::Length) =
+    t -> size(w, h, t)
+
+fullbleed(x=empty) =
+    size(100vw, 100vh, x)
+
+container(w, h) =
+    empty |> size(w, h)
 
 # 1. Placing a Tile inside another
 abstract Position
@@ -160,7 +172,9 @@ end
     crossend => CrossEnd
 end
 
-immutable Flow{D <: Direction} <: Tile
+abstract FlexContainer <: Tile
+
+immutable Flow{D <: Direction} <: FlexContainer
     tiles::AbstractVector{Tile}
 end
 
@@ -248,8 +262,8 @@ abstract Packing
     spacearound => SpaceAround
 end
 
-immutable PackedLines{T <: Packing}
-    tile::Union(Wrap, Flow)
+immutable PackedLines{T <: Packing} <: FlexContainer
+    tile::FlexContainer
 end
 
 packlines{T <: Packing}(packing::T, tile::Wrap) =
@@ -258,21 +272,21 @@ packlines{T <: Packing}(packing::T, tile::Wrap) =
 packlines(p::Packing) =
     t -> packlines(p, t)
 
-immutable PackedItems{T <: Packing} <: Tile
-    tile::Union(Wrap, Flow)
+immutable PackedItems{T <: Packing} <: FlexContainer
+    tile::FlexContainer
 end
 
-packitems{T <: Packing}(packing::T, tile::Union(Wrap, Flow)) =
+packitems{T <: Packing}(packing::T, tile::FlexContainer) =
     PackedItems{T}(tile)
 
 packitems(p::Packing) =
     t -> packitems(p, t)
 
-immutable PackedAcross{T <: Packing} <: Tile
-    tile::Union(Wrap, Flow)
+immutable PackedAcross{T <: Packing} <: FlexContainer
+    tile::FlexContainer
 end
 
-packacross{T <: Packing}(pack::T, tile::Union(Wrap, Flow)) =
+packacross{T <: Packing}(pack::T, tile::FlexContainer) =
     PackedAcross{T}(tile)
 
 packacross(p::Packing) =
@@ -299,6 +313,10 @@ space(dir::Direction, tiles::AbstractArray) =
 # give a fixed space around a tile, you can pad it. `pad` in
 # Canvas wraps the tile in another tile and adds padding.
 # to pad an element like you would in CSS, use `padcontent`.
+
+immutable Container <: Tile
+    tile::Tile
+end
 
 immutable Padded{T <: Union(Axis, Direction, Nothing)} <: Tile
     len::Length

@@ -149,10 +149,7 @@ classes(t::PackedAcross{Baseline}) =
 render(f::Flow) =
     Elem(:div, map(render, f.tiles)) & [:className => classes(f)]
 
-render(f::Wrap) =
-    render(f.tile) & [:className => classes(f.tile) * " " * classes(f)]
-
-render(f::Union(PackedLines, PackedItems, PackedAcross)) =
+render(f::FlexContainer) =
     render(f.tile) & [:className => classes(f.tile) * " " * classes(f)]
 
 render(t::FlexSpace{Right}) =
@@ -171,7 +168,7 @@ render(t::FlexSpace{Up}) =
 # 4. padding
 
 render(cont::Container) = div(render(cont.tile),
-                          style=[:display => :inherit, :position => :inherit])
+                          style=[:height => :auto, :width => :auto])
 
 render_style(pad::Padded{Nothing}) =
     [:padding => pad.len]
