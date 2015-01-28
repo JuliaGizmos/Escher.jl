@@ -21,19 +21,19 @@ render(t::Height) = render(t.tile) & [:style => [:height => t.h]]
 render(p::TopLeft, x, y) =
     [:top => y, :left => x]
 render(p::MidTop, x, y) =
-    [:left =>  50pc, :top => y, :transform => "translate(-50%)", :marginLeft => x]
+    [:left =>  50cent, :top => y, :transform => "translate(-50%)", :marginLeft => x]
 render(p::TopRight, x, y) =
     [:top => x, :right => y]
 render(p::MidLeft, x, y) =
-    [:top => 50pc, :marginTop => y, :left => x, :transform => "translate(0, -50%)"]
+    [:top => 50cent, :marginTop => y, :left => x, :transform => "translate(0, -50%)"]
 render(p::Middle, x, y) =
-    [:top => 50pc, :left=>50pc, :marginLeft => x, :marginTop => y, :transform => "translate(-50%, -50%)"]
+    [:top => 50cent, :left=>50cent, :marginLeft => x, :marginTop => y, :transform => "translate(-50%, -50%)"]
 render(p::MidRight, x, y) =
-    [:top => 50pc, :transform => "translate(0, -50%)", :marginTop => y, :right => x]
+    [:top => 50cent, :transform => "translate(0, -50%)", :marginTop => y, :right => x]
 render(p::BottomLeft, x, y) =
     [:bottom => y, :left => x]
 render(p::MidBottom, x, y) =
-    [:left => 50pc, :marginLeft => x, :bottom => y, :transform => "translate(-50%)"]
+    [:left => 50cent, :marginLeft => x, :bottom => y, :transform => "translate(-50%)"]
 render(p::BottomRight, x, y) =
     [:bottom => y, :right => x]
 
