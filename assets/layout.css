@@ -14,12 +14,10 @@ body {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    width: auto;
-    height: auto;
 }
 
 .flow {
-    display: flex;
+    display: inline-flex;
     align-content: flex-start;
     justify-content: flex-start;
 }

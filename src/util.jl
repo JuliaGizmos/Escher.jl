@@ -8,6 +8,8 @@ ClassSet(c) = ClassSet([string(c)])
 ClassSet(c::ClassSet) = copy(c)
 ClassSet(c::String) = ClassSet(split(c, r"\s+"))
 
+JSON._print(io::IO, ::JSON.State, x::ClassSet) = Base.print(io, "\"", join(" ", c.classes), "\"")
+
 function addclass(el::Elem, cls)
     props = attributes(el)
     if haskey(props, :className)

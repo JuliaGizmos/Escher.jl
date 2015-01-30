@@ -146,11 +146,14 @@ classes(t::PackedAcross{Stretch}) =
 classes(t::PackedAcross{Baseline}) =
     "pack-across-baseline"
 
+all_classes(t::Flow) = classes(t)
+all_classes(t::FlexContainer) = classes(t) * " " * all_classes(t.tile)
+
 render(f::Flow) =
     Elem(:div, map(render, f.tiles)) & [:className => classes(f)]
 
 render(f::FlexContainer) =
-    render(f.tile) & [:className => classes(f.tile) * " " * classes(f)]
+    render(f.tile) & [:className => all_classes(f)]
 
 render(t::FlexSpace{Right}) =
     render(t.tile) & [:style => ["marginRight" => :auto]]
