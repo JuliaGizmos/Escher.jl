@@ -1,0 +1,31 @@
+@import url(http://fonts.googleapis.com/css?family=Lora:700,400italic,700italic);
+
+body {
+    font-size: 0.1666in;
+}
+
+h1, h2, h3, h4 {
+    font-weight: bold;
+    font-family: Lora;
+}
+h1 {
+    font-size: 2.37em;
+    font-style: italic;
+    font-weight: normal;
+    margin-bottom: .422em;
+}
+h2 {
+    font-style: italic;
+    font-size: 1.77em;
+    margin-bottom: .5625em;
+}
+h3 {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 1.25em;
+    margin-bottom: .75em;
+}
+
+p {
+    margin-bottom: 1em;
+}

@@ -15492,6 +15492,89 @@ that it uses one color only.
 
 
 
+
+<style>
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+</style>
+<style>@import url("http://fonts.googleapis.com/css?family=Lora:700,400italic,700italic");
+
+body {
+    font-size: 0.1666in;
+}
+
+h1, h2, h3, h4 {
+    font-weight: bold;
+    font-family: Lora;
+}
+h1 {
+    font-size: 2.37em;
+    font-style: italic;
+    font-weight: normal;
+    margin-bottom: .422em;
+}
+h2 {
+    font-style: italic;
+    font-size: 1.77em;
+    margin-bottom: .5625em;
+}
+h3 {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 1.25em;
+    margin-bottom: .75em;
+}
+
+p {
+    margin-bottom: 1em;
+}
+</style>
 <style>/* The Box model
  *
  * - Each box has 4 edges: the margin edge, the border edge, padding edge and the content edge
@@ -15508,12 +15591,10 @@ body {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    width: auto;
-    height: auto;
 }
 
 .flow {
-    display: flex;
+    display: inline-flex;
     align-content: flex-start;
     justify-content: flex-start;
 }
@@ -15616,13 +15697,6 @@ body {
     align-items: baseline;
 }
 
-
-
-/* Defaults */
-
-h1, h2, h3, h4, h5 {
-    font-family: Raleway;
-}
 </style>
 
 <script>// IJulia setup
