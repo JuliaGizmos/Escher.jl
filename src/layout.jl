@@ -80,7 +80,7 @@ height(h, t) = Height(h, t)
 width(w)  = t -> width(w, t)
 height(h) = t -> height(h, t)
 
-size(w::Length, h::Length, t::Tile) =
+size(w::Length, h::Length, t) =
     t |> width(w) |> height(h)
 size(w::Length, h::Length) =
     t -> size(w, h, t)
@@ -125,6 +125,9 @@ offset(x, y) = offset(TopLeft(), x, y)
 
 place(pos::Position, a, b) =
     Positioned(pos, a, b)
+
+place(a, b) =
+    Positioned(topleft, a, b)
 
 place(x::Length, y::Length, a, b) =
     Positioned(offset(x, y), a, b)
