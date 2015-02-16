@@ -1,13 +1,36 @@
 using Color
 
-fill(elem::Elem, c::Union(ColorValue, AlphaColorValue)) =
-    style(elem, :backgroundColor, string("#", hex(c)))
+import Base: fill
 
-color(elem::Elem, c::Union(ColorValue, AlphaColorValue)) =
-    style(elem, :color, string("#", hex(c)))
+export fill,
+       color
 
-fill(elem::Elem, c::String) =
-    style(elem, :backgroundColor, string("#", hex(c)))
+immutable Styled{attr}
+    value
+    tile
+end
 
-color(elem::Elem, c::String) =
-    style(elem, :color, string("#", hex(c)))
+fill(c::ColorValue, tile) =
+    Style{:fillColor}(c, tile)
+
+textcolor(c::Union(ColorValue, AlphaColorValue), tile) =
+    Style{:color}(c, tile)
+
+border(tile::Tile, c::Union(ColorValue, AlphaColorValue)) =
+    Style{:borderColor}(c)
+
+# Styling:
+
+# FillColor
+# Opacity
+# FgColor
+# FontFamily
+# FontSize
+# FontStyle
+# FontWeight
+
+# BorderStyle
+# BorderColor
+# BorderWeight
+
+# BoxRadius

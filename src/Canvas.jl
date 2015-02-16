@@ -10,14 +10,15 @@ import Base: writemime
 export Elem, div, h1, h2, h3, h4, h5, p, blockquote, em, strong
 
 # Polymer Setup
-const custom_elements = readall(Pkg.dir("Canvas", "assets", "vulcanized.html"))
+custom_elements() =
+    readall(Pkg.dir("Canvas", "assets", "vulcanized.html"))
 
 include("length.jl")
 include("util.jl")
 include("layout.jl")
 include("looks.jl")
-include("signals.jl")
-include("widgets.jl")
+include("signal.jl")
+include("widget.jl")
 include("render.jl")
 
 # Fallback to Patchwork writemime
@@ -36,7 +37,7 @@ end
     import BlinkDisplay, Graphics
 
     Blink.windowinit() do w
-        Blink.head(w, custom_elements_html)
+        Blink.head(w, custom_elements())
     end
 
     Graphics.media(Tile, Graphics.Media.Graphical)

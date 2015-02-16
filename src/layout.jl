@@ -6,6 +6,7 @@ export place,
        empty,
        container,
        fullbleed,
+       snugfit,
        offset,
        width,
        height,
@@ -33,6 +34,8 @@ export place,
        shrink,
        flex,
        wrap,
+       grid,
+       table,
        axisstart,
        axisend,
        center,
@@ -87,6 +90,9 @@ size(w::Length, h::Length) =
 
 fullbleed(x=empty) =
     size(100vw, 100vh, x)
+
+snugfit(x=empty) =
+    size(100cent, 100cent, x)
 
 container(w, h) =
     empty |> size(w, h)
@@ -187,7 +193,7 @@ flow{T <: Direction}(direction::T, tiles) =
 flow{T <: Direction}(direction::T) =
     tiles -> Flow{T}(tiles)
 
-immutable Wrap{D <: Direction, T <: Direction} <: Tile
+immutable Wrap{D <: Direction, T <: Direction} <: FlexContainer
     tile::Flow{T}
 end
 wrap{T <: Direction, U <: Direction}(d::T, f::Flow{U}) =
@@ -196,7 +202,7 @@ wrap{T <: Direction, U <: Direction}(d::T, f::Flow{U}) =
 wrap{T <: Direction}(d::T) =
     tiles -> wrap(d, tiles)
 
-flow{T <: Direction, U <: Direction}(stack::T, wrap_::U, tiles) =
+flow(stack::Direction, wrap_::Direction, tiles) =
     wrap(wrap_, flow(stack, tiles))
 
 flow(stack::Direction, wrap::Direction) =
@@ -338,3 +344,27 @@ pad(len::Length, tile) =
 
 pad(len::Length) =
     t -> pad(len, t)
+
+
+# Utility functions
+
+function grid(tiles::AbstractArray, column=x -> flow(down, x))
+    m, n = size(tiles)
+    flow(right, [column(tiles[:, i]) for i=1:m])
+end
+
+using DataFrames
+
+immutable Table
+    title::Tile
+    columns::AbstractArray
+    data::AbstractDataFrame
+end
+
+function table(title, headers::AbstractArray, data::AbstractDataFrame)
+    @assert length(headers) > 0
+    if !isa(headers[1], Tuple)
+        headers = zip(headers, headers)
+    end
+end
+

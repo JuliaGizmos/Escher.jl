@@ -243,3 +243,4 @@ render(d::Dropdown) =
 
 render(l::Label) =
     custom("core-label"; [:for => l.target]...) << render(l.label)
+
