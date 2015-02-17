@@ -15492,6 +15492,51 @@ that it uses one color only.
 
 
 
+<script>
+(function () {
+    window.Canvasd = {
+        socket_url: function (addr) {
+            var loc = window.location, new_uri;
+            if (loc.protocol === "https:") {
+                new_uri = "wss:";
+            } else {
+                new_uri = "ws:";
+            }
+            new_uri += "//" + loc.host;
+            new_uri += "/socket/" + addr;
+            return new_uri;
+        },
+        start: function (addr) {
+            var ws = new WebSocket(Canvasd.socket_url(addr));
+            ws.onmessage = function (msg) {
+                var cmd = JSON.parse(msg.data)
+                var f = Canvasd.commands[cmd.command]
+                f(cmd)
+            }
+            ws.onerror = function (y) {
+                console.log(y)
+            }
+        },
+        commands: {
+            mount: function (cmd) {
+                var el = document.getElementById(cmd.id)
+                node = new Patchwork.Node(cmd.id, cmd.data, el)
+            },
+            patch: function (cmd) {
+                var n = Patchwork.nodes[cmd.id]
+                if (!n) {
+                    console.log("Patch received for an unknown node!", cmd.id)
+                }
+                n.applyPatch(cmd.data)
+            },
+            log: function (cmd) {
+                console.log(cmd)
+            }
+        }
+    }
+})();
+</script>
+
 
 <style>
 /* http://meyerweb.com/eric/tools/css/reset/
@@ -23634,7 +23679,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <polymer-element name="reactive-signal" attributes="name value" assetpath="">
 
-<tempmlate>
+<template></template>
 
 <script>
 
@@ -23653,7 +23698,7 @@ Polymer('reactive-signal',{
 
 </script>
 
-</tempmlate></polymer-element>
+</polymer-element>
 
 
 <polymer-element name="stop-propagation" attributes="name" assetpath="">
@@ -23724,4 +23769,5 @@ Polymer('state-signal',{
 </script>
 
 </polymer-element>
+
 </div></body></html>

@@ -3,7 +3,9 @@
 # Webapp
 using Morsel
 using Canvas
+using JSON
 
+using Reactive
 using Patchwork, Patchwork.HTML5
 using WebSockets
 using Morsel
@@ -35,19 +37,49 @@ function renderfile(filename)
     end
 end
 
+function setup_transport(file)
+    io = IOBuffer()
+    write_canvas_prelude(io)
+
+    write(io, """<script>Canvasd.start($(JSON.json(file)));</script>""")
+    write(io, """<div id="root"></div>""")
+    takebuf_string(io)
+end
+
 route(app, GET, "/") do req, res
-    renderfile("index.jl")
+    setup_transport("index.jl")
 end
 
 route(app, GET, "/<file>") do req, res
-    filename = abspath(req.params[:file])
-    renderfile(filename)
+    setup_transport(req.params[:file])
 end
 
-wsock = WebSocketHandler() do req, client
-    while true
-        msg = read(client)
-        write(client, msg)
+mount_cmd(node, id="root") =
+   [ "command" => "mount",
+    "id" => id,
+    "data" => Patchwork.jsonfmt(node)] |> JSON.json
+
+patch_cmd(diff, id="root") =
+   [ "command" => "patch",
+    "id" => id,
+    "data" => Patchwork.jsonfmt(diff)] |> JSON.json
+
+wsroute(app, GET, "/socket/<file>") do req, sock
+    file = abspath(req.params[:file])
+    main = renderfile(file) |> render
+
+    write(sock, mount_cmd(main))
+
+    while isopen(sock)
+        fw = watch_file(file)
+        wait(fw)
+        sleep(0.2) # But wai???
+        close(fw)
+
+        next = renderfile(file) |> render
+        write(sock, patch_cmd(Patchwork.diff(main, next)))
+        println("Diffed.")
+        main = next
     end
 end
 
@@ -61,4 +93,4 @@ end
 #end
 
 
-start(app, 8080, wsock=wsock)
+start(app, 6767)
