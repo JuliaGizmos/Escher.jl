@@ -49,3 +49,5 @@ function makeid(sig::Signal)
         return id
     end
 end
+
+render{T <: Tile}(s::Signal{T}) = render(value(s))

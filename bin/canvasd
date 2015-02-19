@@ -64,21 +64,38 @@ patch_cmd(diff, id="root") =
     "id" => id,
     "data" => Patchwork.jsonfmt(diff)] |> JSON.json
 
+swap!(tilestream, next::Signal) =
+    push!(tilestream, next)
+
+swap!(tilestream, next) =
+    push!(tilestream, Input(next))
+
 wsroute(app, GET, "/socket/<file>") do req, sock
     file = abspath(req.params[:file])
-    main = renderfile(file) |> render
+    current = renderfile(file) |> render
 
-    write(sock, mount_cmd(main))
+    tilestream = Input{Signal}(Input{Tile}(empty))
+    swap!(tilestream, current)
+
+    write(sock, mount_cmd(current))
+
+    foldl(current, flatten(tilestream; typ=Any); output_type=Any) do prev, next
+        rendered_next = render(next)
+        write(sock, patch_cmd(
+            Patchwork.diff(prev, rendered_next)))
+        rendered_next
+    end
 
     while isopen(sock)
         fw = watch_file(file)
         wait(fw)
-        sleep(0.2) # But wai???
         close(fw)
+        sleep(0.2) # But wai???
 
-        next = renderfile(file) |> render
-        write(sock, patch_cmd(Patchwork.diff(main, next)))
-        main = next
+        next = renderfile(file)
+
+        # Replace the current main signal
+        swap!(tilestream, next)
     end
 end
 
