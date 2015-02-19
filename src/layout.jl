@@ -5,7 +5,6 @@ import Base: convert, size
 export place,
        empty,
        container,
-       fullbleed,
        snugfit,
        offset,
        width,
@@ -87,9 +86,6 @@ size(w::Length, h::Length, t) =
     t |> width(w) |> height(h)
 size(w::Length, h::Length) =
     t -> size(w, h, t)
-
-fullbleed(x=empty) =
-    size(100vw, 100vh, x)
 
 snugfit(x=empty) =
     size(100cent, 100cent, x)
