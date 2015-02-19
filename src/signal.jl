@@ -1,15 +1,15 @@
 using Reactive
 
-export statesignal, stoppropagation, pipe
+export stoppropagation, pipe
 
-immutable InboundSignal <: Tile
+immutable SignalTransport <: Tile
     tile::Tile
     name::Symbol
     signal::Input
 end
 
 pipe(t::Tile, signalname, s::Input) =
-    InboundSignal(t, signalname, s)
+    SignalTransport(t, signalname, s)
 
 setup_transport(x::Input) =
     error("Looks like there is no trasport set up for signals")
@@ -21,22 +21,6 @@ immutable StopPropagation <: Tile
 end
 stoppropagation(tile::Tile, name::Symbol) =
     StopPropagation(tile, name)
-
-# A low level type representing drawing a signal from a Patchwork level attribute
-# This is ideally not part of user-facing API
-immutable StateSignal <: Tile
-    tile::Tile
-    name::Symbol
-    attr::String
-    trigger::String
-end
-
-statesignal(tile::Tile, name; attr="value", trigger="change") =
-    StateSignal(tile, name, attr, trigger)
-
-statesignal(w::Tile, x::Input; tag=:val, attr="value", trigger="change", absorb=true) =
-    pipe(statesignal(w, tag, attr=attr, trigger=trigger), tag, x) |>
-       (x -> absorb ? stoppropagation(x, tag) : x)
 
 # Utility functions for transports
 decodeJSON(sig::Input, val) = val

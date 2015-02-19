@@ -189,15 +189,15 @@ render_style(pad::Padded{Down}) =
 render(padded::Padded) =
     render(padded.tile) & [:style => render_style(padded)]
 
-render(t::StateSignal) =
+render{attr}(t::WithState{attr}) =
     render(t.tile) << Elem("state-signal",
-        attributes=[:name=>t.name, :attr=>t.attr, :trigger=>t.trigger])
+        attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
 
 render(tile::StopPropagation) =
     Elem("stop-propagation", render(tile.tile),
         attributes=[:name=>tile.name])
 
-function render(sig::InboundSignal)
+function render(sig::SignalTransport)
     id = setup_transport(sig.signal)
     Elem("signal-transport",
         render(sig.tile), attributes=[:name=>sig.name, :signalId => id])

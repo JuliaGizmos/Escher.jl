@@ -78,19 +78,8 @@ wsroute(app, GET, "/socket/<file>") do req, sock
 
         next = renderfile(file) |> render
         write(sock, patch_cmd(Patchwork.diff(main, next)))
-        println("Diffed.")
         main = next
     end
 end
-
-#function Canvas.setup_transport(sig::Input)
-#    id = makeid(sig)
-#    # add_channel
-#    # 
-#    comm = Comm(:CanvasSignal, data=[:signalId => id])
-#    comm.on_msg = (msg) -> push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
-#    return id
-#end
-
 
 start(app, 6767)
