@@ -15493,47 +15493,77 @@ that it uses one color only.
 
 
 <script>
+
+function teelog(x) {
+    console.log(x)
+    return x
+}
+
 (function () {
-    window.Canvasd = {
-        socket_url: function (addr) {
-            var loc = window.location, new_uri;
-            if (loc.protocol === "https:") {
-                new_uri = "wss:";
-            } else {
-                new_uri = "ws:";
-            }
-            new_uri += "//" + loc.host;
-            new_uri += "/socket/" + addr;
-            return new_uri;
+
+    var socket_url = function (suffix) {
+        var loc = window.location, new_uri;
+        if (loc.protocol === "https:") {
+            new_uri = "wss:";
+        } else {
+            new_uri = "ws:";
+        }
+        new_uri += "//" + loc.host;
+        new_uri += "/socket/" + suffix;
+        return new_uri;
+    }
+
+    var commands = {
+        mount: function (cmd) {
+            var el = document.getElementById(cmd.id)
+            this.node = new Patchwork.Node(cmd.id, cmd.data, el)
+            var self = this
+            el.addEventListener("signal-transport", function (ev) {
+                    self.message(teelog({
+                        command: "signal-update",
+                        data: {
+                            signalId: ev.detail.signalId,
+                            value: ev.detail.value
+                        }
+                    }))
+                    ev.stopPropagation()
+            })
         },
-        start: function (addr) {
-            var ws = new WebSocket(Canvasd.socket_url(addr));
-            ws.onmessage = function (msg) {
-                var cmd = JSON.parse(msg.data)
-                var f = Canvasd.commands[cmd.command]
-                f(cmd)
-            }
-            ws.onerror = function (y) {
-                console.log(y)
-            }
+        patch: function (cmd) {
+            this.node.applyPatch(cmd.data)
         },
-        commands: {
-            mount: function (cmd) {
-                var el = document.getElementById(cmd.id)
-                node = new Patchwork.Node(cmd.id, cmd.data, el)
-            },
-            patch: function (cmd) {
-                var n = Patchwork.nodes[cmd.id]
-                if (!n) {
-                    console.log("Patch received for an unknown node!", cmd.id)
-                }
-                n.applyPatch(cmd.data)
-            },
-            log: function (cmd) {
-                console.log(cmd)
-            }
+        log: function (cmd) {
+            console.log(cmd)
+        },
+        message: function (ws, msg) {
+            this.websocket.send(JSON.stringify(msg))
         }
     }
+
+
+    function Canvasd(suffix, el) {
+        this.node = null
+        this.websocket = null
+
+        var ws = new WebSocket(socket_url(suffix))
+
+        var self = this
+        ws.onmessage = function (msg) {
+            var cmd = JSON.parse(msg.data),
+                f = commands[cmd.command]
+            if (!f) {
+                console.log("Invalid command", cmd.command, "invoked")
+            } else {
+                f.call(self, cmd)
+            }
+        }
+        ws.onerror = function (e) {
+            console.log("Error in web socket connection", e)
+        }
+        this.websocket = ws
+    }
+
+    window.Canvasd = Canvasd
 })();
 </script>
 

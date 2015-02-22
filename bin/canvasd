@@ -41,8 +41,8 @@ function setup_transport(file)
     io = IOBuffer()
     write_canvas_prelude(io)
 
-    write(io, """<script>Canvasd.start($(JSON.json(file)));</script>""")
     write(io, """<div id="root"></div>""")
+    write(io, """<script>new Canvasd($(JSON.json(file)), "root");</script>""")
     takebuf_string(io)
 end
 
