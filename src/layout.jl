@@ -48,11 +48,6 @@ export place,
        pad,
        padcontent
 
-# To abstract away the DOM's bullshit, we will call renderable
-# Canvas elements Tile and define well-behaved functions on it
-
-abstract Tile
-
 immutable Leaf <: Tile
     element::Elem
 end

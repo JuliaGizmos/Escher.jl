@@ -10,8 +10,6 @@ using Patchwork, Patchwork.HTML5
 using WebSockets
 using Morsel
 
-include("setup.jl")
-
 app = Morsel.app()
 
 function renderfile(filename)
@@ -39,7 +37,7 @@ end
 
 function setup_socket(file)
     io = IOBuffer()
-    write_canvas_prelude(io)
+    Canvas.write_canvas_prelude(io)
 
     write(io, """<div id="root"></div>""")
     write(io, """<script>new Canvasd($(JSON.json(file)), "root");</script>""")
