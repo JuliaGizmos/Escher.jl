@@ -37,7 +37,7 @@ function renderfile(filename)
     end
 end
 
-function setup_transport(file)
+function setup_socket(file)
     io = IOBuffer()
     write_canvas_prelude(io)
 
@@ -47,11 +47,11 @@ function setup_transport(file)
 end
 
 route(app, GET, "/") do req, res
-    setup_transport("index.jl")
+    setup_socket("index.jl")
 end
 
 route(app, GET, "/<file>") do req, res
-    setup_transport(req.params[:file])
+    setup_socket(req.params[:file])
 end
 
 mount_cmd(node, id="root") =
@@ -70,16 +70,31 @@ swap!(tilestream, next::Signal) =
 swap!(tilestream, next) =
     push!(tilestream, Input(next))
 
+const signals = Dict()
+function Canvas.setup_transport(x::Input)
+    Canvas.makeid(x)
+end
+
+const commands = Dict([
+    ("signal-update", (msg) -> begin
+        id = msg["data"]["signalId"]
+        sig = Canvas.fromid(id)
+        push!(sig, Canvas.decodeJSON(sig, msg["data"]["value"]))
+    end),
+])
+
 wsroute(app, GET, "/socket/<file>") do req, sock
     file = abspath(req.params[:file])
-    current = renderfile(file) |> render
-
     tilestream = Input{Signal}(Input{Tile}(empty))
+    current = renderfile(file)
+    println("Mounting a ", typeof(current))
+
     swap!(tilestream, current)
 
-    write(sock, mount_cmd(current))
+    rendered = render(current)
+    write(sock, mount_cmd(rendered))
 
-    foldl(current, flatten(tilestream; typ=Any); output_type=Any) do prev, next
+    foldl(rendered, flatten(tilestream; typ=Any); output_type=Any) do prev, next
         rendered_next = render(next)
         write(sock, patch_cmd(
             Patchwork.diff(prev, rendered_next)))
@@ -87,16 +102,28 @@ wsroute(app, GET, "/socket/<file>") do req, sock
     end
 
     while isopen(sock)
-        fw = watch_file(file)
-        wait(fw)
-        close(fw)
-        sleep(0.2) # But wai???
-
-        next = renderfile(file)
-
-        # Replace the current main signal
-        swap!(tilestream, next)
+        data = read(sock)
+        msg = JSON.parse(bytestring(data))
+        if !haskey(commands, msg["command"])
+            warn("Unknown command received ", msg["command"])
+        else
+            commands[msg["command"]](msg)
+        end
     end
+
+    #while isopen(sock)
+    #    fw = watch_file(file)
+    #    wait(fw)
+    #    close(fw)
+    #    sleep(0.2) # But wai???
+
+    #    next = renderfile(file)
+
+    #    println("Replacing with a ", typeof(current))
+    #    # Replace the current main signal
+    #    swap!(tilestream, next)
+    #end
+
 end
 
 start(app, 6767)

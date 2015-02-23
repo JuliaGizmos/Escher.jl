@@ -15519,13 +15519,13 @@ function teelog(x) {
             this.node = new Patchwork.Node(cmd.id, cmd.data, el)
             var self = this
             el.addEventListener("signal-transport", function (ev) {
-                    self.message(teelog({
+                    commands["message"].call(self, (teelog({
                         command: "signal-update",
                         data: {
                             signalId: ev.detail.signalId,
                             value: ev.detail.value
                         }
-                    }))
+                    })))
                     ev.stopPropagation()
             })
         },
@@ -15535,7 +15535,7 @@ function teelog(x) {
         log: function (cmd) {
             console.log(cmd)
         },
-        message: function (ws, msg) {
+        message: function (msg) {
             this.websocket.send(JSON.stringify(msg))
         }
     }
@@ -15775,7 +15775,7 @@ body {
 </style>
 
 <script>// IJulia setup
-if (IPython && window) {
+if (window.IPython && window) {
     window.addEventListener('polymer-ready', function () {
         var commMgr = IPython.notebook.kernel.comm_manager,
             comms = {}

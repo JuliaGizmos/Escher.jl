@@ -4,11 +4,12 @@ export hasstate
 
 immutable WithState{attr} <: Behaviour
     tile::Tile
+    tag::Symbol
     trigger::String
 end
 
-hasstate(tile::Tile, name; attr="value", trigger="change") =
-    WithState{symbol(attr)}(tile, name, attr, trigger)
+hasstate(tile::Tile, tag; attr="value", trigger="change") =
+    WithState{symbol(attr)}(tile, tag, trigger)
 
 hasstate(w::Tile, x::Input; tag=:val, attr="value", trigger="change", absorb=true) =
     pipe(hasstate(w, tag, attr=attr, trigger=trigger), tag, x) |>
