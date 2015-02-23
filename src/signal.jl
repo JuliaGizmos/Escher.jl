@@ -11,7 +11,7 @@ end
 pipe(t::Tile, signalname, s::Input) =
     SignalTransport(t, signalname, s)
 
-setup_transport(x::Input) =
+setup_transport(x) =
     error("Looks like there is no trasport set up for signals")
 
 # Don't allow a signal to propagate outward
@@ -26,6 +26,8 @@ stoppropagation(tile::Tile, name::Symbol) =
 decodeJSON(sig::Input, val) = val
 decodeJSON{T <: String}(sig::Input{T}, ::Nothing) = ""
 decodeJSON{T <: String}(sig::Input{T}, val) = string(val)
+decodeJSON{T <: Integer}(sig::Input{T}, val) = convert(T, int(val))
+decodeJSON{T <: FloatingPoint}(sig::Input{T}, val) = convert(T, float(val))
 
 istruthy(::Nothing) = false
 istruthy(b::Bool) = b
@@ -48,6 +50,10 @@ function makeid(sig::Signal)
         id_to_signal[id] = sig
         return id
     end
+end
+
+function fromid(id)
+    id_to_signal[id]
 end
 
 render{T <: Tile}(s::Signal{T}) = render(value(s))

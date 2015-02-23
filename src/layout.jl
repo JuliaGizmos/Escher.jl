@@ -117,22 +117,25 @@ end
 
 immutable Positioned <: Tile
     position::Position
-    contained::Tile
     containing::Tile
+    contained::Tile
 end
 
 offset{T <: Corner}(corner::T, x, y) =
     Relative{T}(x, y)
 offset(x, y) = offset(TopLeft(), x, y)
 
-place(pos::Position, a, b) =
-    Positioned(pos, a, b)
+place(pos::Position, outer, inner) =
+    Positioned(pos, outer, inner)
 
-place(a, b) =
-    Positioned(topleft, a, b)
+place(outer, inner) =
+    Positioned(topleft, outer, inner)
 
 place(x::Length, y::Length, a, b) =
     Positioned(offset(x, y), a, b)
+
+place(p::Position) = (x...) -> place(p, x...)
+place(p::Position, outer) = inner -> place(p, outer, inner)
 
 # 2. Axes, Directions and Flow
 
@@ -335,12 +338,18 @@ padcontent{T <: Union(Axis, Direction)}(
     axis::T,
     len::Length, tile) = Padded{T}(len, tile)
 
+pad{T <: Union(Axis, Direction)}(
+    axis::T,
+    len::Length, tile) = padcontent(axis, len, tile)
+
 pad(len::Length, tile) =
     padcontent(len, Container(tile))
 
 pad(len::Length) =
     t -> pad(len, t)
 
+pad(d::Union(Axis, Direction), len::Length) =
+    t -> pad(d, len, t)
 
 # Utility functions
 

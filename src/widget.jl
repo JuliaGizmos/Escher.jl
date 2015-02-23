@@ -13,16 +13,13 @@ abstract Widget <: Tile
 # A widget that can signal its state
 abstract SignalWidget <: Tile
 
-tag(w::SignalWidget) = w.tag
-
-bind(w::SignalWidget, x::Input) = statesignal(w, x, tag=tag(w))
+bind(w::SignalWidget, x::Input) = hasstate(w, x)
 (|>)(w::SignalWidget, x::Input) = bind(w, x)
 
 
 ## Slider
 
 immutable Slider{T <: Real} <: SignalWidget
-    tag::Symbol
     value::T
     range::Range{T}
     editable::Bool
@@ -32,46 +29,41 @@ immutable Slider{T <: Real} <: SignalWidget
 end
 
 slider{T}(range::Range{T};
-          tag=nexttag("slider"),
           value=first(range),
           editable=true,
           pin=false,
           disabled=false,
           secondaryprogress=zero(T)) =
-    Slider(symbol(tag), convert(T, value), range, editable, pin, disabled, secondaryprogress)
+    Slider(convert(T, value), range, editable, pin, disabled, secondaryprogress)
 
 
 ## Boolean widgets: Checkbox and Toggle Button
 
 immutable BoolWidget{typ} <: SignalWidget
-    tag::Symbol
     value::Bool
     label::String
     disabled::Bool
 end
 
 checkbox(;
-         tag=nexttag("checkbox"),
          value=false,
          label="",
          disabled=false) =
-    BoolWidget{:checkbox}(symbol(tag), value, label, disabled)
+    BoolWidget{:checkbox}(value, label, disabled)
 
 togglebutton(;
-             tag=nexttag("checkbox"),
              value=false,
              label="",
              disabled=false) =
-    BoolWidget{:toggle}(symbol(tag), value, label, disabled)
+    BoolWidget{:toggle}(value, label, disabled)
 
 bind(c::BoolWidget, x::Input) =
-   statesignal(c, x, tag=tag(c), attr="checked", trigger="change")
+   hasstate(c, x, attr="checked", trigger="change")
 
 
 ## Text input
 
 immutable TextInput <: SignalWidget
-    tag::Symbol
     value::String
     label::String
     floatinglabel::Bool
@@ -79,14 +71,13 @@ immutable TextInput <: SignalWidget
 end
 
 textinput(value::String="";
-          tag=nexttag("text"),
           label="",
           floatinglabel=false,
           disabled=false) =
-    TextInput(tag, value, label, floatinglabel, disabled)
+    TextInput(value, label, floatinglabel, disabled)
 
 bind(t::TextInput, x::Input) =
-   statesignal(t, x, tag=tag(t), attr="value", trigger="keyup")
+   hasstate(t, x, attr="value", trigger="keyup")
 
 ## Dropdown
 
@@ -96,7 +87,6 @@ immutable SelectionItem{T} <: Tile
 end
 
 immutable Dropdown <: SignalWidget
-    tag::Symbol
     value::String
     label::String
     items::Vector{SelectionItem}
@@ -107,9 +97,8 @@ makeitems(xs) =
     [SelectionItem(k, v) for (k, v) in xs]
 
 dropdown(items::AbstractArray;
-         tag=nexttag("dropdown"),
          value=first(items)) =
-    Dropdown(makeitems(items), tag, value)
+    Dropdown(makeitems(items), value)
 
 
 # label a widget
@@ -118,8 +107,3 @@ immutable Label <: Widget
     label::Tile
 end
 
-# TODO: toolbar
-
-# FIXME
-labelfor(w::Widget, tile) = Label(w.tag, tile)
-labelfor(w, tile) = Label(symbol(w), tile)

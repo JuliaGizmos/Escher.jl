@@ -181,6 +181,10 @@ render_style(pad::Padded{Vertical}) =
     [:paddingTop => pad.len, :paddingBottom => pad.len]
 render_style(pad::Padded{Vertical}) =
     [:paddingTop => pad.len, :paddingBottom => pad.len]
+render_style(pad::Padded{Right}) =
+    [:paddingRight => pad.len]
+render_style(pad::Padded{Left}) =
+    [:paddingLeft => pad.len]
 render_style(pad::Padded{Up}) =
     [:paddingTop => pad.len]
 render_style(pad::Padded{Down}) =
@@ -191,7 +195,7 @@ render(padded::Padded) =
 
 render{attr}(t::WithState{attr}) =
     render(t.tile) << Elem("state-signal",
-        attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
+        attributes=[:name=>t.tag, :attr=>attr, :trigger=>t.trigger])
 
 render(tile::StopPropagation) =
     Elem("stop-propagation", render(tile.tile),
@@ -211,22 +215,21 @@ custom(name; attrs...) = Elem(name, attributes=Dict(attrs))
 _bool(a, name) = a ? name : nothing
 
 render(s::Slider) =
-    custom("paper-slider", min=first(s.range), max=last(s.range), id=s.tag,
+    custom("paper-slider", min=first(s.range), max=last(s.range),
            step=step(s.range), value=s.value, editable=s.editable,
            disabled=s.disabled, secondaryProgress=s.secondaryprogress)
 
 render(c::BoolWidget{:checkbox}) =
-    custom("paper-checkbox", checked=c.value, id=c.tag, disabled=_bool(c.disabled, "disabled"))
+    custom("paper-checkbox", checked=c.value, disabled=_bool(c.disabled, "disabled"))
 
 render(t::BoolWidget{:toggle}) =
     custom("paper-toggle-button",
            checked=t.value,
-           id=t.tag,
            disabled=_bool(t.disabled, "disabled"))
 
 render(t::TextInput) =
     custom("paper-input") &
-           [ :id=>t.tag, :label=>t.label,
+           [ :label=>t.label,
              :floatingLabel=>_bool(t.floatinglabel, "floatingLabel"), :disabled=>_bool(t.disabled, "disabled")]
 
 render(t::SelectionItem) =
@@ -234,7 +237,6 @@ render(t::SelectionItem) =
 
 render(d::Dropdown) =
     custom("paper-dropdown-menu",
-           id=d.tag,
            value=d.value,
            label=d.label,
            floatingLabel=_bool(d.floatinglabel, "floatingLabel"),
