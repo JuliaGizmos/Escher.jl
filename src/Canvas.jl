@@ -20,6 +20,7 @@ include("looks.jl")
 include("behaviour.jl")
 include("signal.jl")
 include("widget.jl")
+include("library/codeeditor.jl")
 include("render.jl")
 
 # Fallback to Patchwork writemime

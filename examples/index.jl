@@ -24,5 +24,5 @@ stack(w, h, d, n) =
             stack(cut(w, h, d[1])..., vcat(d[2:end], d[1]), n-1)])
 
 main = place(middle,
-             stack(80vmin, 80vmin, [down, left, up, right], 12),
-             snugfit())
+             snugfit(),
+             stack(80vmin, 80vmin, [down, left, up, right], 12))
