@@ -40,7 +40,7 @@ render(p::BottomRight, x, y) =
 render(c::Corner) = [:style => render(c, 0, 0)]
 render{C <: Corner}(p::Relative{C}) = [:style => render(C(), p.x, p.y)]
 
-function render(tile::Positioned)
+function render(tile::Inset)
     outer = render(tile.containing)
     inner = render(tile.contained)
 

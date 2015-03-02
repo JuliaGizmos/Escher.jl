@@ -2,7 +2,7 @@
 import Patchwork.div
 import Base: convert, size
 
-export place,
+export inset,
        empty,
        container,
        snugfit,
@@ -30,11 +30,12 @@ export place,
        outward,
        flow,
        grow,
+       vfill,
+       hfill,
        shrink,
        flex,
        wrap,
        grid,
-       table,
        axisstart,
        axisend,
        center,
@@ -110,7 +111,7 @@ immutable Relative{T <: Corner} <: Position
     # z::Length
 end
 
-immutable Positioned <: Tile
+immutable Inset <: Tile
     position::Position
     containing::Tile
     contained::Tile
@@ -120,17 +121,17 @@ offset{T <: Corner}(corner::T, x, y) =
     Relative{T}(x, y)
 offset(x, y) = offset(TopLeft(), x, y)
 
-place(pos::Position, outer, inner) =
-    Positioned(pos, outer, inner)
+inset(pos::Position, outer, inner) =
+    Inset(pos, outer, inner)
 
-place(outer, inner) =
-    Positioned(topleft, outer, inner)
+inset(outer, inner) =
+    Inset(topleft, outer, inner)
 
-place(x::Length, y::Length, a, b) =
-    Positioned(offset(x, y), a, b)
+inset(x::Length, y::Length, a, b) =
+    Inset(offset(x, y), a, b)
 
-place(p::Position) = (x...) -> place(p, x...)
-place(p::Position, outer) = inner -> place(p, outer, inner)
+inset(p::Position) = (x...) -> inset(p, x...)
+inset(p::Position, outer) = inner -> inset(p, outer, inner)
 
 # 2. Axes, Directions and Flow
 
@@ -353,18 +354,6 @@ function grid(tiles::AbstractArray, column=x -> flow(down, x))
     flow(right, [column(tiles[:, i]) for i=1:m])
 end
 
-using DataFrames
-
-immutable Table
-    title::Tile
-    columns::AbstractArray
-    data::AbstractDataFrame
-end
-
-function table(title, headers::AbstractArray, data::AbstractDataFrame)
-    @assert length(headers) > 0
-    if !isa(headers[1], Tuple)
-        headers = zip(headers, headers)
-    end
-end
+vfill(y, el=empty) = el |> size(100cent, y)
+hfill(x, el=empty) = el |> size(x, 100cent)
 

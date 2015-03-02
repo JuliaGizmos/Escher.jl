@@ -23,6 +23,6 @@ stack(w, h, d, n) =
         flow(d[1], [ box(cut(w, h, d[1])..., n),
             stack(cut(w, h, d[1])..., vcat(d[2:end], d[1]), n-1)])
 
-main = place(middle,
+main = inset(middle,
              snugfit(),
              stack(80vmin, 80vmin, [down, left, up, right], 12))
