@@ -5,6 +5,11 @@ style(elem::Elem, key, val)  = elem & [:style => [key => val]]
 
 # render function takes a tile and creates an Elem
 
+render(x) = string(x)
+
+# render for some primitive types
+render(x::FloatingPoint) = string(round(x, 4))
+
 render(x::Elem) = x
 render(x::Leaf) = x.element
 
