@@ -25,7 +25,9 @@ include("looks.jl")
 include("behaviour.jl")
 include("signal.jl")
 include("widget.jl")
-include("library/codeeditor.jl")
+
+include("library/codemirror.jl")
+
 include("render.jl")
 include("lazyload.jl")
 

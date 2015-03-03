@@ -245,10 +245,3 @@ render(d::Dropdown) =
 
 render(l::Label) =
     custom("core-label"; [:for => l.target]...) << render(l.label)
-
-render(c::CodeEditor) =
-    custom("code-mirror") & [
-        "value" => c.value,
-        "mode" => c.mode,
-        "theme" => c.theme,
-        "lineNumbers" => c.linenumbers]
