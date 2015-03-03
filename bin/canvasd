@@ -99,7 +99,7 @@ wsroute(app, GET, "/socket/<file>") do req, sock
         rendered_next
     end
 
-    while isopen(sock)
+    @async while isopen(sock)
         data = read(sock)
         msg = JSON.parse(bytestring(data))
         if !haskey(commands, msg["command"])
@@ -109,18 +109,18 @@ wsroute(app, GET, "/socket/<file>") do req, sock
         end
     end
 
-    #while isopen(sock)
-    #    fw = watch_file(file)
-    #    wait(fw)
-    #    close(fw)
-    #    sleep(0.2) # But wai???
+    while isopen(sock)
+        fw = watch_file(file)
+        wait(fw)
+        close(fw)
+        sleep(0.2) # But wai???
 
-    #    next = renderfile(file)
+        next = renderfile(file)
 
-    #    println("Replacing with a ", typeof(current))
-    #    # Replace the current main signal
-    #    swap!(tilestream, next)
-    #end
+        println("Replacing with a ", typeof(current))
+        # Replace the current main signal
+        swap!(tilestream, next)
+    end
 
 end
 
