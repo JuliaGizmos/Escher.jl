@@ -8,8 +8,8 @@ export hasstate,
 
 abstract Behaviour <: Tile
 
-pipe(t::Behaviour, s::Input, absorb=true) =
-    pipe(t, t.name, s, absorb)
+pipe(t::Behaviour, s::Input; absorb=true) =
+    pipe(t, t.name, s, absorb=absorb)
 
 (|>)(t::Behaviour, s::Input) = pipe(t, s)
 

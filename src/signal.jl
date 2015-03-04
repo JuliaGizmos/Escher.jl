@@ -21,7 +21,7 @@ immutable SignalTransport <: Tile
     signal::Input
 end
 
-pipe(t::Tile, name, s::Input, absorb=true) =
+pipe(t::Tile, name, s::Input; absorb=true) =
     SignalTransport(t, name, s) |>
        (x -> absorb ? stoppropagation(x, name) : x)
 
