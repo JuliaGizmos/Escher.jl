@@ -203,7 +203,7 @@ render(padded::Padded) =
 
 render{attr}(t::WithState{attr}) =
     render(t.tile) << Elem("watch-state",
-        attributes=[:name=>t.tag, :attr=>attr, :trigger=>t.trigger])
+        attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
 
 render(tile::StopPropagation) =
     Elem("stop-propagation", render(tile.tile),
@@ -217,7 +217,10 @@ end
 
 function render(sig::SignalSampler)
     Elem("sample-signals",
-        render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
+        render(sig.tile),
+        name=sig.name,
+        signals=sig.signals,
+        triggers=sig.triggers)
 end
 
 ### Widgets
@@ -228,12 +231,15 @@ custom(name; attrs...) = Elem(name, attributes=Dict(attrs))
 _bool(a, name) = a ? name : nothing
 
 render(s::Slider) =
-    custom("paper-slider", min=first(s.range), max=last(s.range),
+    Elem("paper-slider", min=first(s.range), max=last(s.range),
            step=step(s.range), value=s.value, editable=s.editable,
            disabled=s.disabled, secondaryProgress=s.secondaryprogress)
 
+render(b::Button) =
+    Elem("paper-button", render(b.label))
+
 render(c::BoolWidget{:checkbox}) =
-    custom("paper-checkbox", checked=c.value, disabled=_bool(c.disabled, "disabled"))
+    Elem("paper-checkbox", checked=c.value, disabled=_bool(c.disabled, "disabled"))
 
 render(t::BoolWidget{:toggle}) =
     custom("paper-toggle-button",
@@ -241,8 +247,9 @@ render(t::BoolWidget{:toggle}) =
            disabled=_bool(t.disabled, "disabled"))
 
 render(t::TextInput) =
-    custom("paper-input") &
+    Elem("paper-input") &
            [ :label=>t.label,
+             :value=>t.value,
              :floatingLabel=>_bool(t.floatinglabel, "floatingLabel"), :disabled=>_bool(t.disabled, "disabled")]
 
 render(t::SelectionItem) =

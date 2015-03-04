@@ -1,5 +1,6 @@
 import Base: |>
 export bind,
+       button,
        slider,
        checkbox,
        togglebutton,
@@ -10,20 +11,18 @@ export bind,
 # A widget can signal some state
 abstract Widget <: Tile
 
-pipe(w::Widget, s::Input) = pipe(hasstate(w, name=w.name), s)
-(|>)(w::Widget, s::Input) = pipe(w, s)
-
 ## Button
 
 immutable Button <: Widget
+    label::Tile
 end
 
-pipe(w::Button, s::Input) = clickable(w) |> s
+button(label; name=:_button) =
+    clickable(Button(label), name=name)
 
 ## Slider
 
 immutable Slider{T <: Real} <: Widget
-    name::Symbol
     value::T
     range::Range{T}
     editable::Bool
@@ -39,13 +38,14 @@ slider{T}(range::Range{T};
           pin=false,
           disabled=false,
           secondaryprogress=zero(T)) =
-    Slider(name, convert(T, value), range, editable, pin, disabled, secondaryprogress)
+    hasstate(
+        Slider(convert(T, value), range, editable, pin, disabled, secondaryprogress),
+        name=name)
 
 
 ## Boolean widgets: Checkbox and Toggle Button
 
 immutable BoolWidget{typ} <: Widget
-    name::Symbol
     value::Bool
     label::String
     disabled::Bool
@@ -56,23 +56,23 @@ checkbox(;
          value=false,
          label="",
          disabled=false) =
-    BoolWidget{:checkbox}(name, value, label, disabled)
+    hasstate(
+        BoolWidget{:checkbox}(value, label, disabled),
+        name=name, attr="checked", trigger="change")
 
 togglebutton(;
              name=:_togglebutton,
              value=false,
              label="",
              disabled=false) =
-    BoolWidget{:toggle}(name, value, label, disabled)
-
-pipe(c::BoolWidget, x::Input) =
-   hasstate(c, x, name=c.name, attr="checked", trigger="change")
+    hasstate(
+        BoolWidget{:toggle}(value, label, disabled),
+        name=name, attr="checked", trigger="change")
 
 
 ## Text input
 
 immutable TextInput <: Widget
-    name::Symbol
     value::String
     label::String
     floatinglabel::Bool
@@ -80,14 +80,13 @@ immutable TextInput <: Widget
 end
 
 textinput(value::String="";
-          name=:_textinput,
           label="",
+          name=:_textinput,
           floatinglabel=false,
           disabled=false) =
-    TextInput(name, value, label, floatinglabel, disabled)
-
-pipe(t::TextInput, x::Input) =
-   hasstate(t, x, attr="value", trigger="keyup")
+    hasstate(
+        TextInput(value, label, floatinglabel, disabled),
+        name=name, attr="value", trigger="keyup")
 
 ## Dropdown
 
@@ -97,7 +96,6 @@ immutable SelectionItem{T} <: Tile
 end
 
 immutable Dropdown <: Widget
-    name::Symbol
     value::String
     label::String
     items::Vector{SelectionItem}
@@ -110,7 +108,7 @@ makeitems(xs) =
 dropdown(items::AbstractArray;
          name=:_dropdown,
          value=first(items)) =
-    Dropdown(name, makeitems(items), value)
+    hasstate(Dropdown(makeitems(items), value), name=name)
 
 
 # label a widget
