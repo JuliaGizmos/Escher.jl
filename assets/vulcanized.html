@@ -35612,9 +35612,9 @@ Polymer('reactive-signal',{
 </polymer-element>
 
 
-<polymer-element name="sample-signals" attributes="signals trigger" extends="reactive-signal" assetpath="">
+<polymer-element name="sample-signals" attributes="signals triggers" extends="reactive-signal" assetpath="">
 
-<template><content></content></template>
+<template><content id="content"></content></template>
 
 <script>
 Polymer('sample-signals',{
@@ -35623,16 +35623,17 @@ Polymer('sample-signals',{
     domReady: function () {
         var self = this
         this.addEventListener("signal-updated", function (ev) {
-            if (self.triggers.indexOf(ev.detail.name) > 0) {
+            if (self.triggers.indexOf(ev.detail.name) >= 0) {
                 var result = {}
                 for(var i=0, l=self.signals.length; i < l; i++) {
                     var s = self.signals[i]
-                    result[s] = self.$.querySelector("#signal-" + s).value
+                    result[s] = self.querySelector("#signal-" + s).value
                 }
                 self.value = result
                 self.update()
             }
         })
+        this.super()
     }
 })
 </script>

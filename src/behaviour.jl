@@ -22,6 +22,25 @@ end
 hasstate(tile::Tile; name=:_state, attr="value", trigger="change") =
     WithState{symbol(attr)}(name, tile, trigger)
 
+# Sample a bunch of signals upon changes to another bunch of signals
+# Returns a signal of dict of signal values
+immutable SignalSampler <: Behaviour
+    name::Symbol
+    signals::AbstractArray
+    triggers::AbstractArray
+    tile::Tile
+end
+
+samplesignals(tosample, triggers, tile; name=:_sampler) =
+    SignalSampler(name, tosample, triggers, tile)
+
+samplesignals(tosample::Symbol, triggers::Symbol, tile; name=:_sampler) =
+    SignalSampler(name, [tosample], [triggers], tile)
+samplesignals(tosample::Symbol, triggers, tile; name=:_sampler) =
+    SignalSampler(name, [tosample], triggers, tile)
+samplesignals(tosample, triggers::Symbol, tile; name=:_sampler) =
+    SignalSampler(name, tosample, [triggers], tile)
+
 abstract MouseButton
 
 @terms MouseButton begin

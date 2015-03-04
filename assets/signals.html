@@ -80,7 +80,7 @@ Polymer({
 
 <polymer-element
     name="sample-signals"
-    attributes="signals trigger"
+    attributes="signals triggers"
     extends="reactive-signal" >
 
 <template><content></content></template>
@@ -92,16 +92,17 @@ Polymer({
     domReady: function () {
         var self = this
         this.addEventListener("signal-updated", function (ev) {
-            if (self.triggers.indexOf(ev.detail.name) > 0) {
+            if (self.triggers.indexOf(ev.detail.name) >= 0) {
                 var result = {}
                 for(var i=0, l=self.signals.length; i < l; i++) {
                     var s = self.signals[i]
-                    result[s] = self.$.querySelector("#signal-" + s).value
+                    result[s] = self.querySelector("#signal-" + s).value
                 }
                 self.value = result
                 self.update()
             }
         })
+        this.super()
     }
 })
 </script>
