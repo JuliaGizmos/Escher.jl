@@ -29,6 +29,8 @@ export inset,
        inward,
        outward,
        flow,
+       hstack,
+       vstack,
        grow,
        vfill,
        hfill,
@@ -59,6 +61,8 @@ const empty = Empty()
 
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
 convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
+convert(::Type{AbstractVector{Tile}}, xs::Union(Tuple, AbstractArray)) =
+    [convert(Tile, x) for x in xs]
 
 # 0. Width and height
 
@@ -182,11 +186,17 @@ immutable Flow{D <: Direction} <: FlexContainer
     tiles::AbstractVector{Tile}
 end
 
-flow{T <: Direction}(direction::T, tiles) =
+flow{T <: Direction}(direction::T, tiles::Union(Tuple, AbstractArray)) =
     Flow{T}(tiles)
+
+flow(direction::Direction, tiles...) =
+    flow(direction, tiles)
 
 flow{T <: Direction}(direction::T) =
     tiles -> Flow{T}(tiles)
+
+hstack(args...) = flow(right, args...)
+vstack(args...) = flow(down, args...)
 
 immutable Wrap{D <: Direction, T <: Direction} <: FlexContainer
     tile::Flow{T}
