@@ -91,6 +91,7 @@ Polymer({
     triggers: [],
     domReady: function () {
         var self = this
+        this.value = {}
         this.addEventListener("signal-updated", function (ev) {
             if (self.triggers.indexOf(ev.detail.name) >= 0) {
                 var result = {}

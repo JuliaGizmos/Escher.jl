@@ -33,7 +33,6 @@ end
 
 samplesignals(tosample, triggers, tile; name=:_sampler) =
     SignalSampler(name, tosample, triggers, tile)
-
 samplesignals(tosample::Symbol, triggers::Symbol, tile; name=:_sampler) =
     SignalSampler(name, [tosample], [triggers], tile)
 samplesignals(tosample::Symbol, triggers, tile; name=:_sampler) =
