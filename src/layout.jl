@@ -369,5 +369,5 @@ end
 vfill(y, el=div(" ")) = el |> height(100cent)
 hfill(x, el=div(" ")) = el |> width(100cent)
 
-vskip(y) = vfill(y)
-hskip(y) = hfill(y)
+vskip(y) = size(1px, y, empty)
+hskip(x) = size(x, 1px, empty)
