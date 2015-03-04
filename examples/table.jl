@@ -4,10 +4,13 @@ using Gadfly
 
 import Canvas.render
 
-data = DataFrame(x=[1:12], y=rand(12))
-main = inset(
-    Canvas.middle,
-    snugfit(),
-    flow(down, [h1("Table"),
-        flow(right, [table(data), plot(data, x=:x, y=:y)]),
-        button("Refresh") |> Canvas.clickable]))
+clicks = Input(0)
+data_length = Input(10)
+
+main = lift(data_length) do l
+    data = DataFrame(x=[1:l], y=rand(l))
+        vbox(h1("Table"),
+            slider(1:1000) |> data_length,
+            flow(right, [table(data), plot(data, x=:x, y=:y, Geom.line)]),
+        ) |> pad(0.5Canvas.inch)
+end
