@@ -17,7 +17,7 @@ body {
 }
 
 .flow {
-    display: inline-flex;
+    display: flex;
     align-content: flex-start;
     justify-content: flex-start;
 }
