@@ -236,7 +236,7 @@ render(s::Slider) =
            disabled=s.disabled, secondaryProgress=s.secondaryprogress)
 
 render(b::Button) =
-    Elem("paper-button", render(b.label))
+    Elem("paper-button", render(b.label), raised=_bool(b.raised, "raised"), noink=_bool(b.raised, "raised"))
 
 render(c::BoolWidget{:checkbox}) =
     Elem("paper-checkbox", checked=c.value, disabled=_bool(c.disabled, "disabled"))

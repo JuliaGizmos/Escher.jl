@@ -15,10 +15,12 @@ abstract Widget <: Tile
 
 immutable Button <: Widget
     label::Tile
+    raised::Bool
+    noink::Bool
 end
 
-button(label; name=:_button) =
-    clickable(Button(label), name=name)
+button(label; name=:_button, raised=false, noink=false) =
+    clickable(Button(label, raised, noink), name=name)
 
 ## Slider
 
