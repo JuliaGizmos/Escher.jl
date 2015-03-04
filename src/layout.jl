@@ -29,11 +29,13 @@ export inset,
        inward,
        outward,
        flow,
-       hstack,
-       vstack,
+       hbox,
+       vbox,
        grow,
        vfill,
        hfill,
+       vskip,
+       hskip,
        shrink,
        flex,
        wrap,
@@ -195,8 +197,8 @@ flow(direction::Direction, tiles...) =
 flow{T <: Direction}(direction::T) =
     tiles -> Flow{T}(tiles)
 
-hstack(args...) = flow(right, args...)
-vstack(args...) = flow(down, args...)
+hbox(args...) = flow(right, args...)
+vbox(args...) = flow(down, args...)
 
 immutable Wrap{D <: Direction, T <: Direction} <: FlexContainer
     tile::Flow{T}
@@ -364,6 +366,8 @@ function grid(tiles::AbstractArray, column=x -> flow(down, x))
     flow(right, [column(tiles[:, i]) for i=1:m])
 end
 
-vfill(y, el=empty) = el |> size(100cent, y)
-hfill(x, el=empty) = el |> size(x, 100cent)
+vfill(y, el=div(" ")) = el |> height(100cent)
+hfill(x, el=div(" ")) = el |> width(100cent)
 
+vskip(y) = vfill(y)
+hskip(y) = hfill(y)
