@@ -42,3 +42,13 @@ table td {
 table thead {
     border-bottom: 1px solid #989898;
 }
+
+paper-button {
+    border: 1px solid #d3d3d3;
+    border-radius: 2px;
+}
+
+clickable-behaviour {
+    width: auto;
+    height: auto;
+}
