@@ -42,6 +42,7 @@ function teelog(x) {
             console.log(cmd)
         },
         message: function (msg) {
+            console.log("Sending message", msg)
             this.websocket.send(JSON.stringify(msg))
         }
     }

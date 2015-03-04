@@ -62,4 +62,13 @@ function fromid(id)
     id_to_signal[id]
 end
 
-render{T <: Tile}(s::Signal{T}) = render(value(s))
+# Sample a bunch of signals upon changes to another bunch of signals
+# Returns a signal of dict of signal values
+immutable SignalSampler
+    signals::AbstractArray
+    triggers::AbstractArray
+    tile::Tile
+end
+
+samplesignals(tosample, triggers, tile) =
+    SignalSampler(signals, triggers, tile)

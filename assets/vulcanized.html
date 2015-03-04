@@ -17875,6 +17875,7 @@ that it uses one color only.
 
 
 
+
 <script>
 
 function teelog(x) {
@@ -17919,6 +17920,7 @@ function teelog(x) {
             console.log(cmd)
         },
         message: function (msg) {
+            console.log("Sending message", msg)
             this.websocket.send(JSON.stringify(msg))
         }
     }
@@ -35547,7 +35549,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 Polymer('reactive-signal',{
     name: null,
     value: null,
-    valueChanged: function (a, b, c) {
+    domReady: function () {
+        this.setAttribute("id", "signal-" + this.name)
+    },
+    update: function () {
         // console.log("signal updated", a,b,c)
         this.fire("signal-updated", {
             name: this.name,
@@ -35568,8 +35573,9 @@ Polymer('reactive-signal',{
     Polymer('stop-propagation',{
         names: [],
         domReady: function () {
+            var self = this
             this.addEventListener("signal-updated", function (ev) {
-                if (name === ev.detail.name < 0) {
+                if (self.names.indexOf(ev.detail.name) > 0) {
                     ev.stopPorpagation()
                 }
             })
@@ -35593,7 +35599,7 @@ Polymer('reactive-signal',{
             var self = this
             this.addEventListener("signal-updated", function (ev) {
                 if (self.name == ev.detail.name) {
-                    this.fire("signal-transport", {
+                    self.fire("signal-transport", {
                         signalId: self.signalId,
                         value: ev.detail.value
                     }) // bail
@@ -35606,12 +35612,39 @@ Polymer('reactive-signal',{
 </polymer-element>
 
 
-<polymer-element name="state-signal" attributes="attr trigger" extends="reactive-signal" assetpath="">
+<polymer-element name="sample-signals" attributes="signals trigger" extends="reactive-signal" assetpath="">
+
+<template><content></content></template>
+
+<script>
+Polymer('sample-signals',{
+    signals: [],
+    triggers: [],
+    domReady: function () {
+        var self = this
+        this.addEventListener("signal-updated", function (ev) {
+            if (self.triggers.indexOf(ev.detail.name) > 0) {
+                var result = {}
+                for(var i=0, l=self.signals.length; i < l; i++) {
+                    var s = self.signals[i]
+                    result[s] = self.$.querySelector("#signal-" + s).value
+                }
+                self.value = result
+                self.update()
+            }
+        })
+    }
+})
+</script>
+
+</polymer-element>
+
+<polymer-element name="watch-state" attributes="attr trigger" extends="reactive-signal" assetpath="">
 <template></template>
 
 <script>
 
-Polymer('state-signal',{
+Polymer('watch-state',{
     attr: "value",
     trigger: "change",
     elem: null,
@@ -35622,11 +35655,48 @@ Polymer('state-signal',{
         var elem = this.elem
         this.elem.addEventListener(this.trigger, function () {
             self.value = elem[self.attr] || elem.getAttribute(self.attr)
+            self.update()
         })
         this.super()
     }
 })
 
+</script>
+
+</polymer-element>
+
+<polymer-element name="clickable-behaviour" attributes="name buttons" extends="reactive-signal" assetpath="">
+
+<template><content></content></template>
+
+<script>
+Polymer('clickable-behaviour',{
+    buttons: [1],
+    domReady: function () {
+        var self = this
+        if (this.buttons.indexOf(2) >= 0) {
+            this.addEventListener("contextmenu", function (ev) {
+                ev.preventDefault()
+                self.value = 2
+                self.update()
+                return false
+            })
+        }
+        if (this.buttons.indexOf(1) >= 0 || this.buttons.indexOf(3) >= 0) {
+            this.addEventListener("click", function (ev) {
+                if (ev.button == 0 && this.buttons.indexOf(1) >= 0) {
+                    // Left click
+                    self.value = 1
+                    self.update()
+                } else if(ev.button == 1 && this.buttons.indexOf(3) >= 0) {
+                    // Right click
+                    self.value = 3
+                    self.update()
+                }
+            })
+        }
+    }
+})
 </script>
 
 </polymer-element>
