@@ -1,18 +1,10 @@
 using Reactive
 
-export stoppropagation, pipe
+import Base: pipe
 
-immutable SignalTransport <: Tile
-    tile::Tile
-    name::Symbol
-    signal::Input
-end
-
-pipe(t::Tile, signalname, s::Input) =
-    SignalTransport(t, signalname, s)
-
-setup_transport(x) =
-    error("Looks like there is no trasport set up for signals")
+export stoppropagation,
+       pipe,
+       samplesignals
 
 # Don't allow a signal to propagate outward
 immutable StopPropagation <: Tile
@@ -21,6 +13,20 @@ immutable StopPropagation <: Tile
 end
 stoppropagation(tile::Tile, name::Symbol) =
     StopPropagation(tile, name)
+
+# Send a signal update to the Julia side
+immutable SignalTransport <: Tile
+    tile::Tile
+    name::Symbol
+    signal::Input
+end
+
+pipe(t::Tile, name, s::Input, absorb=true) =
+    SignalTransport(t, name, s) |>
+       (x -> absorb ? stoppropagation(x, name) : x)
+
+setup_transport(x) =
+    error("Looks like there is no trasport set up")
 
 # Utility functions for transports
 decodeJSON(sig::Input, val) = val

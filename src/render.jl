@@ -13,6 +13,9 @@ render(x::FloatingPoint) = string(round(x, 4))
 render(x::Elem) = x
 render(x::Leaf) = x.element
 
+render{T <: Tile}(s::Signal{T}) =
+    render(value(s))
+
 ########## Layouts ##########
 
 render(t::Empty) = div(style=[:display => :inherit, :position => :inherit])
@@ -199,7 +202,7 @@ render(padded::Padded) =
     render(padded.tile) & [:style => render_style(padded)]
 
 render{attr}(t::WithState{attr}) =
-    render(t.tile) << Elem("state-signal",
+    render(t.tile) << Elem("watch-state",
         attributes=[:name=>t.tag, :attr=>attr, :trigger=>t.trigger])
 
 render(tile::StopPropagation) =
@@ -209,6 +212,11 @@ render(tile::StopPropagation) =
 function render(sig::SignalTransport)
     id = setup_transport(sig.signal)
     Elem("signal-transport",
+        render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
+end
+
+function render(sig::SignalSampler)
+    Elem("sample-signals",
         render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
 end
 
@@ -250,3 +258,11 @@ render(d::Dropdown) =
 
 render(l::Label) =
     custom("core-label"; [:for => l.target]...) << render(l.label)
+
+button_number(::LeftButton) = 1
+button_number(::RightButton) = 2
+button_number(::ScrollButton) = 3
+
+render(c::Clickable) =
+    custom("clickable-behaviour", name=c.name,
+        buttons=string(map(button_number, c.buttons))) << render(c.tile)

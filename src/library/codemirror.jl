@@ -1,7 +1,7 @@
 
 export codemirror
 
-immutable CodeMirror <: SignalWidget
+immutable CodeMirror <: Widget
     value::String
     mode::String
     theme::String
