@@ -32,7 +32,7 @@ custom_elements() =
 include("length.jl")
 include("util.jl")
 include("layout.jl")
-include("looks.jl")
+include("embellishment.jl")
 include("signal.jl")
 include("behaviour.jl")
 include("widget.jl")
