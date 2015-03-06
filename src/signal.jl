@@ -1,7 +1,5 @@
 using Reactive
 
-import Base: pipe
-
 export stoppropagation,
        pipe,
        samplesignals

@@ -8,7 +8,7 @@ main = lift(data) do x
         vbox(
             h1("Submit your rating"),
             textinput(label="Your Name", name=:name),
-            hbox("Your rating", slider(0:10, value=10, pin=true, name=:rating)),
+            hbox(div("Your rating", style=[:whiteSpace=>:nowrap]), slider(0:10, value=10, pin=true, name=:rating)),
             button("Submit", name=:submit),
             vskip(1cm),
             "Submitted data: ",
