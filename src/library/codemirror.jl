@@ -10,17 +10,19 @@ immutable CodeMirror <: Widget
 end
 
 codemirror(;
+            name=:_code,
             value="",
             mode="julia",
             theme="monokai",
             linenumbers=false,
             tabsize=4) =
-    CodeMirror(value, mode, theme, linenumbers, tabsize)
+    CodeMirror(value, mode, theme, linenumbers, tabsize) |>
+        c -> hasstate(c, name=name, attr="value", trigger="keyup")
 
 # Render to virtual DOM
 render(c::CodeMirror) =
-    custom("code-mirror") & [
-        "value" => c.value,
-        "mode" => c.mode,
-        "theme" => c.theme,
-        "lineNumbers" => c.linenumbers]
+    Elem("code-mirror",
+        value=c.value,
+        mode=c.mode,
+        theme=c.theme,
+        lineNumbers=c.linenumbers)

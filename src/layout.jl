@@ -1,6 +1,6 @@
 
 import Patchwork.div
-import Base: convert, size
+import Base: size
 
 export inset,
        empty,
@@ -39,7 +39,6 @@ export inset,
        shrink,
        flex,
        wrap,
-       grid,
        axisstart,
        axisend,
        center,
@@ -52,19 +51,6 @@ export inset,
        space,
        pad,
        padcontent
-
-immutable Leaf <: Tile
-    element::Elem
-end
-
-immutable Empty <: Tile
-end
-const empty = Empty()
-
-convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
-convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
-convert(::Type{AbstractVector{Tile}}, xs::Union(Tuple, AbstractArray)) =
-    [convert(Tile, x) for x in xs]
 
 # 0. Width and height
 
@@ -185,11 +171,14 @@ end
 abstract FlexContainer <: Tile
 
 immutable Flow{D <: Direction} <: FlexContainer
-    tiles::AbstractVector{Tile}
+    tiles::AbstractVector
 end
 
-flow{T <: Direction}(direction::T, tiles::Union(Tuple, AbstractArray)) =
-    Flow{T}(tiles)
+flow{T <: Direction}(direction::T, tiles::AbstractArray) =
+    Flow{T}([convert(Tile, t) for t in tiles])
+
+flow(direction::Direction, tiles::Tuple) =
+    flow(direction, [t for t in tiles])
 
 flow(direction::Direction, tiles...) =
     flow(direction, tiles)
@@ -216,6 +205,15 @@ flow(stack::Direction, wrap::Direction) =
    tiles -> flow(stack, wrap, tiles)
 
 # 3. Flexing and alignment
+
+immutable FloatingTile{T <: Direction{Horizontal}} <: Tile
+    tile::Tile
+end
+
+float{T <: Direction{Horizontal}}(d::T, tile) =
+    FloatingTile{T}(tile)
+float(d::Direction{Horizontal}) =
+    t -> float(d, t)
 
 immutable Grow <: Tile
     factor::Float64
@@ -361,13 +359,8 @@ pad(d::Union(Axis, Direction), len::Length) =
 
 # Utility functions
 
-function grid(tiles::AbstractArray, column=x -> flow(down, x))
-    m, n = size(tiles)
-    flow(right, [column(tiles[:, i]) for i=1:m])
-end
-
-vfill(y, el=div(" ")) = el |> height(100cent)
-hfill(x, el=div(" ")) = el |> width(100cent)
+vfill(y, el=width(0px, empty)) = height(100cent, el)
+hfill(x, el=height(0px, empty)) = width(100cent, el)
 
 vskip(y) = size(0px, y, empty)
 hskip(x) = size(x, 0px, empty)

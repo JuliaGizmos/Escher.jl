@@ -4,7 +4,7 @@ using Patchwork
 using Reactive
 using Requires
 
-import Base: writemime
+import Base: convert, writemime
 
 # Export from Patchwork
 export Elem, div, h1, h2, h3, h4, h5, p, blockquote, em, strong
@@ -13,6 +13,17 @@ export Tile
 
 # A Tile is a renderable value.
 abstract Tile
+
+immutable Leaf <: Tile
+    element::Elem
+end
+
+immutable Empty <: Tile
+end
+const empty = Empty()
+
+convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
+convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
 
 # Polymer Setup
 custom_elements() =

@@ -7,6 +7,9 @@ style(elem::Elem, key, val)  = elem & [:style => [key => val]]
 
 render(x) = string(x)
 
+render{T <: Tile}(x::T) =
+    error("$T cannot be rendered. Is it a valid composition?")
+
 # render for some primitive types
 render(x::FloatingPoint) = string(round(x, 4))
 
@@ -18,7 +21,7 @@ render{T <: Tile}(s::Signal{T}) =
 
 ########## Layouts ##########
 
-render(t::Empty) = div(style=[:display => :inherit, :position => :inherit])
+render(t::Empty) = div("")
 
 # 0. height and width
 render(t::Width) = render(t.tile) & [:style => [:width => t.w]]
