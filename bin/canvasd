@@ -90,17 +90,30 @@ wsroute(app, GET, "/socket/<file>") do req, sock
     swap!(tilestream, current)
 
     rendered = render(current)
-    write(sock, mount_cmd(rendered))
+    try
+        write(sock, mount_cmd(rendered))
+    catch ex
+        if isopen(sock)
+            rethrow(ex)
+        end
+    end
 
     foldl(rendered, flatten(tilestream; typ=Any); output_type=Any) do prev, next
         rendered_next = render(next)
-        write(sock, patch_cmd(
-            Patchwork.diff(prev, rendered_next)))
+        try
+            write(sock, patch_cmd(
+                Patchwork.diff(prev, rendered_next)))
+        catch ex
+            if isopen(sock)
+                rethrow(ex)
+            end
+        end
         rendered_next
     end
 
     @async while isopen(sock)
         data = read(sock)
+
         msg = JSON.parse(bytestring(data))
         if !haskey(commands, msg["command"])
             warn("Unknown command received ", msg["command"])
