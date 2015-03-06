@@ -3,7 +3,7 @@ export render
 # style helpers
 style(elem::Elem, key, val)  = elem & [:style => [key => val]]
 
-# render function takes a tile and creates an Elem
+# render function takes a Tile and creates an Elem
 
 render(x) = string(x)
 

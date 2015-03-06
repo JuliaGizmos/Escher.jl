@@ -39,7 +39,7 @@ function setup_socket(file)
     io = IOBuffer()
     Canvas.write_canvas_prelude(io)
 
-    write(io, """<div id="root"></div>""")
+    write(io, """<div id="root" class="canvasRoot"></div>""")
     write(io, """<script>new Canvasd($(JSON.json(file)), "root");</script>""")
     takebuf_string(io)
 end
