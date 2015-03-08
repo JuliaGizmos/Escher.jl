@@ -5,7 +5,6 @@ import Base: size
 export inset,
        empty,
        container,
-       snugfit,
        offset,
        width,
        height,
@@ -31,11 +30,9 @@ export inset,
        flow,
        hbox,
        vbox,
-       grow,
-       vfill,
-       hfill,
        vskip,
        hskip,
+       grow,
        shrink,
        flex,
        wrap,
@@ -54,18 +51,24 @@ export inset,
 
 # 0. Width and height
 
-immutable Width <: Tile
+immutable Width{stage} <: Tile
     w::Length
     tile::Tile
 end
 
-immutable Height <: Tile
+immutable Height{stage} <: Tile
     h::Length
     tile::Tile
 end
 
-width(w, t) = Width(w, t)
-height(h, t) = Height(h, t)
+width(w, t) = Width{:natural}(w, t)
+height(h, t) = Height{:natural}(h, t)
+
+minwidth(w, t) = Width{:min}(w, t)
+minheight(h, t) = Height{:min}(h, t)
+
+maxwidth(w, t) = Width{:max}(w, t)
+maxheight(h, t) = Height{:max}(h, t)
 
 width(w)  = t -> width(w, t)
 height(h) = t -> height(h, t)
@@ -74,9 +77,6 @@ size(w::Length, h::Length, t) =
     t |> width(w) |> height(h)
 size(w::Length, h::Length) =
     t -> size(w, h, t)
-
-snugfit(x=empty) =
-    size(100cent, 100cent, x)
 
 container(w, h) =
     empty |> size(w, h)
@@ -189,6 +189,9 @@ flow{T <: Direction}(direction::T) =
 hbox(args...) = flow(right, args...)
 vbox(args...) = flow(down, args...)
 
+vskip(y) = size(0px, y, empty)
+hskip(x) = size(x, 0px, empty)
+
 immutable Wrap{D <: Direction, T <: Direction} <: FlexContainer
     tile::Flow{T}
 end
@@ -255,6 +258,7 @@ flexbasis(basis, tile) = FlexBasis(basis, tile)
 flex(factor::Real, t) =
     flexbasis(0mm, grow(factor, t))
 flex(t) = flex(1.0, t)
+flex() = flex(empty)
 flex{T <: Real}(factor::AbstractVector{T}, t) =
     map(flex, factor, t)
 flex(t::AbstractVector) =
@@ -319,14 +323,7 @@ space(dir::Direction) =
 space(dir::Direction, tiles::AbstractArray) =
     map(space(dir), tiles)
 
-# 4. Pad content
-
-# we show the finger to CSS's margins, they are far from simple
-# to reason about and have special meanings in different contexts
-# (auto margin, margin collapsing etc), if you want to
-# give a fixed space around a tile, you can pad it. `pad` in
-# Canvas wraps the tile in another tile and adds padding.
-# to pad an element like you would in CSS, use `padcontent`.
+# 4. Padding
 
 immutable Container <: Tile
     tile::Tile
@@ -356,11 +353,3 @@ pad(len::Length) =
 
 pad(d::Union(Axis, Direction), len::Length) =
     t -> pad(d, len, t)
-
-# Utility functions
-
-vfill(y, el=width(0px, empty)) = height(100cent, el)
-hfill(x, el=height(0px, empty)) = width(100cent, el)
-
-vskip(y) = size(0px, y, empty)
-hskip(x) = size(x, 0px, empty)
