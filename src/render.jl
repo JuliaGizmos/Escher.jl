@@ -24,6 +24,7 @@ render{T <: Tile}(x::T) =
     error("$T cannot be rendered.")
 
 render(x::FloatingPoint) = @sprintf "%0.3f" x
+render(x::Symbol) = string(x)
 
 render(x::Elem) = x
 render(x::Leaf) = x.element
@@ -131,12 +132,14 @@ classes(t::PackedAcross{AxisCenter}) = "pack-across-center"
 classes(t::PackedAcross{Stretch}) = "pack-across-stretch"
 classes(t::PackedAcross{Baseline}) = "pack-across-baseline"
 
+addclasses(t, cs) =
+    t & [:className => cs * " " * getproperty(t, :className, "")]
+
 render(f::Flow) =
-    Elem(:div, map(render, f.tiles)) & [:className => classes(f)]
+    addclasses(Elem(:div, map(render, f.tiles)), classes(f))
 
 render(f::FlexContainer) =
-    render(f.tile) |>
-       t -> t & [:className => classes(f) * " " * getproperty(t, :className, "")]
+    addclasses(render(f.tile), classes(f))
 
 render(t::FlexSpace{Right}) =
     render(t.tile) & [:style => ["marginRight" => :auto]]
@@ -287,11 +290,13 @@ classes(::WithFont{Heavy}) = "font-weight-heavy"
 classes(::WithFont{FatWeight}) = "font-weight-fat"
 
 render(t::WithFont) =
-    render(t.tile) |>
-       child -> child & [:className => classes(t) * " " * getproperty(child, :className, "")]
+    addclasses(render(t.tile), classes(t))
 
 render{n}(t::WithFont{NumericFontWeight{n}}) =
     render(t.tile) & [:style => [:fontWeight => n]]
+
+render(t::WithFont{FontFamily}) =
+    render(t.tile) & [:style => [:fontFamily => t.prop.family]]
 
 render(t::AlignText{RaggedRight}) =
     render(t.tile) & [:style => [:textAlign => :left]]
@@ -307,3 +312,11 @@ render(p::Paragraph) =
 
 render{n}(p::Headline{n}) =
     Elem(string("h", n), render(p.tile))
+
+## Embellishment
+
+
+### Borders
+
+render(t::WithBorder{StrokeStyle}) =
+    render(t.tile)

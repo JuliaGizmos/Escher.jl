@@ -6,15 +6,14 @@ export noborder,
        solid,
        border,
        roundcorner,
-       hline,
-       vline,
        shadow,
        fillcolor
 
 ## Borders
 
-abstract StrokeStyle
+abstract BorderProperty
 
+abstract StrokeStyle <: BorderProperty
 @terms StrokeStyle begin
     noborder => NoStroke
     dotted => Dotted
@@ -22,32 +21,36 @@ abstract StrokeStyle
     solid => Solid
 end
 
-immutable Bordered <: Tile
-    sides::AbstractArray{Direction}
-    stroke::StrokeStyle
+immutable StrokeThickness <: BorderProperty
     thickness::Length
-    color::ColorValue
+end
+
+immutable BorderColor <: BorderProperty
+    color::AlphaColorValue
+end
+
+immutable WithBorder{P <: BorderProperty} <: Tile
+    sides::AbstractArray{Direction}
+    stroke::P
     tile::Tile
 end
 
-border(tile;
-    color=color("lightgray"),
-    thickness=1px,
-    sides=Direction[],
-    stroke=solid) =
-    Bordered(sides, stroke, thickness, color, tile)
+border(sides::AbstractArray, p::BorderProperty, x) =
+    WithBorder(sides, p, convert(Tile, x))
+border(t::Union(Tile, String), args::BorderProperty...) =
+    foldr(font, t, props)
+border(props::BorderProperty...) =
+    t -> border(t, args)
 
 ## RoundRects
 
-immutable RoundedCorner <: Tile
+immutable RoundedRect <: Tile
     corners::AbstractArray{Corner}
     radius::Length
     tile::Tile
 end
 
-roundcorner(tile;
-    corners=Corner[],
-    radius=Length) =
+roundcorner(radius, tile; corners=Corner[]) =
     RoundedCorner(corners, radius, tile)
 
 ## Box shadow
@@ -79,8 +82,6 @@ end
 fillcolor(color::ColorValue, t) =
     FillColor(color, t)
 
-## Library
-
-hline(len=100cent; kwargs...) = border(size(len, 0px, empty); kwargs...)
-vline(len=100cent; kwargs...) = border(size(0px, len, empty); kwargs...)
+fillcolor(color::ColorValue) =
+    t -> fillcolor(color, t)
 
