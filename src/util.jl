@@ -1,4 +1,5 @@
-export cycle
+export cycle,
+       intersperse
 
 immutable ClassSet
     classes::Set{String}
@@ -59,4 +60,13 @@ macro terms(parent, terms)
     Expr(:block,
         reduce(vcat, [make_term(arg.args[1], arg.args[2], parent)
             for arg in args])...)
+end
+
+function intersperse(x, xs, enclose=false)
+    if length(xs) > 1
+        res = foldl((acc, nxt) -> vcat(acc, x, nxt), Any[xs[1]], xs[2:end])
+    else
+        res = xs
+    end
+    enclose ? [x, res, x] : res
 end
