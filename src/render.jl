@@ -218,61 +218,124 @@ function render(sig::SignalTransport)
         render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
 end
 
-function render(sig::SignalSampler)
-    Elem("sample-signals",
+## Behaviour
+
+render{attr}(t::WithState{attr}) =
+    render(t.tile) << Elem("watch-state",
+        attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
+
+render(c::Clickable) =
+    Elem("clickable-behaviour", render(c.tile), name=c.name,
+        buttons=string(map(button_number, c.buttons)))
+
+render(sig::SignalSampler) =
+    Elem("signal-sampler",
         render(sig.tile),
         name=sig.name,
         signals=sig.signals,
         triggers=sig.triggers)
-end
 
 ### Widgets
 
-custom(name, attrs) = Elem(name, attributes=Dict(attrs))
-custom(name; attrs...) = Elem(name, attributes=Dict(attrs))
-
-_bool(a, name) = a ? name : nothing
-
-render(s::Slider) =
-    Elem("paper-slider", min=first(s.range), max=last(s.range),
-           step=step(s.range), value=s.value, editable=s.editable,
-           disabled=s.disabled, secondaryProgress=s.secondaryprogress)
-
-render(b::Button) =
-    Elem("paper-button", render(b.label), raised=_bool(b.raised, "raised"), noink=_bool(b.raised, "raised"))
-
-render(c::BoolWidget{:checkbox}) =
-    Elem("paper-checkbox", checked=c.value, disabled=_bool(c.disabled, "disabled"))
-
-render(t::BoolWidget{:toggle}) =
-    custom("paper-toggle-button",
-           checked=t.value,
-           disabled=_bool(t.disabled, "disabled"))
-
-render(t::TextInput) =
-    Elem("paper-input") &
-           [ :label=>t.label,
-             :value=>t.value,
-             :floatingLabel=>_bool(t.floatinglabel, "floatingLabel"), :disabled=>_bool(t.disabled, "disabled")]
-
-render(t::SelectionItem) =
-    custom("paper-item", value=t.value) << render(t.tile)
-
-render(d::Dropdown) =
-    custom("paper-dropdown-menu",
-           value=d.value,
-           label=d.label,
-           floatingLabel=_bool(d.floatinglabel, "floatingLabel"),
-           disabled=_bool(d.disabled, "disabled")) |>
-    (wrap -> reduce(<<, wrap, map(render, d.items)))
-
-render(l::Label) =
-    custom("core-label"; [:for => l.target]...) << render(l.label)
+boolattr(a, name) = a ? name : nothing
 
 button_number(::LeftButton) = 1
 button_number(::RightButton) = 2
 button_number(::ScrollButton) = 3
 
-render(c::Clickable) =
-    custom("clickable-behaviour", name=c.name,
-        buttons=string(map(button_number, c.buttons))) << render(c.tile)
+render(s::Slider) =
+    Elem("paper-slider",
+        min=first(s.range),
+        max=last(s.range),
+        step=step(s.range),
+        value=s.value,
+        editable=s.editable,
+        disabled=s.disabled,
+        secondaryProgress=s.secondaryprogress)
+
+render(b::Button) =
+    Elem("paper-button", render(b.label),
+        raised=boolattr(b.raised, "raised"), noink=boolattr(b.raised, "raised"))
+
+render(c::BoolWidget{:checkbox}) =
+    Elem("paper-checkbox",
+        checked=c.value,
+        disabled=boolattr(c.disabled, "disabled"))
+
+render(t::BoolWidget{:toggle}) =
+    Elem("paper-toggle-button",
+        checked=t.value,
+        disabled=boolattr(t.disabled, "disabled"))
+
+render(t::TextInput) =
+    Elem("paper-input",
+        label=t.label,
+        value=t.value,
+        floatingLabel=boolattr(t.floatinglabel, "floatingLabel"),
+        disabled=boolattr(t.disabled, "disabled"))
+
+render(t::SelectionItem) =
+    Elem("paper-item", render(t.tile), value=t.value)
+
+render(d::Dropdown) =
+    Elem("paper-dropdown-menu",
+        value=d.value,
+        label=d.label,
+        floatingLabel=boolattr(d.floatinglabel, "floatingLabel"),
+        disabled=boolattr(d.disabled, "disabled")) |>
+    (wrap -> reduce(<<, wrap, map(render, d.items)))
+
+# font type
+classes(::WithFont{Serif}) = "font-serif"
+classes(::WithFont{SansSerif}) = "font-sansserif"
+classes(::WithFont{SlabSerif}) = "font-serif font-slab"
+classes(::WithFont{Monospace}) = "font-monospace"
+
+# font style
+classes(::WithFont{Normal}) = "font-normal"
+classes(::WithFont{Slanted}) = "font-slanted"
+classes(::WithFont{Italic}) = "font-italic"
+
+# font case
+classes(::WithFont{Uppercase}) = "font-uppercase"
+classes(::WithFont{Lowercase}) = "font-lowercase"
+
+# font size
+classes(::WithFont{TinyFont}) = "font-tiny"
+classes(::WithFont{SmallFont}) = "font-small"
+classes(::WithFont{MediumFont}) = "font-medium"
+classes(::WithFont{BigFont}) = "font-big"
+classes(::WithFont{HugeFont}) = "font-huge"
+
+# font weight
+classes(::WithFont{Thin}) = "font-weight-thin"
+classes(::WithFont{ExtraLight}) = "font-weight-extralight"
+classes(::WithFont{Light}) = "font-weight-light"
+classes(::WithFont{BookWeight}) = "font-weight-book"
+classes(::WithFont{MediumWeight}) = "font-weight-medium"
+classes(::WithFont{SemiBold}) = "font-weight-semibold"
+classes(::WithFont{Bold}) = "font-weight-bold"
+classes(::WithFont{Heavy}) = "font-weight-heavy"
+classes(::WithFont{FatWeight}) = "font-weight-fat"
+
+render(t::WithFont) =
+    render(t.tile) |>
+       child -> child & [:className => classes(t) * " " * getproperty(child, :className, "")]
+
+render{n}(t::WithFont{NumericFontWeight{n}}) =
+    render(t.tile) & [:style => [:fontWeight => n]]
+
+render(t::AlignText{RaggedRight}) =
+    render(t.tile) & [:style => [:textAlign => :left]]
+render(t::AlignText{RaggedLeft}) =
+    render(t.tile) & [:style => [:textAlign => :right]]
+render(t::AlignText{JustifyText}) =
+    render(t.tile) & [:style => [:textAlign => :justify]]
+render(t::AlignText{CenterText}) =
+    render(t.tile) & [:style => [:textAlign => :center]]
+
+render(p::Paragraph) =
+    Elem(:p, render(p.tile))
+
+render{n}(p::Headline{n}) =
+    Elem(string("h", n), render(p.tile))

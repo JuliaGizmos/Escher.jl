@@ -1,0 +1,107 @@
+@import url(http://fonts.googleapis.com/css?family=Fira+Sans:300,400,500,700,300italic,400italic,500italic,700italic);
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic);
+@import url(http://fonts.googleapis.com/css?family=EB+Garamond|Merriweather:400,300,300italic,400italic,700,700italic,900,900italic|Crimson+Text:400,400italic,600,600italic,700,700italic);
+
+body {
+    line-height: 1.5;
+    color: #222;
+    font-family: 'Source Sans Pro';
+}
+
+h1,
+h2,
+h3 {
+    font-weight: bold;
+    font-family: 'Fira Sans';
+}
+
+h1 {
+    font-size: 2.37em;
+}
+h2 {
+    font-size: 1.77em;
+    margin-bottom: .5625em;
+}
+h3 {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 1.25em;
+}
+
+.font-serif {
+    font-family: Merriweather;
+}
+
+.font-sansserif {
+    font-family: 'Source Sans Pro';
+}
+
+.font-sansserif.font-weight-bold,
+.font-sansserif.font-weight-heavy,
+.font-sansserif.font-weight-fat {
+    font-family: 'Fira Sans';
+}
+
+.font-weight-thin {
+    font-family: 'Fira Sans';
+    font-weight: 100;
+}
+.font-weight-extralight {
+    font-weight: 200;
+}
+.font-weight-light {
+    font-weight: 300;
+}
+.font-weight-book {
+    font-weight: 400;
+}
+.font-weight-medium {
+    font-weight: 500;
+}
+.font-weight-semibold {
+    font-weight: 600;
+}
+.font-weight-bold {
+    font-weight: 700;
+}
+.font-weight-heavy {
+    font-weight: 800;
+}
+.font-weight-fat {
+    font-weight: 900;
+}
+.font-uppercase {
+    text-transform: uppercase;
+}
+
+.font-lowercase {
+    text-transform: lowercase;
+}
+
+.font-tiny {
+    font-size: 0.67em;
+}
+
+.font-small {
+    font-size: 0.75em;
+}
+
+.font-medium {
+    font-size: 1em;
+}
+
+.font-big {
+    font-size: 1.333em;
+}
+
+.font-huge {
+    font-size: 2em;
+}
+
+.font-italic {
+    font-style: italic;
+}
+
+.font-monospace {
+    font-family: monospace;
+}
