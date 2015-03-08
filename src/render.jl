@@ -1,17 +1,29 @@
 export render
 
-# style helpers
-style(elem::Elem, key, val)  = elem & [:style => [key => val]]
-
 # render function takes a Tile and creates an Elem
 
-render(x) = string(x)
+function bestmime(val)
+  for mime in ("text/html", "image/svg+xml", "image/png", "text/plain")
+    mimewritable(mime, val) && return MIME(symbol(mime))
+  end
+  error("Cannot render $val.")
+end
 
+render(m::MIME"text/plain", x) = Elem(:div, stringmime(m, x))
+render(m::MIME"text/html", x)  = Elem(:div, innerHTML=stringmime(m, x))
+render(m::MIME"text/svg", x)   = Elem(:div, innerHTML=stringmime(m, x))
+render(m::MIME"image/png", x)  = Elem(:img, src="data:image/png;base64," * stringmime(m, x))
+
+# Catch-all render
+function render(x)
+    render(bestmime(x), x)
+end
+
+# e.g you can't float a tile up/down
 render{T <: Tile}(x::T) =
-    error("$T cannot be rendered. Is it a valid composition?")
+    error("$T cannot be rendered.")
 
-# render for some primitive types
-render(x::FloatingPoint) = string(round(x, 4))
+render(x::FloatingPoint) = @sprintf "%0.3f" x
 
 render(x::Elem) = x
 render(x::Leaf) = x.element
@@ -32,24 +44,35 @@ render(t::Height) = render(t.tile) & [:style => [:height => t.h]]
 render(p::TopLeft, x, y) =
     [:top => y, :left => x]
 render(p::MidTop, x, y) =
-    [:left =>  50cent, :top => y, :transform => "translate(-50%)", :marginLeft => x]
+    [:left =>  50cent, :top => y,
+     :transform => "translate(-50%)",
+     :marginLeft => x]
 render(p::TopRight, x, y) =
     [:top => x, :right => y]
 render(p::MidLeft, x, y) =
-    [:top => 50cent, :marginTop => y, :left => x, :transform => "translate(0, -50%)"]
+    [:top => 50cent, :left => x,
+     :marginTop => y,
+     :transform => "translate(0, -50%)"]
 render(p::Middle, x, y) =
-    [:top => 50cent, :left=>50cent, :marginLeft => x, :marginTop => y, :transform => "translate(-50%, -50%)"]
+    [:top => 50cent, :left=>50cent,
+     :marginLeft => x, :marginTop => y,
+     :transform => "translate(-50%, -50%)"]
 render(p::MidRight, x, y) =
-    [:top => 50cent, :transform => "translate(0, -50%)", :marginTop => y, :right => x]
+    [:top => 50cent,
+    :transform => "translate(0, -50%)",
+    :marginTop => y, :right => x]
 render(p::BottomLeft, x, y) =
     [:bottom => y, :left => x]
 render(p::MidBottom, x, y) =
-    [:left => 50cent, :marginLeft => x, :bottom => y, :transform => "translate(-50%)"]
+    [:left => 50cent, :bottom => y,
+     :marginLeft => x,
+     :transform => "translate(-50%)"]
 render(p::BottomRight, x, y) =
     [:bottom => y, :right => x]
 
 render(c::Corner) = [:style => render(c, 0, 0)]
-render{C <: Corner}(p::Relative{C}) = [:style => render(C(), p.x, p.y)]
+render{C <: Corner}(p::Relative{C}) =
+    [:style => render(C(), p.x, p.y)]
 
 function render(tile::Inset)
     outer = render(tile.containing)
@@ -72,99 +95,48 @@ render(t::Shrink) =
 render(t::FlexBasis) =
     render(t.tile) & [:style => [:flexBasis => t.basis]]
 
-classes(f::Flow{Right}) =
-    "flow flow-right"
+getproperty(el::Elem, prop, default) =
+    hasproperties(el) ? get(properties(el), prop, default) : default
 
-classes(f::Flow{Left}) =
-    "flow flow-left"
+classes(f::Flow{Right}) = "flow flow-right"
+classes(f::Flow{Left}) = "flow flow-left"
+classes(f::Flow{Down}) = "flow flow-down"
+classes(f::Flow{Up}) = "flow flow-up"
 
-classes(f::Flow{Down}) =
-    "flow flow-down"
+classes(f::Wrap{Down, Right}) = "flex-wrap"
+classes(f::Wrap{Up, Right}) = "flex-wrap-reverse"
+classes(f::Wrap{Down, Left}) = "flex-wrap"
+classes(f::Wrap{Up, Left}) = "flex-wrap-reverse"
+classes(f::Wrap{Left, Up}) = "flex-wrap-reverse"
+classes(f::Wrap{Right, Up}) = "flex-wrap-reverse"
+classes(f::Wrap{Left, Down}) = "flex-wrap"
+classes(f::Wrap{Right, Down}) = "flex-wrap"
 
-classes(f::Flow{Up}) =
-    "flow flow-up"
+classes(t::PackedItems{AxisStart}) = "pack-start"
+classes(t::PackedItems{AxisEnd}) = "pack-end"
+classes(t::PackedItems{AxisCenter}) = "pack-center"
+classes(t::PackedItems{SpaceBetween}) = "pack-space-between"
+classes(t::PackedItems{SpaceAround}) = "pack-space-around"
 
-classes(f::Wrap{Down, Right}) =
-    "flex-wrap"
+classes(t::PackedLines{AxisStart}) = "pack-lines-start"
+classes(t::PackedLines{AxisEnd}) = "pack-lines-end"
+classes(t::PackedLines{AxisCenter}) = "pack-lines-center"
+classes(t::PackedLines{Stretch}) = "pack-lines-stretch"
+classes(t::PackedLines{SpaceBetween}) = "pack-lines-space-between"
+classes(t::PackedLines{SpaceAround}) = "pack-lines-space-around"
 
-classes(f::Wrap{Up, Right}) =
-    "flex-wrap-reverse"
-
-classes(f::Wrap{Down, Left}) =
-    "flex-wrap"
-
-classes(f::Wrap{Up, Left}) =
-    "flex-wrap-reverse"
-
-classes(f::Wrap{Left, Up}) =
-    "flex-wrap-reverse"
-
-classes(f::Wrap{Right, Up}) =
-    "flex-wrap-reverse"
-
-classes(f::Wrap{Left, Down}) =
-    "flex-wrap"
-
-classes(f::Wrap{Right, Down}) =
-    "flex-wrap"
-
-# Packing
-classes(t::PackedItems{AxisStart}) =
-    "pack-start"
-
-classes(t::PackedItems{AxisEnd}) =
-    "pack-end"
-
-classes(t::PackedItems{AxisCenter}) =
-    "pack-center"
-
-classes(t::PackedItems{SpaceBetween}) =
-    "pack-space-between"
-
-classes(t::PackedItems{SpaceAround}) =
-    "pack-space-around"
-
-classes(t::PackedLines{AxisStart}) =
-    "pack-lines-start"
-
-classes(t::PackedLines{AxisEnd}) =
-    "pack-lines-end"
-
-classes(t::PackedLines{AxisCenter}) =
-    "pack-lines-center"
-
-classes(t::PackedLines{Stretch}) =
-    "pack-lines-stretch"
-
-classes(t::PackedLines{SpaceBetween}) =
-    "pack-lines-space-between"
-
-classes(t::PackedLines{SpaceAround}) =
-    "pack-lines-space-around"
-
-classes(t::PackedAcross{AxisStart}) =
-    "pack-across-start"
-
-classes(t::PackedAcross{AxisEnd}) =
-    "pack-across-end"
-
-classes(t::PackedAcross{AxisCenter}) =
-    "pack-across-center"
-
-classes(t::PackedAcross{Stretch}) =
-    "pack-across-stretch"
-
-classes(t::PackedAcross{Baseline}) =
-    "pack-across-baseline"
-
-all_classes(t::Flow) = classes(t)
-all_classes(t::FlexContainer) = classes(t) * " " * all_classes(t.tile)
+classes(t::PackedAcross{AxisStart}) = "pack-across-start"
+classes(t::PackedAcross{AxisEnd}) = "pack-across-end"
+classes(t::PackedAcross{AxisCenter}) = "pack-across-center"
+classes(t::PackedAcross{Stretch}) = "pack-across-stretch"
+classes(t::PackedAcross{Baseline}) = "pack-across-baseline"
 
 render(f::Flow) =
     Elem(:div, map(render, f.tiles)) & [:className => classes(f)]
 
 render(f::FlexContainer) =
-    render(f.tile) & [:className => all_classes(f)]
+    render(f.tile) |>
+       t -> t & [:className => classes(f) * " " * getproperty(t, :className, "")]
 
 render(t::FlexSpace{Right}) =
     render(t.tile) & [:style => ["marginRight" => :auto]]
@@ -203,10 +175,6 @@ render_style(pad::Padded{Down}) =
 
 render(padded::Padded) =
     render(padded.tile) & [:style => render_style(padded)]
-
-render{attr}(t::WithState{attr}) =
-    render(t.tile) << Elem("watch-state",
-        attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
 
 render(tile::StopPropagation) =
     Elem("stop-propagation", render(tile.tile),

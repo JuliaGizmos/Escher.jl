@@ -24,7 +24,7 @@ end
 
 immutable Bordered <: Tile
     sides::AbstractArray{Direction}
-    style::StrokeStyle
+    stroke::StrokeStyle
     thickness::Length
     color::ColorValue
     tile::Tile
@@ -34,8 +34,8 @@ border(tile;
     color=color("lightgray"),
     thickness=1px,
     sides=Direction[],
-    style=solid) =
-    Bordered(sides, style, thickness, color, tile)
+    stroke=solid) =
+    Bordered(sides, stroke, thickness, color, tile)
 
 ## RoundRects
 
