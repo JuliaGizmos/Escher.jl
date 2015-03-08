@@ -99,19 +99,13 @@ render(t::FlexBasis) =
 getproperty(el::Elem, prop, default) =
     hasproperties(el) ? get(properties(el), prop, default) : default
 
-classes(f::Flow{Right}) = "flow flow-right"
-classes(f::Flow{Left}) = "flow flow-left"
-classes(f::Flow{Down}) = "flow flow-down"
-classes(f::Flow{Up}) = "flow flow-up"
+classes(f::Flow{Horizontal, false}) = "flow horizontal"
+classes(f::Flow{Vertical, false}) = "flow vertical"
+classes(f::Flow{Horizontal, true}) = "flow horizontal flow-reverse"
+classes(f::Flow{Vertical, true}) = "flow vertical flow-reverse"
 
-classes(f::Wrap{Down, Right}) = "flex-wrap"
-classes(f::Wrap{Up, Right}) = "flex-wrap-reverse"
-classes(f::Wrap{Down, Left}) = "flex-wrap"
-classes(f::Wrap{Up, Left}) = "flex-wrap-reverse"
-classes(f::Wrap{Left, Up}) = "flex-wrap-reverse"
-classes(f::Wrap{Right, Up}) = "flex-wrap-reverse"
-classes(f::Wrap{Left, Down}) = "flex-wrap"
-classes(f::Wrap{Right, Down}) = "flex-wrap"
+classes(f::Wrap{false}) = "flex-wrap"
+classes(f::Wrap{true}) = "flex-wrap-reverse"
 
 classes(t::PackedItems{AxisStart}) = "pack-start"
 classes(t::PackedItems{AxisEnd}) = "pack-end"
@@ -141,43 +135,21 @@ render(f::Flow) =
 render(f::FlexContainer) =
     addclasses(render(f.tile), classes(f))
 
-render(t::FlexSpace{Right}) =
-    render(t.tile) & [:style => ["marginRight" => :auto]]
-
-render(t::FlexSpace{Left}) =
-    render(t.tile) & [:style => ["marginLeft" => :auto]]
-
-render(t::FlexSpace{Down}) =
-    render(t.tile) & [:style => ["marginBottom" => :auto]]
-
-render(t::FlexSpace{Up}) =
-    render(t.tile) & [:style => ["marginTop" => :auto]]
-
-
 # 4. padding
 
 render(cont::Container) = div(render(cont.tile),
                           style=[:height => :auto, :width => :auto])
 
-render_style(pad::Padded{Nothing}) =
-    [:padding => pad.len]
-render_style(pad::Padded{Horizontal}) =
-    [:paddingRight => pad.len, :paddingLeft => pad.len]
-render_style(pad::Padded{Vertical}) =
-    [:paddingTop => pad.len, :paddingBottom => pad.len]
-render_style(pad::Padded{Vertical}) =
-    [:paddingTop => pad.len, :paddingBottom => pad.len]
-render_style(pad::Padded{Right}) =
-    [:paddingRight => pad.len]
-render_style(pad::Padded{Left}) =
-    [:paddingLeft => pad.len]
-render_style(pad::Padded{Up}) =
-    [:paddingTop => pad.len]
-render_style(pad::Padded{Down}) =
-    [:paddingBottom => pad.len]
+name(s::Left) = "Left"
+name(s::Right) = "Right"
+name(s::TopSide) = "Top"
+name(s::Bottom) = "Bottom"
 
 render(padded::Padded) =
-    render(padded.tile) & [:style => render_style(padded)]
+    render(padded.tile) &
+        (isempty(padded.sides) ? # Apply padding to all sides if none specified
+                [:style => [:padding => padded.length]] :
+                [:style => ["padding" * name(p) => padded.length for p=padded.sides]])
 
 render(tile::StopPropagation) =
     Elem("stop-propagation", render(tile.tile),
@@ -311,12 +283,9 @@ render(p::Paragraph) =
     Elem(:p, render(p.tile))
 
 render{n}(p::Headline{n}) =
-    Elem(string("h", n), render(p.tile))
+    addclass(Elem(string("h", n), render(p.tile)), "headline-"*n)
 
 ## Embellishment
-
-
-### Borders
 
 render(t::WithBorder{StrokeStyle}) =
     render(t.tile)

@@ -22,19 +22,19 @@ body {
     justify-content: flex-start;
 }
 
-.flow-right {
+.flow.horizontal {
     flex-direction: row;
 }
 
-.flow-left {
+.flow.horizontal.flow-reverse {
     flex-direction: row-reverse;
 }
 
-.flow-down {
+.flow.vertical {
     flex-direction: column;
 }
 
-.flow-up {
+.flow.vertical.flow-reverse {
     flex-direction: column-reverse;
 }
 
@@ -43,11 +43,6 @@ body {
 }
 .flex-wrap-reverse {
     flex-wrap: wrap-reverse;
-}
-
-.padding-box {
-    display: inherit;
-    flex: inherit;
 }
 
 .flow-inward {

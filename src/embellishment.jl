@@ -30,7 +30,7 @@ immutable BorderColor <: BorderProperty
 end
 
 immutable WithBorder{P <: BorderProperty} <: Tile
-    sides::AbstractArray{Direction}
+    sides::AbstractArray{Side}
     stroke::P
     tile::Tile
 end

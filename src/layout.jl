@@ -23,8 +23,8 @@ export inset,
        depth,
        left,
        right,
-       up,
-       down,
+       top,
+       bottom,
        inward,
        outward,
        flow,
@@ -128,94 +128,85 @@ inset(p::Position, outer) = inner -> inset(p, outer, inner)
 # 2. Axes, Directions and Flow
 
 abstract Axis
-@terms Axis begin
+
+abstract FixedAxis <: Axis
+@terms FixedAxis begin
     horizontal => Horizontal
     vertical => Vertical
     depth => Depth
 end
 
-abstract FlowRelative <: Axis
+abstract  Side{Perpendicular <: Axis}
 
-@terms FlowRelative begin
-    mainaxis => MainAxis
-    crossaxis => CrossAxis
-end
-
-abstract  Direction{T <: Axis}
-
-@terms Direction{Horizontal} begin
+@terms Side{Horizontal} begin
     left => Left
     right => Right
 end
 
-@terms Direction{Vertical} begin
-    up => Up
-    down => Down
+@terms Side{Vertical} begin
+    top => TopSide
+    bottom => Bottom
 end
 
-@terms Direction{Depth} begin
+@terms Side{Depth} begin
     inward => Inward
     outward => Outward
 end
 
-@terms Direction{MainAxis} begin
+abstract FlowRelativeAxis <: Axis
+@terms FlowRelativeAxis begin
+    mainaxis => MainAxis
+    crossaxis => CrossAxis
+end
+
+@terms Side{MainAxis} begin
     mainstart => MainStart
     mainend => MainEnd
 end
 
-@terms Direction{CrossAxis} begin
+@terms Side{CrossAxis} begin
     crossstart => CrossStart
     crossend => CrossEnd
 end
 
 abstract FlexContainer <: Tile
-
-immutable Flow{D <: Direction} <: FlexContainer
+immutable Flow{Along <: FixedAxis, reverse} <: FlexContainer
     tiles::AbstractVector
 end
 
-flow{T <: Direction}(direction::T, tiles::AbstractArray) =
-    Flow{T}([convert(Tile, t) for t in tiles])
+flow{T <: FixedAxis}(axis::T, tiles::AbstractArray; reverse=false) =
+    Flow{T, reverse}([convert(Tile, t) for t in tiles])
 
-flow(direction::Direction, tiles::Tuple) =
-    flow(direction, [t for t in tiles])
+flow(axis::FixedAxis, tiles::Tuple; reverse=false) =
+    flow(axis, [t for t in tiles]; reverse=reverse)
 
-flow(direction::Direction, tiles...) =
-    flow(direction, tiles)
+flow(axis::FixedAxis, tiles...; reverse=false) =
+    flow(axis, tiles; reverse=reverse)
 
-flow{T <: Direction}(direction::T) =
-    tiles -> Flow{T}(tiles)
+Base.reverse{T, x}(flow::Flow{T, x}) =
+    Flow{T, (!x)}(flow.tiles)
 
-hbox(args...) = flow(right, args...)
-vbox(args...) = flow(down, args...)
+hbox(args...) = flow(horizontal, args...)
+vbox(args...) = flow(vertical, args...)
 
 vskip(y) = size(0px, y, empty)
 hskip(x) = size(x, 0px, empty)
 
-immutable Wrap{D <: Direction, T <: Direction} <: FlexContainer
-    tile::Flow{T}
+immutable Wrap{reverse} <: FlexContainer
+    tile::FlexContainer
 end
-wrap{T <: Direction, U <: Direction}(d::T, f::Flow{U}) =
-    Wrap{T, U}(f)
-
-wrap{T <: Direction}(d::T) =
-    tiles -> wrap(d, tiles)
-
-flow(stack::Direction, wrap_::Direction, tiles) =
-    wrap(wrap_, flow(stack, tiles))
-
-flow(stack::Direction, wrap::Direction) =
-   tiles -> flow(stack, wrap, tiles)
+wrap(t) = Wrap{false}(t)
+wrapreverse(t) = Wrap(t)
 
 # 3. Flexing and alignment
 
-immutable FloatingTile{T <: Direction{Horizontal}} <: Tile
+immutable FloatingTile{T <: Side{Horizontal}} <: Tile
     tile::Tile
 end
 
-float{T <: Direction{Horizontal}}(d::T, tile) =
+float{T <: Side{Horizontal}}(d::T, tile) =
     FloatingTile{T}(tile)
-float(d::Direction{Horizontal}) =
+float(d::Side{Horizontal}) =
     t -> float(d, t)
 
 immutable Grow <: Tile
@@ -310,46 +301,32 @@ packacross{T <: Packing}(pack::T, tile::FlexContainer) =
 packacross(p::Packing) =
     t -> packacross(p, t)
 
-immutable FlexSpace{T <: Direction} <: Tile
-    tile::Tile
-end
-
-space{T <: Direction}(dir::T, tile) =
-    FlexSpace{T}(tile)
-
-space(dir::Direction) =
-    x -> space(dir, x)
-
-space(dir::Direction, tiles::AbstractArray) =
-    map(space(dir), tiles)
-
 # 4. Padding
 
 immutable Container <: Tile
     tile::Tile
 end
 
-immutable Padded{T <: Union(Axis, Direction, Nothing)} <: Tile
-    len::Length
+immutable Padded <: Tile
+    sides::AbstractVector{Side}
+    length::Length
     tile::Tile
 end
 
 padcontent(len::Length, tile) =
-    Padded{Nothing}(len, tile)
+    Padded(Side[], len, tile)
 
-padcontent{T <: Union(Axis, Direction)}(
-    axis::T,
-    len::Length, tile) = Padded{T}(len, tile)
-
-pad{T <: Union(Axis, Direction)}(
-    axis::T,
-    len::Length, tile) = padcontent(axis, len, tile)
+padcontent(sides::AbstractVector{Side}, len::Length, tile) =
+    Padded(sides, len, tile)
 
 pad(len::Length, tile) =
+    padcontent(len, Container(tile))
+
+pad(sides::AbstractVector{Side}, len::Length, tile) =
     padcontent(len, Container(tile))
 
 pad(len::Length) =
     t -> pad(len, t)
 
-pad(d::Union(Axis, Direction), len::Length) =
+pad(d::AbstractVector{Side}, len::Length) =
     t -> pad(d, len, t)
