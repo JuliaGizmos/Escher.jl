@@ -283,7 +283,26 @@ render(t::AlignText{CenterText}) =
 render{class}(p::FontClass{class}) =
     addclasses(render(p.tile), string("font-", class))
 
-## Embellishment
+render(x::Code) = Elem(:code, x.code)
 
-render(t::WithBorder{StrokeStyle}) =
-    render(t.tile)
+## Borders
+
+render_color(c) = string("#" * hex(c))
+
+propname(::StrokeStyle) = "Style"
+propname(::StrokeWidth) = "Width"
+propname(::BorderColor) = "Color"
+
+name(::NoStroke) = "none"
+name(::Solid) = "solid"
+name(::Dotted) = "dotted"
+name(::Dashed) = "dashed"
+
+name(p::StrokeWidth) = p.thickness
+name(p::BorderColor) = render_color(p.color)
+
+render(t::WithBorder) =
+    render(t.tile) &
+        (isempty(t.sides) ? # Apply padding to all sides if none specified
+                [:style => ["border" * propname(t.prop) => name(t.prop)]] :
+                [:style => ["border" * name(s) * propname(t.prop) => name(t.prop) for s=t.sides]])

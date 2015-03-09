@@ -4,7 +4,9 @@ export noborder,
        dotted,
        dashed,
        solid,
+       strokewidth,
        border,
+       bordercolor,
        roundcorner,
        shadow,
        fillcolor
@@ -21,26 +23,45 @@ abstract StrokeStyle <: BorderProperty
     solid => Solid
 end
 
-immutable StrokeThickness <: BorderProperty
+immutable StrokeWidth <: BorderProperty
     thickness::Length
 end
+strokewidth(x) = StrokeWidth(x)
 
 immutable BorderColor <: BorderProperty
-    color::AlphaColorValue
+    color::ColorValue
 end
+bordercolor(c) = BorderColor(c)
 
 immutable WithBorder{P <: BorderProperty} <: Tile
     sides::AbstractArray{Side}
-    stroke::P
+    prop::P
     tile::Tile
 end
 
+border(sides::AbstractArray, p::Length, x) =
+    WithBorder(sides, strokewidth(p), convert(Tile, x))
+
 border(sides::AbstractArray, p::BorderProperty, x) =
     WithBorder(sides, p, convert(Tile, x))
-border(t::Union(Tile, String), args::BorderProperty...) =
-    foldr(font, t, props)
+
+border(sides::AbstractArray, p::ColorValue, x) =
+    WithBorder(sides, bordercolor(p), convert(Tile, x))
+
+border(p::Union(BorderProperty, ColorValue, Length), x) =
+    border(Side[], p, convert(Tile, x))
+
+border(t::Union(Tile, String), props::BorderProperty...) =
+    foldr(border, t, props)
+
+border(sides::AbstractArray, t::Union(Tile, String), props::BorderProperty...) =
+    foldr((x, y) -> border(sides, x, y), t, props)
+
+border(sides::AbstractArray, props::BorderProperty...) =
+    t -> border(sides, t, props...)
+
 border(props::BorderProperty...) =
-    t -> border(t, args)
+    t -> border(t, props...)
 
 ## RoundRects
 
