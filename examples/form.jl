@@ -14,7 +14,7 @@ main = lift(data) do x
             button("Submit", name=:submit),
             vskip(1cm),
             "Submitted data: ",
-            pad(10px, string(x))) |> pad(2em) |> width(400px)
+            pad(10px, string(x))) |> pad(2em) |> maxwidth(400px)
     ) |> data
 end
 

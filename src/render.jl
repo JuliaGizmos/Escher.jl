@@ -37,8 +37,10 @@ render{T <: Tile}(s::Signal{T}) =
 render(t::Empty) = Elem(:div)
 
 # 0. height and width
-render(t::Width) = render(t.tile) & [:style => [:width => t.w]]
-render(t::Height) = render(t.tile) & [:style => [:height => t.h]]
+render(t::Width{:natural}) = render(t.tile) & [:style => [:width => t.w]]
+render(t::Height{:natural}) = render(t.tile) & [:style => [:height => t.h]]
+render{bound}(t::Width{bound}) = render(t.tile) & [:style => [string(bound, "Width") => t.w]]
+render{bound}(t::Height{bound}) = render(t.tile) & [:style => [string(bound, "Height") => t.h]]
 
 # 1. Positioning
 

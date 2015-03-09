@@ -160,6 +160,7 @@ end
 title(t) = FontClass{:title}(t)
 paragraph(t) = FontClass{symbol("body-1")}(t)
 headline(t) = FontClass{:headline}(t)
+headline(n, t) = FontClass{symbol("headline-" * string(n))}(t)
 subhead(t) = FontClass{:subhead}(t)
 caption(t) = FontClass{:caption}(t)
 menu(t) = FontClass{:menu}(t)
@@ -168,5 +169,10 @@ displayfont(n, tile) =
     FontClass{symbol(string("display", '-', n))}(tile)
 displayfont(n::Int) =
     t -> displayfont(n, t)
+
+immutable BlockQuote <: Tile
+    tile::Tile
+end
+blockquote(txt) = BlockQuote(txt)
 
 # colsize

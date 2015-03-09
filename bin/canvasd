@@ -37,10 +37,13 @@ end
 
 function setup_socket(file)
     io = IOBuffer()
-    Canvas.write_canvas_prelude(io)
+    write(io, """<!doctype html>
+    <html>
+        <head>""")
+    Canvas.write_canvas_prelude(io) # load the most essential html
 
-    write(io, """<div id="root" class="canvasRoot"></div>""")
-    write(io, """<script>new Canvasd($(JSON.json(file)), "root");</script>""")
+    write(io, """</head> <body><div id="root" class="canvasRoot"></div>""")
+    write(io, """<script>new Canvasd($(JSON.json(file)), "root");</script></body>""")
     takebuf_string(io)
 end
 

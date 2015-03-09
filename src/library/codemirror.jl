@@ -1,6 +1,14 @@
 
 export codemirror
 
+immutable Code <: Tile
+    language::String
+    value::Tile
+end
+
+code(language, c) = Code(language, c)
+code(c) = code("julia", c)
+
 immutable CodeMirror <: Widget
     value::String
     mode::String

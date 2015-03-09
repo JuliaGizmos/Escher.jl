@@ -8,6 +8,10 @@ export inset,
        offset,
        width,
        height,
+       minwidth,
+       minheight,
+       maxwidth,
+       maxheight,
        size,
        topleft,
        midtop,
@@ -64,14 +68,20 @@ end
 width(w, t) = Width{:natural}(w, t)
 height(h, t) = Height{:natural}(h, t)
 
+width(w)  = t -> width(w, t)
+height(h) = t -> height(h, t)
+
 minwidth(w, t) = Width{:min}(w, t)
 minheight(h, t) = Height{:min}(h, t)
+
+minwidth(w)  = t -> minwidth(w, t)
+minheight(h) = t -> minheight(h, t)
 
 maxwidth(w, t) = Width{:max}(w, t)
 maxheight(h, t) = Height{:max}(h, t)
 
-width(w)  = t -> width(w, t)
-height(h) = t -> height(h, t)
+maxwidth(w)  = t -> maxwidth(w, t)
+maxheight(h) = t -> maxheight(h, t)
 
 size(w::Length, h::Length, t) =
     t |> width(w) |> height(h)
