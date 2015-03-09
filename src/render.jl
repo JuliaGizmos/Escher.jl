@@ -139,8 +139,9 @@ render(f::FlexContainer) =
 
 # 4. padding
 
-render(cont::Container) = Elem(:div, render(cont.tile),
-                              style=[:height => :auto, :width => :auto])
+render(cont::Container) = Elem(:div, render(cont.tile))
+
+render(group::Group) = Elem(:span, map(render, group.tiles))
 
 name(s::Left) = "Left"
 name(s::Right) = "Right"

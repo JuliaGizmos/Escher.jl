@@ -20,6 +20,13 @@ end
 
 immutable Empty <: Tile
 end
+
+immutable Group <: Tile
+    tiles::AbstractArray
+end
+
+group(xs) = Group(xs)
+
 const empty = Empty()
 
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
@@ -39,6 +46,7 @@ include("behaviour.jl")
 include("widget.jl")
 
 include("library/codemirror.jl")
+include("library/markdown.jl")
 
 include("render.jl")
 include("lazyload.jl")
