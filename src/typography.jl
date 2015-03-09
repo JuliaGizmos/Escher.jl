@@ -16,15 +16,10 @@ export plaintext,
        medium,
        big,
        huge,
-       thin,
-       extralight,
-       light,
-       book,
-       mediumweight,
-       semibold,
+       normal,
        bold,
-       heavy,
-       fat,
+       bolder,
+       lighter,
        textalign,
        raggedright,
        raggedleft,
@@ -93,27 +88,27 @@ abstract FontCase <: NamedFontProperty
 end
 
 abstract FontSize <: NamedFontProperty
-
-@terms FontSize begin
-    tiny => TinyFont
-    small => SmallFont
-    medium => MediumFont
-    big => BigFont
-    huge => HugeFont
+@terms FontSize do
+    xxsmall => XXSmall
+    xsmall => xsmall
+    small => small
+    medium => Medium
+    large => Large
+    xlarge => XLarge
+    xxlarge => XXLarge
 end
+
+immutable AbsFontSize <: AbsFontProperty
+    size::Length
+end
+fontsize(size::Length) = AbsFontSize(size)
 
 abstract FontWeight <: NamedFontProperty
 
 @terms FontWeight begin
-    thin => Thin
-    extralight => ExtraLight
-    light => Light
-    book => BookWeight
-    mediumweight => MediumWeight
-    semibold => SemiBold
     bold => Bold
-    heavy => Heavy
-    fat => FatWeight
+    bolder => Bolder
+    lighter => Lighter
 end
 
 immutable NumericFontWeight{n} <: AbsFontProperty

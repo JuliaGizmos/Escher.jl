@@ -36,72 +36,30 @@ h3 {
     font-family: 'Source Sans Pro';
 }
 
+.font-monospace {
+    font-family: monospace;
+}
+
 .font-sansserif.font-weight-bold,
 .font-sansserif.font-weight-heavy,
 .font-sansserif.font-weight-fat {
     font-family: 'Fira Sans';
 }
 
-.font-weight-thin {
-    font-family: 'Fira Sans';
-    font-weight: 100;
-}
-.font-weight-extralight {
-    font-weight: 200;
-}
-.font-weight-light {
-    font-weight: 300;
-}
-.font-weight-book {
-    font-weight: 400;
-}
-.font-weight-medium {
-    font-weight: 500;
-}
-.font-weight-semibold {
-    font-weight: 600;
-}
-.font-weight-bold {
-    font-weight: 700;
-}
-.font-weight-heavy {
-    font-weight: 800;
-}
-.font-weight-fat {
-    font-weight: 900;
-}
-.font-uppercase {
-    text-transform: uppercase;
-}
+.font-uppercase { text-transform: uppercase; }
 
-.font-lowercase {
-    text-transform: lowercase;
-}
+.font-lowercase { text-transform: lowercase; }
 
-.font-tiny {
-    font-size: 0.67em;
-}
+.font-xx-small { font-size: xx-small; }
+.font-x-small { font-size: x-small; }
+.font-small { font-size: small; }
+.font-medium { font-size: medium; }
+.font-large { font-size: large; }
+.font-x-large { font-size: x-large; }
+.font-xx-large { font-size: xx-large; }
 
-.font-small {
-    font-size: 0.75em;
-}
+.font-bold { font-weight: bold; }
+.font-bolder { font-weight: bolder; }
+.font-lighter {font-weight: lighter; }
 
-.font-medium {
-    font-size: 1em;
-}
-
-.font-big {
-    font-size: 1.333em;
-}
-
-.font-huge {
-    font-size: 2em;
-}
-
-.font-italic {
-    font-style: italic;
-}
-
-.font-monospace {
-    font-family: monospace;
-}
+.font-italic { font-style: italic; }

@@ -244,28 +244,27 @@ classes(::WithFont{Uppercase}) = "font-uppercase"
 classes(::WithFont{Lowercase}) = "font-lowercase"
 
 # font size
-classes(::WithFont{TinyFont}) = "font-tiny"
-classes(::WithFont{SmallFont}) = "font-small"
-classes(::WithFont{MediumFont}) = "font-medium"
-classes(::WithFont{BigFont}) = "font-big"
-classes(::WithFont{HugeFont}) = "font-huge"
+classes(::WithFont{XXSmall}) = "font-xx-small"
+classes(::WithFont{XSmall}) = "font-x-small"
+classes(::WithFont{Small}) = "font-small"
+classes(::WithFont{Medium}) = "font-medium"
+classes(::WithFont{Large}) = "font-large"
+classes(::WithFont{XLarge}) = "font-x-large"
+classes(::WithFont{XXLarge}) = "font-xx-large"
 
 # font weight
-classes(::WithFont{Thin}) = "font-weight-thin"
-classes(::WithFont{ExtraLight}) = "font-weight-extralight"
-classes(::WithFont{Light}) = "font-weight-light"
-classes(::WithFont{BookWeight}) = "font-weight-book"
-classes(::WithFont{MediumWeight}) = "font-weight-medium"
-classes(::WithFont{SemiBold}) = "font-weight-semibold"
-classes(::WithFont{Bold}) = "font-weight-bold"
-classes(::WithFont{Heavy}) = "font-weight-heavy"
-classes(::WithFont{FatWeight}) = "font-weight-fat"
+classes(::WithFont{Bold}) = "font-bold"
+classes(::WithFont{Bolder}) = "font-bolder"
+classes(::WithFont{Lighter}) = "font-lighter"
 
 render(t::WithFont) =
     addclasses(render(t.tile), classes(t))
 
 render{n}(t::WithFont{NumericFontWeight{n}}) =
     render(t.tile) & [:style => [:fontWeight => n]]
+
+render(t::WithFont{AbsFontSize}) =
+    render(t.tile) & [:style => [:fontSize => t.prop.size]]
 
 render(t::WithFont{FontFamily}) =
     render(t.tile) & [:style => [:fontFamily => t.prop.family]]
