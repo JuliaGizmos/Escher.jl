@@ -1,33 +1,12 @@
-blub = "A quick brown fox jumped over the lazy dog."
 
-a, b, c, d = Any[
-[
-   normal,
-   italic,
-   uppercase,
- ], [
-   tiny,
-   medium,
-   big,
-   huge,
-  ], [
-   serif,
-   sansserif,
- ], [
-   thin,
-   extralight,
-   light,
-   book,
-   mediumweight,
-   semibold,
-   bold,
-   heavy,
-   fat
-  ]
-]
-
-desc(p, q, r, s) =
-    font(p, q, r, s)(blub)
-
-boxes = [desc(p, q, r, s) for p=a, q=b, r=c, s=d]
-main = vbox(boxes) |> pad(1cm)
+main = vbox(
+    displayfont(4, "Light 112sp"),
+    displayfont(3, "Regular 56sp"),
+    displayfont(2, "Regular 45sp"),
+    displayfont(1, "Regular 34sp"),
+    headline("Regular 24sp"),
+    title("Medium 20sp"),
+    subhead("Regular 16sp"),
+    paragraph("Regular 14sp"),
+    caption("Regular 12sp") ,
+) |> pad(2em)

@@ -12,12 +12,3 @@
     border-bottom: 1px solid #989898;
 }
 
-.canvasRoot paper-button {
-    border: 1px solid #d3d3d3;
-    border-radius: 5px;
-}
-
-.canvasRoot paper-slider {
-    width: 100%;
-}
-

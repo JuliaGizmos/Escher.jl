@@ -6,7 +6,7 @@ using Canvas
 using JSON
 
 using Reactive
-using Patchwork, Patchwork.HTML5
+using Patchwork
 using WebSockets
 using Morsel
 

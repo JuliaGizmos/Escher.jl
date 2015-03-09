@@ -34,7 +34,7 @@ render{T <: Tile}(s::Signal{T}) =
 
 ########## Layouts ##########
 
-render(t::Empty) = div("")
+render(t::Empty) = Elem(:div)
 
 # 0. height and width
 render(t::Width) = render(t.tile) & [:style => [:width => t.w]]
@@ -137,8 +137,8 @@ render(f::FlexContainer) =
 
 # 4. padding
 
-render(cont::Container) = div(render(cont.tile),
-                          style=[:height => :auto, :width => :auto])
+render(cont::Container) = Elem(:div, render(cont.tile),
+                              style=[:height => :auto, :width => :auto])
 
 name(s::Left) = "Left"
 name(s::Right) = "Right"
@@ -278,11 +278,8 @@ render(t::AlignText{JustifyText}) =
 render(t::AlignText{CenterText}) =
     render(t.tile) & [:style => [:textAlign => :center]]
 
-render(p::Paragraph) =
-    Elem(:p, render(p.tile))
-
-render{n}(p::Headline{n}) =
-    addclass(Elem(string("h", n), render(p.tile)), "headline-"*n)
+render{class}(p::FontClass{class}) =
+    addclasses(render(p.tile), string("font-", class))
 
 ## Embellishment
 

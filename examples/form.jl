@@ -6,13 +6,15 @@ data = Input(Dict())
 main = lift(data) do x
     samplesignals([:rating, :name], :submit,
         vbox(
-            "Submit your rating" |> font(sansserif, huge, bold),
+            headline("Submit your rating"),
+            vskip(1em),
             textinput(label="Your Name", name=:name),
-            hbox("Your rating", flex(slider(0:10, value=10, pin=true, name=:rating))),
+            hbox(vbox(flex(), "Your rating", flex()),
+                 flex(slider(0:10, value=10, pin=true, name=:rating))),
             button("Submit", name=:submit),
             vskip(1cm),
             "Submitted data: ",
-            pad(10px, string(x))) |> pad(1inch)
+            pad(10px, string(x))) |> pad(2em) |> width(400px)
     ) |> data
 end
 

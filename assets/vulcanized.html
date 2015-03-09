@@ -18017,15 +18017,6 @@ table {
     border-bottom: 1px solid #989898;
 }
 
-.canvasRoot paper-button {
-    border: 1px solid #d3d3d3;
-    border-radius: 5px;
-}
-
-.canvasRoot paper-slider {
-    width: 100%;
-}
-
 </style>
 <style>/* The Box model
  *
@@ -18145,34 +18136,16 @@ body {
 }
 
 </style>
-<style>@import url("http://fonts.googleapis.com/css?family=Fira+Sans:300,400,500,700,300italic,400italic,500italic,700italic");
-@import url("http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,400italic,600italic,700italic,900italic");
-@import url("http://fonts.googleapis.com/css?family=EB+Garamond|Merriweather:400,300,300italic,400italic,700,700italic,900,900italic|Crimson+Text:400,400italic,600,600italic,700,700italic");
+<style>@import url("http://fonts.googleapis.com/css?family=RobotoDraft:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic");
 
 body {
     line-height: 1.5;
-    color: #222;
-    font-family: 'Source Sans Pro';
-}
-
-h1,
-h2,
-h3 {
-    font-weight: bold;
-    font-family: 'Fira Sans';
-}
-
-h1 {
-    font-size: 2.37em;
-}
-h2 {
-    font-size: 1.77em;
-    margin-bottom: .5625em;
-}
-h3 {
-    font-style: italic;
-    font-weight: normal;
-    font-size: 1.25em;
+    font-family: RobotoDraft;
+    color: #212121;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 20px;  /* guessed */
+    text-indent: -0.074em;
 }
 
 .font-serif {
@@ -18183,74 +18156,146 @@ h3 {
     font-family: 'Source Sans Pro';
 }
 
+.font-monospace {
+    font-family: monospace;
+}
+
 .font-sansserif.font-weight-bold,
 .font-sansserif.font-weight-heavy,
 .font-sansserif.font-weight-fat {
     font-family: 'Fira Sans';
 }
 
-.font-weight-thin {
-    font-family: 'Fira Sans';
-    font-weight: 100;
-}
-.font-weight-extralight {
-    font-weight: 200;
-}
-.font-weight-light {
-    font-weight: 300;
-}
-.font-weight-book {
-    font-weight: 400;
-}
-.font-weight-medium {
-    font-weight: 500;
-}
-.font-weight-semibold {
-    font-weight: 600;
-}
-.font-weight-bold {
-    font-weight: 700;
-}
-.font-weight-heavy {
-    font-weight: 800;
-}
-.font-weight-fat {
-    font-weight: 900;
-}
-.font-uppercase {
-    text-transform: uppercase;
+.font-uppercase { text-transform: uppercase; }
+
+.font-lowercase { text-transform: lowercase; }
+
+.font-xx-small { font-size: xx-small; }
+.font-x-small { font-size: x-small; }
+.font-small { font-size: small; }
+.font-medium { font-size: medium; }
+.font-large { font-size: large; }
+.font-x-large { font-size: x-large; }
+.font-xx-large { font-size: xx-large; }
+
+.font-bold { font-weight: bold; }
+.font-bolder { font-weight: bolder; }
+.font-lighter {font-weight: lighter; }
+
+.font-italic { font-style: italic; }
+
+/* Material design */
+/* This was adapted from https://github.com/nevir/paper-theme-experiment/blob/master/global/typography.html */
+
+.font-display-4 {
+  color: #757575;
+  font-size: 112px;
+  font-weight: 300;
+  letter-spacing: -.044em;
+  line-height: 120px;  /* guessed */
+  text-indent: -0.089em;
+  text-rendering: optimizeLegibility;
 }
 
-.font-lowercase {
-    text-transform: lowercase;
+.font-display-3 {
+  color: #757575;
+  font-size: 56px;
+  font-weight: 400;
+  letter-spacing: -.026em;
+  line-height: 60px;  /* guessed */
+  text-indent: -0.082em;
+  text-rendering: optimizeLegibility;
 }
 
-.font-tiny {
-    font-size: 0.67em;
+.font-display-2 {
+  color: #757575;
+  font-size: 45px;
+  font-weight: 400;
+  letter-spacing: -.018em;
+  line-height: 48px;
+  text-indent: -0.08em;
+  text-rendering: optimizeLegibility;
 }
 
-.font-small {
-    font-size: 0.75em;
+.font-display-1 {
+  color: #757575;
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -.01em;
+  line-height: 40px;
+  text-indent: -0.08em;
+  text-rendering: optimizeLegibility;
 }
 
-.font-medium {
-    font-size: 1em;
+.font-headline {
+  color: #212121;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -.012em;
+  line-height: 32px;
+  text-indent: -0.078em;
+  text-rendering: optimizeLegibility;
 }
 
-.font-big {
-    font-size: 1.333em;
+.font-title {
+  color: #212121;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;  /* guessed */
+  text-indent: -0.07em;
+  text-rendering: optimizeLegibility;
 }
 
-.font-huge {
-    font-size: 2em;
+.font-subhead {
+  color: #212121;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;  /* guessed */
+  text-indent: -0.068em;
+  text-rendering: optimizeLegibility;
 }
 
-.font-italic {
-    font-style: italic;
+.font-body-2 {
+  color: #212121;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;  /* guessed */
+  text-indent: -0.068em;
 }
 
-.font-monospace {
-    font-family: monospace;
+.font-body-1 {
+  color: #212121;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;  /* guessed */
+  text-indent: -0.074em;
+}
+
+.font-caption {
+  color: #757575;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.011em;
+  line-height: 20px;  /* guessed */
+  text-indent: -0.04em;
+}
+
+.font-menu {
+  color: #212121;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 24px;  /* guessed */
+  text-indent: -0.068em;
+}
+
+paper-button {
+  color: #212121;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.018em;
+  line-height: 24px;  /* guessed */
+  text-indent: -0.068em;
+  text-transform: uppercase;
 }
 </style>
 

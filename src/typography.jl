@@ -11,12 +11,13 @@ export plaintext,
        italic,
        uppercase,
        lowercase,
-       tiny,
+       xxsmall,
+       xsmall,
        small,
        medium,
-       big,
-       huge,
-       normal,
+       large,
+       xlarge,
+       xxlarge,
        bold,
        bolder,
        lighter,
@@ -25,7 +26,14 @@ export plaintext,
        raggedleft,
        justify,
        centertext,
-       fontwieght
+       fontwieght,
+       headline,
+       title,
+       subhead,
+       paragraph,
+       caption,
+       displayfont,
+       menufont
 
 plaintext(x) = div(x)
 
@@ -88,10 +96,10 @@ abstract FontCase <: NamedFontProperty
 end
 
 abstract FontSize <: NamedFontProperty
-@terms FontSize do
+@terms FontSize begin
     xxsmall => XXSmall
-    xsmall => xsmall
-    small => small
+    xsmall => XSmall
+    small => Small
     medium => Medium
     large => Large
     xlarge => XLarge
@@ -141,17 +149,24 @@ textalign{T <: TextAlignment}(a::T, t) =
 textalign{T <: TextAlignment}(a::T) =
     t -> textalign(a, t)
 
-# Headers
-immutable Headline{n} <: Tile
+# Themable fonts
+# With help from the material design spec
+# http://www.google.com/design/spec/style/typography.html#typography-standard-styles
+
+immutable FontClass{class} <: Tile
     tile::Tile
 end
 
-headline(n, tile) = Headline{n}(tile)
-headline(n) = t -> Headline{n}(t)
+title(t) = FontClass{:title}(t)
+paragraph(t) = FontClass{symbol("body-1")}(t)
+headline(t) = FontClass{:headline}(t)
+subhead(t) = FontClass{:subhead}(t)
+caption(t) = FontClass{:caption}(t)
+menu(t) = FontClass{:menu}(t)
 
-immutable Paragraph
-    tile::Tile
-end
-paragraph(x) = Paragraph(t)
+displayfont(n, tile) =
+    FontClass{symbol(string("display", '-', n))}(tile)
+displayfont(n::Int) =
+    t -> displayfont(n, t)
 
 # colsize
