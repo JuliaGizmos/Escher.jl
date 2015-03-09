@@ -19,7 +19,7 @@ Polymer({
         // initialize
         this.value = elem[self.attr] || elem.getAttribute(self.attr)
 
-        this.elem.addEventListener(this.trigger, function () {
+        elem.addEventListener(this.trigger, function () {
             self.value = elem[self.attr] || elem.getAttribute(self.attr)
             self.update()
         })
@@ -43,9 +43,13 @@ Polymer({
     buttons: [1],
     domReady: function () {
         var self = this
+
+        this.elem = this.elem || this.parentNode
+        var elem = this.elem
+
         this.value = 0
         if (this.buttons.indexOf(2) >= 0) {
-            this.addEventListener("contextmenu", function (ev) {
+            elem.addEventListener("contextmenu", function (ev) {
                 ev.preventDefault()
                 self.value = 2
                 self.update()
@@ -53,12 +57,12 @@ Polymer({
             })
         }
         if (this.buttons.indexOf(1) >= 0 || this.buttons.indexOf(3) >= 0) {
-            this.addEventListener("click", function (ev) {
-                if (ev.button == 0 && this.buttons.indexOf(1) >= 0) {
+            elem.addEventListener("click", function (ev) {
+                if (ev.button == 0 && self.buttons.indexOf(1) >= 0) {
                     // Left click
                     self.value = 1
                     self.update()
-                } else if(ev.button == 1 && this.buttons.indexOf(3) >= 0) {
+                } else if(ev.button == 1 && self.buttons.indexOf(3) >= 0) {
                     // Right click
                     self.value = 3
                     self.update()
@@ -84,14 +88,20 @@ Polymer({
     triggers: [],
     domReady: function () {
         var self = this
+
+        this.elem = this.elem || this.parentNode
+        var elem = this.elem
+
         this.value = {}
-        this.addEventListener("signal-updated", function (ev) {
+        elem.addEventListener("signal-updated", function (ev) {
             if (self.triggers.indexOf(ev.detail.name) >= 0) {
                 var result = {}
                 for(var i=0, l=self.signals.length; i < l; i++) {
                     var s = self.signals[i]
-                    result[s] = self.querySelector("#signal-" + s).value
+                    result[s] = elem.querySelector("#signal-" + s).value
                 }
+                result[ev.target.name] = ev.target.value
+                result._trigger = ev.target.name
                 self.value = result
                 self.update()
             }

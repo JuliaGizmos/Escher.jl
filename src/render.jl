@@ -170,15 +170,15 @@ render{attr}(t::WithState{attr}) =
         attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
 
 render(c::Clickable) =
-    Elem("clickable-behaviour", render(c.tile), name=c.name,
-        buttons=string(map(button_number, c.buttons)))
+    render(c.tile) << Elem("clickable-behaviour", name=c.name,
+                        buttons=string(map(button_number, c.buttons)))
 
 render(sig::SignalSampler) =
-    Elem("signal-sampler",
-        render(sig.tile),
-        name=sig.name,
-        signals=sig.signals,
-        triggers=sig.triggers)
+    render(sig.tile) <<
+        Elem("signal-sampler",
+            name=sig.name,
+            signals=sig.signals,
+            triggers=sig.triggers)
 
 ### Widgets
 
