@@ -6,7 +6,7 @@ data = Input(Dict())
 main = lift(data) do x
     samplesignals([:rating, :name], :submit,
         vbox(
-            headline("Submit your rating"),
+            h1("A simple form"),
             vskip(1em),
             textinput(label="Your Name", name=:name),
             hbox(vbox(flex(), "Your rating", flex()),

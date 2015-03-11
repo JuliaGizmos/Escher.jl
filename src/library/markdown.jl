@@ -11,16 +11,16 @@ import Markdown
 # Link(text, url)
 # LaTeX
 
+totile(x) = x
 convert(::Type{Tile}, md::Markdown.MD) = totile(md)
+convert(::Type{Union(Tile, String)}, md::Markdown.MD) = totile(md)
 
-totile(x) = convert(Tile, x)
 totile(xs::AbstractArray) = group(map(totile, xs))
 totile(md::Markdown.MD) = totile(md.content)
-totile{n}(md::Markdown.Header{n}) = headline(n, totile(md.text))
+totile{n}(md::Markdown.Header{n}) = heading(n, totile(md.text))
 totile(md::Markdown.Code) = code(md.language, totile(md.code))
 totile(md::Markdown.BlockQuote) = blockquote(totile(md.content))
 totile(md::Markdown.List) = map(totile, md.items)
 totile(md::Markdown.Paragraph) = paragraph(totile(md.content))
-totile(md::Markdown.Italic) = font(italic, totile(md.text))
+totile(md::Markdown.Italic) = emph(totile(md.text))
 totile(md::Markdown.Bold) = font(bold, totile(md.text))
-totile(md::Markdown.Image) = font(bold, totile(md.text))

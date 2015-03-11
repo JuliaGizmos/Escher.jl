@@ -1,16 +1,18 @@
 using Canvas
 using DataFrames
-using Gadfly
+import Gadfly: plot, Geom
 
 import Canvas.render
 
 clicks = Input(0)
-data_length = Input(10)
+phase = Input(0.0)
 
-main = lift(data_length) do l
-    data = DataFrame(x=[1:l], y=rand(l))
-    vbox(h1("Table"),
-        slider(1:1000) |> data_length,
-        hbox(table(data), plot(data, x=:x, y=:y, Geom.line)),
+x = [0:0.01:2pi]
+
+main = lift(phase) do ϕ
+    data = DataFrame(x=x, y=sin(ϕ + x))
+    vbox(headline("Table"),
+        slider(0:0.01:2pi) |> phase,
+        font(monospace, hbox(table(data), plot(data, x=:x, y=:y, Geom.line))),
     ) |> pad(0.5Canvas.inch)
 end

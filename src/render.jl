@@ -25,6 +25,7 @@ render{T <: Tile}(x::T) =
 
 render(x::FloatingPoint) = @sprintf "%0.3f" x
 render(x::Symbol) = string(x)
+render(x::String) = x
 
 render(x::Elem) = x
 render(x::Leaf) = x.element
@@ -155,13 +156,15 @@ render(padded::Padded) =
                 [:style => ["padding" * name(p) => padded.length for p=padded.sides]])
 
 render(tile::StopPropagation) =
-    Elem("stop-propagation", render(tile.tile),
-        attributes=[:name=>tile.name])
+    render(tile.tile) <<
+        Elem("stop-propagation",
+            attributes=[:name=>tile.name])
 
 function render(sig::SignalTransport)
     id = setup_transport(sig.signal)
-    Elem("signal-transport",
-        render(sig.tile), attributes=[:name=>sig.name, :signalId => id])
+    render(sig.tile) <<
+        Elem("signal-transport",
+            attributes=[:name=>sig.name, :signalId => id])
 end
 
 ## Behaviour
@@ -281,8 +284,8 @@ render(t::AlignText{JustifyText}) =
 render(t::AlignText{CenterText}) =
     render(t.tile) & [:style => [:textAlign => :center]]
 
-render{class}(p::FontClass{class}) =
-    addclasses(render(p.tile), string("font-", class))
+render{tag, class}(p::TextClass{tag, class}) =
+    addclasses(Elem(tag, render(p.tile)), string(class))
 
 render(x::Code) = Elem(:code, x.code)
 
@@ -307,3 +310,13 @@ render(t::WithBorder) =
         (isempty(t.sides) ? # Apply padding to all sides if none specified
                 [:style => ["border" * propname(t.prop) => name(t.prop)]] :
                 [:style => ["border" * name(s) * propname(t.prop) => name(t.prop) for s=t.sides]])
+
+## RoundedRect
+
+render{C <: Corner}(::C) = string(C)
+
+render(t::RoundedRect) =
+    render(t.tile) &
+        (isempty(t.corners) ? # Apply padding to all sides if none specified
+                [:style => ["borderRadius" => t.radius]] :
+                [:style => ["borderRadius" * name(c) => t.radius for c=t.corners]])

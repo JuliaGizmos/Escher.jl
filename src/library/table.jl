@@ -1,7 +1,5 @@
 # HTML tables
 
-using Patchwork.HTML5
-
 export table
 
 using DataFrames
@@ -31,7 +29,7 @@ end
 # Render logic
 
 render_cell(x) =
-    td(render(x))
+    Elem(:td, render(x))
 
 function render(t::Table)
     if length(t.head) > 0
@@ -42,9 +40,9 @@ function render(t::Table)
     end
 
     Elem(:table,
-        [thead(tr(map(x -> th(render(x)), head))),
-         tbody(
-            [tr([render_cell(v) for (k,v) in row])
+        [Elem(:thead, Elem(:tr, map(x -> Elem(:th, render(x)), head))),
+         Elem(:tbody,
+            [Elem(:tr, [render_cell(v) for (k,v) in row])
                 for row in eachrow(t.body)]
          )]
     )

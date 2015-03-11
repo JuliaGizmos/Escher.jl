@@ -26,13 +26,15 @@ export plaintext,
        raggedleft,
        justify,
        centertext,
-       fontwieght,
-       headline,
-       title,
-       subhead,
+       fontweight,
+       heading,
+       h1, h2, h3, h4,
        paragraph,
+       emph,
+       codeblock,
+       blockquote,
        caption,
-       displayfont,
+       title,
        menufont
 
 plaintext(x) = div(x)
@@ -124,11 +126,11 @@ end
 
 const allowed_font_weights = 100:100:900
 
-function fontweight(w::Integer, x)
-    if !(x in allowed_font_weights)
-        error(string(x, " is not an allowed font weight"))
+function fontweight(w::Integer)
+    if !(w in allowed_font_weights)
+        error(string(w, " is not an allowed font weight"))
     end
-    NumericFontWeight{n}(x)
+    NumericFontWeight{w}()
 end
 
 abstract TextAlignment
@@ -150,25 +152,23 @@ textalign{T <: TextAlignment}(a::T) =
     t -> textalign(a, t)
 
 # Themable fonts
-# With help from the material design spec
-# http://www.google.com/design/spec/style/typography.html#typography-standard-styles
 
-immutable FontClass{class} <: Tile
-    tile::Tile
+immutable TextClass{tag, class} <: Tile
+    tile::Union(Tile, String)
 end
 
-title(t) = FontClass{:title}(t)
-paragraph(t) = FontClass{symbol("body-1")}(t)
-headline(t) = FontClass{:headline}(t)
-headline(n, t) = FontClass{symbol("headline-" * string(n))}(t)
-subhead(t) = FontClass{:subhead}(t)
-caption(t) = FontClass{:caption}(t)
-menu(t) = FontClass{:menu}(t)
+heading(n::Int, txt) = TextClass{symbol("h$n"), symbol("heading-$n")}(txt)
 
-displayfont(n, tile) =
-    FontClass{symbol(string("display", '-', n))}(tile)
-displayfont(n::Int) =
-    t -> displayfont(n, t)
+h1(txt) = heading(1, txt)
+h2(txt) = heading(2, txt)
+h3(txt) = heading(3, txt)
+h4(txt) = heading(4, txt)
+
+title(n::Int, txt) = TextClass{symbol("h$n"), symbol("title-$n")}(txt)
+paragraph(txt) = TextClass{:p, :paragraph}(txt)
+caption(txt) = TextClass{:p, :caption}(txt)
+emph(txt) = TextClass{:em, :emphasis}(txt)
+codeblock(txt) = TextClass{:pre, :codeblock}(txt)
 
 immutable BlockQuote <: Tile
     tile::Tile

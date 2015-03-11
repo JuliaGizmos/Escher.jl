@@ -72,7 +72,9 @@ immutable RoundedRect <: Tile
 end
 
 roundcorner(radius, tile; corners=Corner[]) =
-    RoundedCorner(corners, radius, tile)
+    RoundedRect(corners, radius, tile)
+roundcorner(radius::Length; corners=Corner[]) =
+    t -> roundcorner(radius, t; corners=Corner[]) =
 
 ## Box shadow
 

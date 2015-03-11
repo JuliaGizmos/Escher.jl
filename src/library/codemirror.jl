@@ -3,7 +3,7 @@ export codemirror
 
 immutable Code <: Tile
     language::String
-    code::Tile
+    code::Union(Tile, String)
 end
 
 code(language, c) = Code(language, c)
@@ -21,11 +21,11 @@ codemirror(;
             name=:_code,
             code="",
             language="julia",
-            theme="monokai",
+            theme="elegant",
             linenumbers=true,
             tabsize=4) =
     CodeMirror(code, language, theme, linenumbers, tabsize) |>
-        c -> hasstate(c, name=name, attr="value", trigger="keyup")
+        c -> hasstate(c, name=name, attr="currentValue", trigger="change")
 
 # Render to virtual DOM
 render(c::CodeMirror) =
