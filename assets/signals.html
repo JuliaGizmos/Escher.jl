@@ -32,13 +32,16 @@ Polymer({
 <polymer-element
     name="stop-propagation"
     attributes="name" >
+<template><content></content></template>
 
 <script>
     Polymer({
         names: [],
+        elem: null,
         domReady: function () {
             var self = this
-            this.addEventListener("signal-updated", function (ev) {
+            this.elem = this.elem || this.parentNode
+            this.elem.addEventListener("signal-updated", function (ev) {
                 if (self.names.indexOf(ev.detail.name) > 0) {
                     ev.stopPorpagation()
                 }
@@ -61,9 +64,11 @@ Polymer({
     Polymer({
         signalId: null,
         name: null,
+        elem: null,
         domReady: function () {
             var self = this
-            this.addEventListener("signal-updated", function (ev) {
+            this.elem = this.elem || this.parentNode
+            this.elem.addEventListener("signal-updated", function (ev) {
                 if (self.name == ev.detail.name) {
                     self.fire("signal-transport", {
                         signalId: self.signalId,

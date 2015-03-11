@@ -1,7 +1,7 @@
 using Reactive
 
 export stoppropagation,
-       pipe,
+       subscribe,
        samplesignals
 
 # Don't allow a signal to propagate outward
@@ -19,7 +19,7 @@ immutable SignalTransport <: Tile
     signal::Input
 end
 
-pipe(t::Tile, name, s::Input; absorb=true) =
+subscribe(t::Tile, name, s::Input; absorb=true) =
     SignalTransport(t, name, s) |>
        (x -> absorb ? stoppropagation(x, name) : x)
 

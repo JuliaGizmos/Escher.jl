@@ -8,10 +8,10 @@ export hasstate,
 
 abstract Behaviour <: Tile
 
-pipe(t::Behaviour, s::Input; absorb=true) =
-    pipe(t, t.name, s, absorb=absorb)
+subscribe(t::Behaviour, s::Input; absorb=true) =
+    subscribe(t, t.name, s, absorb=absorb)
 
-(|>)(t::Behaviour, s::Input) = pipe(t, s)
+(|>)(t::Behaviour, s::Input) = subscribe(t, s)
 
 immutable WithState{attr} <: Behaviour
     name::Symbol

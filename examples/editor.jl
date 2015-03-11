@@ -1,12 +1,13 @@
 using Canvas
 
-code = Input("")
+code_signal = Input("")
 
-main = lift(code) do c
+main = lift(code_signal) do c
     vbox(
-        codemirror(linenumbers=true, mode="julia") |> height(300px),
+        h1("Eval something"),
+        (codemirror(linenumbers=true, language="julia") |> code_signal)|> height(300px),
         vskip(1inch),
         Elem(:pre, c),
         vskip(1inch),
-    )
+    ) |> pad(2em)
 end
