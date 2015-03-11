@@ -7,8 +7,7 @@ using Color
 colors = distinguishable_colors(9)
 
 box(w, h, n) =
-    (div(" ") & [:style =>
-        ["backgroundColor" => "#" * hex(colors[n % 9 + 1])]]) |> size(w, h)
+    empty |> fillcolor(colors[n % 9 + 1]) |> size(w, h)
 
 cut(w, h, ::(Canvas.Vertical, Bool)) =
     (w, h/2)

@@ -45,38 +45,38 @@ render{bound}(t::Height{bound}) = render(t.tile) & [:style => [string(bound, "He
 
 # 1. Positioning
 
-render(p::TopLeft, x, y) =
+render_position(p::TopLeft, x, y) =
     [:top => y, :left => x]
-render(p::MidTop, x, y) =
+render_position(p::MidTop, x, y) =
     [:left =>  50cent, :top => y,
      :transform => "translate(-50%)",
      :marginLeft => x]
-render(p::TopRight, x, y) =
+render_position(p::TopRight, x, y) =
     [:top => x, :right => y]
-render(p::MidLeft, x, y) =
+render_position(p::MidLeft, x, y) =
     [:top => 50cent, :left => x,
      :marginTop => y,
      :transform => "translate(0, -50%)"]
-render(p::Middle, x, y) =
+render_position(p::Middle, x, y) =
     [:top => 50cent, :left=>50cent,
      :marginLeft => x, :marginTop => y,
      :transform => "translate(-50%, -50%)"]
-render(p::MidRight, x, y) =
+render_position(p::MidRight, x, y) =
     [:top => 50cent,
     :transform => "translate(0, -50%)",
     :marginTop => y, :right => x]
-render(p::BottomLeft, x, y) =
+render_position(p::BottomLeft, x, y) =
     [:bottom => y, :left => x]
-render(p::MidBottom, x, y) =
+render_position(p::MidBottom, x, y) =
     [:left => 50cent, :bottom => y,
      :marginLeft => x,
      :transform => "translate(-50%)"]
-render(p::BottomRight, x, y) =
+render_position(p::BottomRight, x, y) =
     [:bottom => y, :right => x]
 
-render(c::Corner) = [:style => render(c, 0, 0)]
-render{C <: Corner}(p::Relative{C}) =
-    [:style => render(C(), p.x, p.y)]
+render_position(c::Corner) = [:style => render_position(c, 0, 0)]
+render_position{C <: Corner}(p::Relative{C}) =
+    [:style => render_position(C(), p.x, p.y)]
 
 function render(tile::Inset)
     outer = render(tile.containing)
@@ -85,7 +85,7 @@ function render(tile::Inset)
     outer &= [:style => [:position => :relative]]
     inner &= [:style => [:position => :absolute]]
 
-    outer << (inner & render(tile.position))
+    outer << (inner & render_position(tile.position))
 end
 
 # 2. Flow
@@ -320,3 +320,6 @@ render(t::RoundedRect) =
         (isempty(t.corners) ? # Apply padding to all sides if none specified
                 [:style => ["borderRadius" => t.radius]] :
                 [:style => ["borderRadius" * name(c) => t.radius for c=t.corners]])
+
+render(t::FillColor) =
+    render(t.tile) & [:style => [:backgroundColor => render_color(t.color)]]
