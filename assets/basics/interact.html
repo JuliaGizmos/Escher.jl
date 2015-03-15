@@ -1,0 +1,57 @@
+<script src="bower_components/interact/interact.js"></script>
+
+<polymer-element
+    name="interact-draggable"
+    attributes="max maxPerElement snap restrict inertia autoScroll axis dx dy"
+    extends="reactive-signal" >
+<template></template>
+
+<script>
+
+Polymer({
+    elem: null,
+    dx: 0,
+    dy: 0,
+    max: undefined,
+    maxPerElement: undefined,
+    snap: {},
+    restrict: {},
+    inertia: {},
+    autoScroll: true,
+    axis: undefined,
+    domReady: function () {
+        var self = this
+        this.elem = this.elem || this.parentNode
+        var elem = this.elem
+
+        interact(this.elem).draggable({
+            max: this.max,
+            maxPerElement: this.maxPerElement,
+            manualStart: this.manualStart || false,
+            snap: this.snap,
+            restrict: this.restrict,
+            inertia: this.inertia,
+            autoScroll: this.autoScroll,
+            axis: this.axis,
+            // call this function on every dragmove event
+            onmove: function (event) {
+              var target = event.target,
+                  x = self.dx + event.dx
+                  y = self.dy + event.dy;
+
+              target.style.webkitTransform =
+              target.style.transform =
+                'translate(' + x + 'px, ' + y + 'px)';
+              self.value = [ x, y ]
+              self.update()
+
+              self.dx = x
+              self.dy = y
+            },
+          });
+    }
+});
+
+</script>
+
+</polymer-element>
