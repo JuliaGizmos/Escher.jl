@@ -30,6 +30,8 @@ render(x::String) = x
 render(x::Elem) = x
 render(x::Leaf) = x.element
 render(list::TileList) = Elem(:div, map(render, list.tiles))
+render(inl::Inline) =
+    Elem(:span, map(render, inl.tiles.tiles))
 
 render{T <: Tile}(s::Signal{T}) =
     render(value(s))

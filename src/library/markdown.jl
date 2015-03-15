@@ -15,7 +15,7 @@ totile(x) = x
 convert(::Type{Tile}, md::Markdown.MD) = totile(md)
 convert(::Type{Union(Tile, String)}, md::Markdown.MD) = totile(md)
 
-totile(xs::AbstractArray) = group(map(totile, xs))
+totile(xs::AbstractArray) = inline(map(totile, xs))
 totile(md::Markdown.MD) = totile(md.content)
 totile{n}(md::Markdown.Header{n}) = heading(n, totile(md.text))
 totile(md::Markdown.Code) = code(md.language, totile(md.code))

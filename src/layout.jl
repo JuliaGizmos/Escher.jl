@@ -344,3 +344,9 @@ pad(len::Length) =
 
 pad(d::AbstractVector{Side}, len::Length) =
     t -> pad(d, len, t)
+
+immutable Inline <: Tile
+    tiles::TileList
+end
+
+inline(ts) = Inline(ts)
