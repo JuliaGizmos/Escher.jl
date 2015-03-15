@@ -32,6 +32,7 @@ export plaintext,
        paragraph,
        emph,
        codeblock,
+       code,
        blockquote,
        caption,
        title,
@@ -169,6 +170,14 @@ paragraph(txt) = TextClass{:p, :paragraph}(txt)
 caption(txt) = TextClass{:p, :caption}(txt)
 emph(txt) = TextClass{:em, :emphasis}(txt)
 codeblock(txt) = TextClass{:pre, :codeblock}(txt)
+
+immutable Code <: Tile
+    language::String
+    code::Union(Tile, String)
+end
+
+code(language, c) = Code(language, c)
+code(c) = code("julia", c)
 
 immutable BlockQuote <: Tile
     tile::Tile

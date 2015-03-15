@@ -1,4 +1,3 @@
-using Reactive
 
 export stoppropagation,
        subscribe,
@@ -9,6 +8,10 @@ immutable StopPropagation <: Tile
     tile::Tile
     name::Symbol
 end
+
+@doc """
+Stop a UI signal from propagating further.
+""" ->
 stoppropagation(tile::Tile, name::Symbol) =
     StopPropagation(tile, name)
 

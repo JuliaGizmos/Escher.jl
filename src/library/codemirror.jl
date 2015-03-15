@@ -1,14 +1,6 @@
 
 export codemirror
 
-immutable Code <: Tile
-    language::String
-    code::Union(Tile, String)
-end
-
-code(language, c) = Code(language, c)
-code(c) = code("julia", c)
-
 immutable CodeMirror <: Widget
     code::String
     language::String

@@ -29,9 +29,40 @@ render(x::String) = x
 
 render(x::Elem) = x
 render(x::Leaf) = x.element
+render(list::TileList) = Elem(:div, map(render, list.tiles))
 
 render{T <: Tile}(s::Signal{T}) =
     render(value(s))
+
+## Signal custom elements
+
+render(tile::StopPropagation) =
+    render(tile.tile) <<
+        Elem("stop-propagation",
+            attributes=[:name=>tile.name])
+
+render(sig::SignalTransport) =
+    render(sig.tile) <<
+        Elem("signal-transport",
+            attributes=[:name=>sig.name, :signalId => setup_transport(sig.signal)])
+
+render(chan::ChanSend) =
+    render(chan.tile) <<
+        Elem("chan-send",
+            attributes=[:name=>chan.chan, :attr=>chan.attr])
+
+render(chan::ChanRecv) =
+    render(chan.tile) <<
+        Elem("chan-recv",
+            attributes=[:name=>chan.chan, :attr=>chan.attr])
+
+function render_window(window, socketurl, assets, tile; io=IOBuffer())
+    write(io, """<!doctype html><html><head>""")
+    Canvas.write_canvas_assets(io) # load the most essential html
+    write(io, """</head> <body><div id="root" class="canvas-root"></div>""")
+    write(io, """<script>new Canvasd($(JSON.json(socketurl)), "root");</script></body>""")
+end
+
 
 ########## Layouts ##########
 
@@ -133,7 +164,7 @@ addclasses(t, cs) =
     t & [:className => cs * " " * getproperty(t, :className, "")]
 
 render(f::Flow) =
-    addclasses(Elem(:div, map(render, f.tiles)), classes(f))
+    addclasses(render(f.tiles), classes(f))
 
 render(f::FlexContainer) =
     addclasses(render(f.tile), classes(f))
@@ -141,8 +172,6 @@ render(f::FlexContainer) =
 # 4. padding
 
 render(cont::Container) = Elem(:div, render(cont.tile))
-
-render(group::Group) = Elem(:span, map(render, group.tiles))
 
 name(s::Left) = "Left"
 name(s::Right) = "Right"
@@ -154,18 +183,6 @@ render(padded::Padded) =
         (isempty(padded.sides) ? # Apply padding to all sides if none specified
                 [:style => [:padding => padded.length]] :
                 [:style => ["padding" * name(p) => padded.length for p=padded.sides]])
-
-render(tile::StopPropagation) =
-    render(tile.tile) <<
-        Elem("stop-propagation",
-            attributes=[:name=>tile.name])
-
-function render(sig::SignalTransport)
-    id = setup_transport(sig.signal)
-    render(sig.tile) <<
-        Elem("signal-transport",
-            attributes=[:name=>sig.name, :signalId => id])
-end
 
 ## Behaviour
 
@@ -183,56 +200,6 @@ render(sig::SignalSampler) =
             name=sig.name,
             signals=sig.signals,
             triggers=sig.triggers)
-
-### Widgets
-
-boolattr(a, name) = a ? name : nothing
-
-button_number(::LeftButton) = 1
-button_number(::RightButton) = 2
-button_number(::ScrollButton) = 3
-
-render(s::Slider) =
-    Elem("paper-slider",
-        min=first(s.range),
-        max=last(s.range),
-        step=step(s.range),
-        value=s.value,
-        editable=s.editable,
-        disabled=s.disabled,
-        secondaryProgress=s.secondaryprogress)
-
-render(b::Button) =
-    Elem("paper-button", render(b.label),
-        raised=boolattr(b.raised, "raised"), noink=boolattr(b.raised, "raised"))
-
-render(c::BoolWidget{:checkbox}) =
-    Elem("paper-checkbox",
-        checked=c.value,
-        disabled=boolattr(c.disabled, "disabled"))
-
-render(t::BoolWidget{:toggle}) =
-    Elem("paper-toggle-button",
-        checked=t.value,
-        disabled=boolattr(t.disabled, "disabled"))
-
-render(t::TextInput) =
-    Elem("paper-input",
-        label=t.label,
-        value=t.value,
-        floatingLabel=boolattr(t.floatinglabel, "floatingLabel"),
-        disabled=boolattr(t.disabled, "disabled"))
-
-render(t::SelectionItem) =
-    Elem("paper-item", render(t.tile), value=t.value)
-
-render(d::Dropdown) =
-    Elem("paper-dropdown-menu",
-        value=d.value,
-        label=d.label,
-        floatingLabel=boolattr(d.floatinglabel, "floatingLabel"),
-        disabled=boolattr(d.disabled, "disabled")) |>
-    (wrap -> reduce(<<, wrap, map(render, d.items)))
 
 # font type
 classes(::WithFont{Serif}) = "font-serif"
@@ -323,3 +290,53 @@ render(t::RoundedRect) =
 
 render(t::FillColor) =
     render(t.tile) & [:style => [:backgroundColor => render_color(t.color)]]
+### Widgets
+
+button_number(::LeftButton) = 1
+button_number(::RightButton) = 2
+button_number(::ScrollButton) = 3
+
+render(s::Slider) =
+    Elem("paper-slider",
+        min=first(s.range),
+        max=last(s.range),
+        step=step(s.range),
+        value=s.value,
+        editable=s.editable,
+        disabled=s.disabled,
+        secondaryProgress=s.secondaryprogress)
+
+render(b::Button) =
+    Elem("paper-button", render(b.label),
+        raised=boolattr(b.raised, "raised"), noink=boolattr(b.raised, "raised"))
+
+render(c::BoolWidget{:checkbox}) =
+    Elem("paper-checkbox",
+        checked=c.value,
+        disabled=boolattr(c.disabled, "disabled"))
+
+render(t::BoolWidget{:toggle}) =
+    Elem("paper-toggle-button",
+        checked=t.value,
+        disabled=boolattr(t.disabled, "disabled"))
+
+render(t::TextInput) =
+    Elem("paper-input",
+        label=t.label,
+        value=t.value,
+        floatingLabel=boolattr(t.floatinglabel, "floatingLabel"),
+        disabled=boolattr(t.disabled, "disabled"))
+
+render(t::SelectionItem) =
+    Elem("paper-item", render(t.tile), value=t.value)
+
+render(d::Dropdown) =
+    Elem("paper-dropdown-menu",
+        value=d.value,
+        label=d.label,
+        floatingLabel=boolattr(d.floatinglabel, "floatingLabel"),
+        disabled=boolattr(d.disabled, "disabled")) |>
+    (wrap -> reduce(<<, wrap, map(render, d.items)))
+
+render(l::LaTeX) =
+    Elem("ka-tex", source=l.source)

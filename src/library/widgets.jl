@@ -1,6 +1,5 @@
 import Base: |>
-export bind,
-       button,
+export button,
        slider,
        checkbox,
        togglebutton,

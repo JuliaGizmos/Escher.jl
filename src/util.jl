@@ -1,55 +1,8 @@
-export cycle,
-       intersperse
-
-immutable ClassSet
-    classes::Set{String}
-end
-
-ClassSet(c) = ClassSet([string(c)])
-ClassSet(c::ClassSet) = copy(c)
-ClassSet(c::String) = ClassSet(split(c, r"\s+"))
-
-JSON._print(io::IO, ::JSON.State, x::ClassSet) = Base.print(io, "\"", join(" ", c.classes), "\"")
-
-function addclass(el::Elem, cls)
-    props = attributes(el)
-    if haskey(props, :className)
-        cls = ClassSet(props[:className])
-        push!(cls.classes, cls)
-        el & [:className => cls]
-    else
-        el & [:className => ClassSet(cls)]
-    end
-end
-
-immutable CyclingIterator{T} <: AbstractVector{T}
-    array::AbstractVector{T}
-end
-
-cycle(itr) = CyclingIterator(itr)
-function take_n(n::Int, c::CyclingIterator)
-    l = length(c.array)
-    if l >= n
-        return c.array[1:n]
-    else
-        return [c.array, take_n(n-l, c)]
-    end
-end
+export intersperse
 
 # Utility functions for Elem
 
-boolattr(x::Union(Symbol, String)) = [:attributes => [x => x]]
-boolattr(xs::AbstractVector) =
-    [:attributes => [x => x for x in xs]]
-
-genid(prefix) = prefix * string(gensym(), "#", "")
-
-const counters = Dict()
-function nexttag(prefix)
-    idx = get(counters, prefix, 1)
-    counters[prefix] = idx + 1
-    symbol(string(prefix, idx))
-end
+boolattr(a, name) = a ? name : nothing
 
 make_term(term, typ, parent) =
     [:(immutable $typ <: $parent end),
@@ -62,9 +15,24 @@ macro terms(parent, terms)
             for arg in args])...)
 end
 
+@doc """
+Intersperse a value in between elements in a vector
+
+Optionally you can tell it to enclose the result in the seperator element.
+
+e.g.
+```
+intersperse(0, [1, 2, 3])
+# => [1, 0, 2, 0, 3]
+
+intersperse(0, [1, 2, 3], true)
+# => [0, 1, 0, 2, 0, 3, 0]
+```
+""" ->
 function intersperse(x, xs, enclose=false)
     if length(xs) > 1
-        res = foldl((acc, nxt) -> vcat(acc, x, nxt), Any[xs[1]], xs[2:end])
+        res = foldl((acc, nxt) -> vcat(acc, x, nxt),
+                    Any[xs[1]], xs[2:end])
     else
         res = xs
     end

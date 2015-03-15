@@ -2,6 +2,8 @@ import Base: |>
 
 export hasstate,
        clickable,
+       draggable,
+       resizable,
        leftbutton,
        rightbutton,
        scrollbutton

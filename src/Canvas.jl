@@ -24,10 +24,15 @@ include("layout.jl")
 include("typography.jl")
 include("embellishment.jl")
 include("behaviour.jl")
+include("ui-messages.jl")
 
 include("library/widgets.jl")
 include("library/codemirror.jl")
 include("library/markdown.jl")
-include("library/render.jl")
+include("library/latex.jl")
+include("library/layout2.jl")
+
+include("render.jl")
 
 end
+

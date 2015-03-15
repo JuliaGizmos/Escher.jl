@@ -179,16 +179,13 @@ end
     crossend => CrossEnd
 end
 
-abstract FlexContainer <: Tile
+abstract FlexContainer <: Tileset
 immutable Flow{Along <: FixedAxis, reverse} <: FlexContainer
-    tiles::AbstractVector
+    tiles::TileList
 end
 
-flow{T <: FixedAxis}(axis::T, tiles::AbstractArray; reverse=false) =
-    Flow{T, reverse}([convert(Tile, t) for t in tiles])
-
-flow(axis::FixedAxis, tiles::Tuple; reverse=false) =
-    flow(axis, [t for t in tiles]; reverse=reverse)
+flow{T <: FixedAxis}(axis::T, tiles; reverse=false) =
+    Flow{T, reverse}(tiles)
 
 flow(axis::FixedAxis, tiles...; reverse=false) =
     flow(axis, tiles; reverse=reverse)
@@ -201,6 +198,13 @@ vbox(args...) = flow(vertical, args...)
 
 vskip(y) = size(0px, y, empty)
 hskip(x) = size(x, 0px, empty)
+
+immutable FlowOrder <: FlexContainer
+    ordering::AbstractArray{Integer}
+    flow::Flow
+end
+
+ordering(ord, flw) = FlowOrder(ord, flw)
 
 immutable Wrap{reverse} <: FlexContainer
     tile::FlexContainer
