@@ -1,61 +1,33 @@
 module Canvas
 
+if VERSION < v"0.4.0-dev"
+    using Docile
+end
+
 using Patchwork
 using Reactive
-using Requires
+using JSON
 
 import Base: convert, writemime
 
-# Export from Patchwork
-export Elem, div, h1, h2, h3, h4, h5, p, blockquote, em, strong
-
-export Tile
-
-# A Tile is a renderable value.
-abstract Tile
-
-immutable Leaf <: Tile
-    element::Elem
-end
-
-immutable Empty <: Tile
-end
-
-immutable Group <: Tile
-    tiles::AbstractArray
-end
-
-group(xs) = Group(xs)
-
-const empty = Empty()
-
-convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
-convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
-
 # Polymer Setup
 custom_elements() =
-    readall(Pkg.dir("Canvas", "assets", "vulcanized.html"))
+    readall(Pkg.dir("Canvas", "assets", "basics/basics.html"))
 
-include("length.jl")
+include("tile.jl")
 include("util.jl")
-include("layout.jl")
-include("embellishment.jl")
-include("typography.jl")
+include("length.jl")
 include("signal.jl")
-include("behaviour.jl")
-include("widget.jl")
-
-include("library/codemirror.jl")
-include("library/markdown.jl")
-
-include("render.jl")
 include("lazyload.jl")
 
-# Fallback to Patchwork writemime
-writemime(io::IO, m::MIME"text/html", x::Tile) =
-    writemime(io, m, div(Canvas.render(x), className="canvasRoot"))
+include("layout.jl")
+include("typography.jl")
+include("embellishment.jl")
+include("behaviour.jl")
 
-writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
-    writemime(io, m, lift(Canvas.render, Patchwork.Elem, x))
+include("library/widgets.jl")
+include("library/codemirror.jl")
+include("library/markdown.jl")
+include("library/render.jl")
 
 end

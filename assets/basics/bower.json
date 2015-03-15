@@ -29,13 +29,11 @@
     "tests"
   ],
   "dependencies": {
-    "core-component-page": "Polymer/core-component-page#^0.5.0",
-    "code-mirror": "shashi/code-mirror#master",
-    "aha-table": "~1.1.2"
-  },
-  "resolutions": {
-    "core-component-page": "master",
-    "webcomponentsjs": "master",
-    "polymer": "master"
+    "polymer": "Polymer/polymer#^0.5.5",
+    "polymer-elements": "Polymer/paper-elements#^0.5.5",
+    "core-elements": "Polymer/core-elements#^0.5.5",
+    "interact": "~1.2.4",
+    "paper-elements": "Polymer/paper-elements#^0.5.5"
   }
 }
+
