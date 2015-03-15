@@ -159,16 +159,17 @@ end
 # App
 @app static = (
     Mux.defaults,
-    route("/assets/:file", req -> readall(Pkg.dir("Canvas", "assets", req[:params][:file]))),
+    route("/assets", req -> readall(Pkg.dir("Canvas", "assets", req[:path]...))),
     route("/:file", req -> setup_socket(req[:params][:file])),
     route("/", req -> setup_socket("index.jl")),
-    Mux.notfound,
+    Mux.notfound(),
 )
 
 @app comm = (
     Mux.wdefaults,
     route("/socket/:file", uisocket),
     Mux.wclose,
+    Mux.notfound(),
 )
 
 @sync serve(static, comm)
