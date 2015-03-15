@@ -1,18 +1,15 @@
 #!/usr/bin/env julia
 #
 # Webapp
-using Morsel
+using Mux
+using Lazy
 using Canvas
 using JSON
 
 using Reactive
 using Patchwork
-using WebSockets
-using Morsel
 
-app = Morsel.app()
-
-function renderfile(filename)
+function renderfile(window, filename)
     if isfile(filename)
         try
             include(filename)
@@ -26,10 +23,10 @@ function renderfile(filename)
         try
             return main
         catch
-            return p("main not defined")
+            return Elem(:p, "main not defined")
         end
     else
-        return p(string(
+        return Elem(:p, string(
             filename, " could not be found."
         ))
     end
@@ -47,18 +44,14 @@ function setup_socket(file)
     takebuf_string(io)
 end
 
-route(app, GET, "/") do req, res
-    setup_socket("index.jl")
-end
-
-route(app, GET, "/<file>") do req, res
-    setup_socket(req.params[:file])
-end
-
 mount_cmd(node, id="root") =
    [ "command" => "mount",
     "id" => id,
     "data" => Patchwork.jsonfmt(node)] |> JSON.json
+
+import_cmd(content) =
+    [ "command" => "import",
+      "data" => content ] 
 
 patch_cmd(diff, id="root") =
    [ "command" => "patch",
@@ -77,18 +70,41 @@ function Canvas.setup_transport(x::Input)
 end
 
 const commands = Dict([
-    ("signal-update", (msg) -> begin
+    ("signal-update", (window, msg) -> begin
         id = msg["data"]["signalId"]
         sig = Canvas.fromid(id)
         push!(sig, Canvas.decodeJSON(sig, msg["data"]["value"]))
     end),
+    ("window-size", (window, msg) -> begin
+        dim = (msg["data"][1] * px, msg["data"][1] * px)
+        push!(window.dimension, dim)
+    end),
+    ("window-route", (window, msg) -> begin
+        push!(window.route, msg["data"])
+    end)
 ])
 
-wsroute(app, GET, "/socket/<file>") do req, sock
-    file = abspath(req.params[:file])
+
+function uisocket(req)
+    file = abspath(req[:params][:file])
+
+    if !isfile(file)
+        return
+    end
+
+    sock = req[:socket]
     tilestream = Input{Signal}(Input{Tile}(empty))
-    current = renderfile(file)
+
+    # TODO: Initialize window with session,
+    # window dimensions and what not
+
+    window = Window()
+    current = renderfile(window, file)
     println("Mounting a ", typeof(current))
+
+    for asset in window.assets
+        write(sock, import_cmd(readall(asset)))
+    end
 
     swap!(tilestream, current)
 
@@ -121,7 +137,7 @@ wsroute(app, GET, "/socket/<file>") do req, sock
         if !haskey(commands, msg["command"])
             warn("Unknown command received ", msg["command"])
         else
-            commands[msg["command"]](msg)
+            commands[msg["command"]](window, msg)
         end
     end
 
@@ -140,4 +156,19 @@ wsroute(app, GET, "/socket/<file>") do req, sock
 
 end
 
-start(app, 6767)
+# App
+@app static = (
+    Mux.defaults,
+    route("/assets/:file", req -> readall(Pkg.dir("Canvas", "assets", req[:params][:file]))),
+    route("/:file", req -> setup_socket(req[:params][:file])),
+    route("/", req -> setup_socket("index.jl")),
+    Mux.notfound,
+)
+
+@app comm = (
+    Mux.wdefaults,
+    route("/socket/:file", uisocket),
+    Mux.wclose,
+)
+
+@sync serve(static, comm)

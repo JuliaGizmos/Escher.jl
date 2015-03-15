@@ -32,6 +32,7 @@ include("library/markdown.jl")
 include("library/latex.jl")
 include("library/layout2.jl")
 
+include("window.jl")
 include("render.jl")
 
 end
