@@ -29,9 +29,9 @@ render(x::String) = x
 
 render(x::Elem) = x
 render(x::Leaf) = x.element
-render(list::TileList) = Elem(:div, map(render, list.tiles))
+render(list::TileList, tag="div") = Elem(tag, map(render, list.tiles))
 render(inl::Inline) =
-    Elem(:span, map(render, inl.tiles.tiles))
+    render(inl.tiles, "span")
 
 render{T <: Tile}(s::Signal{T}) =
     render(value(s))
@@ -342,3 +342,24 @@ render(d::Dropdown) =
 
 render(l::LaTeX) =
     Elem("ka-tex", source=l.source)
+
+## Selection
+
+render(pages::Pages) =
+    render(pages.tiles, "core-pages")
+
+render(tabs::Tabs) =
+    Elem("paper-tabs",
+        map(t -> Elem("paper-tab", render(t)), tabs.tiles.tiles))
+
+render(m::Menu) =
+    render(m.tiles, "core-menu")
+
+render(m2::SubMenu) =
+    render(m2.tiles, "core-submenu")
+
+render(i::Item) =
+    Elem("core-item", icon=i.icon, label=i.label)
+
+render(s::Selected) =
+    render(s.tile) & ["selected" => s.selected]

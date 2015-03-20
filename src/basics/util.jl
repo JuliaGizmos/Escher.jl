@@ -4,17 +4,6 @@ export intersperse
 
 boolattr(a, name) = a ? name : nothing
 
-make_term(term, typ, parent) =
-    [:(immutable $typ <: $parent end),
-     :(const $(esc(term))  = $typ())]
-
-macro terms(parent, terms)
-    args = filter(x -> x.head != :line, terms.args)
-    Expr(:block,
-        reduce(vcat, [make_term(arg.args[1], arg.args[2], parent)
-            for arg in args])...)
-end
-
 @doc """
 Intersperse a value in between elements in a vector
 

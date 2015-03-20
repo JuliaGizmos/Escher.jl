@@ -14,17 +14,18 @@ import Base: convert, writemime
 custom_elements() =
     readall(Pkg.dir("Canvas", "assets", "basics/basics.html"))
 
-include("tile.jl")
-include("util.jl")
-include("length.jl")
-include("signal.jl")
-include("lazyload.jl")
+include("basics/tile.jl")
+include("basics/util.jl")
+include("basics/length.jl")
+include("basics/signal.jl")
+include("basics/lazyload.jl")
 
-include("layout.jl")
-include("typography.jl")
-include("embellishment.jl")
-include("behaviour.jl")
-include("ui-messages.jl")
+include("basics/layout.jl")
+include("basics/typography.jl")
+include("basics/embellishment.jl")
+include("basics/behaviour.jl")
+include("basics/ui-messages.jl")
+include("basics/window.jl")
 
 include("library/widgets.jl")
 include("library/codemirror.jl")
@@ -32,8 +33,7 @@ include("library/markdown.jl")
 include("library/latex.jl")
 include("library/layout2.jl")
 
-include("window.jl")
-include("render.jl")
 
+include("basics/render.jl")
 end
 
