@@ -67,18 +67,28 @@ end
 striptype(exp::Symbol) = exp
 striptype(exp) = exp.head == :(::) ? exp.args[1] : exp
 
-function states(arg)
-    var = getvar(arg)
+replaceparam(x::Symbol, params) = x
+function replaceparam(x, params)
+    if x.head === :(::)
+        typ = get(params, x.args[2], x.args[2])
+        return Expr(x.head, x.args[1], typ)
+    else
+        return x
+    end
+end
+
+function states(arg, params)
+    var = replaceparam(getvar(arg), params)
 
     if hasdefault(arg)
         val = arg.args[2].args[2]
 
-        return [(false, var, var), (false, nothing, val)]
+        return [(false, var, striptype(var)), (false, nothing, esc(val))]
     else
         if argtype(arg) === : curry
-            return [(false, var, var), (true, striptype(var), var)]
+            return [(false, var, striptype(var)), (true, striptype(var), var)]
         else
-            return [(false, var, var)]
+            return [(false, var, striptype(var))]
         end
     end
 end
@@ -106,14 +116,14 @@ function prependarg(state, method)
     ApiMethod(args, lambda_args, constructor_args)
 end
 
-function makeapimethods(arglist)
+function makeapimethods(arglist, params)
     if length(arglist) == 0
         return Any[ApiMethod(Any[], Any[], Any[])]
     else
         this = arglist[1]
         rest = arglist[2:end]
         return [prependarg(state, method)
-            for state in states(this), method in makeapimethods(rest)]
+            for state in states(this, params), method in makeapimethods(rest, params)]
     end
 end
 
@@ -140,6 +150,22 @@ function methodexpr(fn, typ, kws, kwnames, m)
     m
 end
 
+typexpr(typ::Symbol) = typ
+typexpr(typ) =
+    typ.head === :comparison ?
+        Expr(:(<:), typ.args[1], typ.args[3]) : typ
+
+typename(typ::Symbol) = typ
+typename(typ) =
+    typ.head in [:comparison, :curly] ?
+        typename(typ.args[1]) : typ
+
+paramdict(typ::Symbol) = Dict()
+paramdict(typ) =
+    typ.head === :curly ?
+    [param.args[1] => param.args[2] for param in typ.args[2:end]] :
+        (typ.head === :(<:) ?
+            paramdict(typ.args[1]) : Dict())
 @doc """
 `@api` is used to create new tile types and associated constructors
 
@@ -166,15 +192,16 @@ macro api(names, body)
 
     argdefs = filter(f -> f.head != :line, fields)
 
-    typedef = :(immutable $typ end)
-    body = typebody(argdefs)
-    typedef.args[3].args = body
+    typedef = Expr(:type, false, esc(typexpr(typ)),
+        Expr(:block, typebody(argdefs)...))
+
+    dict = paramdict(typexpr(typ))
 
     args, kwargs = argskwargs(argdefs)
-    methoddefs = makeapimethods(args)
+    methoddefs = makeapimethods(args, dict)
     kws = map(kwize, kwargs)
     kwnames = map(x -> striptype(x.args[1]), kws)
-    ms = map(m -> methodexpr(fn, typ, kws, kwnames, m), methoddefs)
+    ms = map(m -> methodexpr(fn, typename(typ), kws, kwnames, m), methoddefs)
 
     Expr(:block, typedef, ms...)
 end

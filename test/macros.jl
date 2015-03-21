@@ -5,6 +5,11 @@ import Canvas: @api
 end
 @fact test1(3) => TestType1(3.0)
 
+@api testsub => TestSubType <: Number begin
+    arg(a::FloatingPoint)
+end
+@fact testsub(3) => TestSubType(3.0)
+
 @api test2 => TestType2 begin
     typedarg(a::FloatingPoint)
     arg(b::Int)
@@ -29,3 +34,14 @@ end
 @fact test3(2.0, 3, 4, p=:white) => TestType3(2.0, 3, 4, :white, 1)
 @fact test3(2.0, 3, q=5.0)(4) => TestType3(2.0, 3, 4, "black", 5.0)
 @fact_throws test3(2.0, 5, 4, q=1)
+
+abstract A
+immutable B<:A end
+
+@api test4 => WithBorder{P <: A} <: Tile begin
+    typedarg(a::AbstractArray=Integer[])
+    arg(b::P)
+    curry(c::Int)
+end
+
+println(test4(B())(2))
