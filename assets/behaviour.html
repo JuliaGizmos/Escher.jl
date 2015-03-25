@@ -112,3 +112,30 @@ Polymer({
 </script>
 
 </polymer-element>
+
+
+<polymer-element
+    name="selectable-behaviour"
+    attributes="name"
+    extends="reactive-signal" >
+
+<template><content></content></template>
+
+<script>
+Polymer({
+    domReady: function () {
+        var self = this
+
+        this.elem = this.elem || this.parentNode
+        var elem = this.elem
+
+        this.elem.addEventListener("core-select", function (ev) {
+            self.value = self.elem.selected || (self.elem.multi ? [] : 0)
+            self.update()
+        })
+        this.super()
+    }
+})
+</script>
+
+</polymer-element>

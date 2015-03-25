@@ -1,9 +1,7 @@
 {
     "excludes": {
         "imports": [
-            "polymer",
-            "interact",
-            "core-*"
+            "polymer"
         ]
     }
 }

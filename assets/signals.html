@@ -83,36 +83,51 @@ Polymer({
 </polymer-element>
 
 
-<polymer-element
-    name="signal-bind"
-    attributes="signal attr">
 
-<template><content></content></template>
+<polymer-element
+    name="chan-send"
+    attributes="chan watch">
+
+<template></template>
 
 <script>
     Polymer({
-        signal: null,
+        chan: null,
+        watch: null,
+        domReady: function () {
+            var self = this
+            this.elem = this.elem || this.parentNode
+
+            console.log("Setting up chan-send", this.chan, this.watch)
+            this.elem.addEventListener("signal-updated", function (ev) {
+                if (self.watch == ev.detail.name) {
+                    self.elem.fire("chan-updated-" + self.chan, {
+                        value: ev.detail.value
+                    })
+                }
+            })
+        }
+    })
+</script>
+</polymer-element>
+
+<polymer-element
+    name="chan-recv"
+    attributes="chan attr">
+
+<template></template>
+
+<script>
+    Polymer({
+        chan: null,
         attr: null,
         domReady: function () {
             var self = this
             this.elem = this.elem || this.parentNode
 
-            this.elem.addEventListener("bind-updated", function (ev) {
-                if (self.name == ev.detail.name) {
-                    self.fire("signal-update", {
-                        signalId: self.signalId,
-                        value: ev.detail.value
-                    }) // bail
-                }
-            })
-
-            this.elem.addEventListener("bind-updated", function (ev) {
-                if (self.name == ev.detail.name) {
-                    self.fire("signal-update", {
-                        signalId: self.signalId,
-                        value: ev.detail.value
-                    }) // bail
-                }
+            console.log("Setting up chan-recv", this.chan, this.attr)
+            document.addEventListener("chan-updated-" + this.chan, function (ev) {
+                self.elem[self.attr] = ev.detail.value
             })
         }
     })

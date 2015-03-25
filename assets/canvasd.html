@@ -38,6 +38,13 @@ function teelog(x) {
         patch: function (cmd) {
             this.node.applyPatch(cmd.data)
         },
+        import: function (cmd) {
+            var ln = document.createElement("link")
+            ln.rel = "import"
+            ln.href = cmd.data
+            document.head.appendChild(ln)
+            console.log("IMPORT", cmd)
+        },
         log: function (cmd) {
             console.log(cmd)
         },
