@@ -27,6 +27,7 @@ directions = [
     (vertical, true),
     (horizontal, false)
 ]
-main = inset(middle,
+
+main(win) = inset(middle,
              size(100vw, 100vh, empty),
-             stack(80vmin, 80vmin, directions, 12))
+             stack(80vmin, 80vmin, directions, 14))
