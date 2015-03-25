@@ -43,10 +43,16 @@ end
 abstract A
 immutable B<:A end
 
-@api test4 => WithBorder{P <: A} <: Tile begin
+#@show macroexpand(:(
+@api test4 => Test4{P <: A} <: Tile begin
     typedarg(a::AbstractArray=Integer[])
     arg(b::P)
     curry(c::Int)
 end
-
+#))
 println(test4(B())(2))
+
+@api code => Code <: A begin
+    arg(language::String="julia")
+    arg(code::Any)
+end
