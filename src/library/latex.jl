@@ -1,10 +1,9 @@
 export latex
 
-immutable LaTeX <: Tile
-    source::String
+@api latex => LaTeX <: Tile begin
+    arg(source::String)
+    kwarg(block::Bool=false)
 end
 
-latex(x::String) = LaTeX(latex)
-
 render(l::LaTeX) =
-    Elem("ka-tex", source=l.source)
+    Elem("ka-tex", source=l.source, block=l.block)

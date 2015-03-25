@@ -3,3 +3,4 @@
 *.swo
 *#
 assets/bower_components
+assets/build
