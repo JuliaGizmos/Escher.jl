@@ -1,5 +1,10 @@
 import Canvas: @api
 
+
+
+@api test1 => TestType1 begin
+    arg(a::FloatingPoint)
+end
 @api test1 => TestType1 begin
     arg(a::FloatingPoint)
 end

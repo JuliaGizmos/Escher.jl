@@ -15,6 +15,12 @@ Stop a UI signal from propagating further.
 stoppropagation(tile::Tile, name::Symbol) =
     StopPropagation(tile, name)
 
+render(tile::StopPropagation) =
+    render(tile.tile) <<
+        Elem("stop-propagation",
+            attributes=[:name=>tile.name])
+
+
 # Send a signal update to the Julia side
 immutable SignalTransport <: Tile
     tile::Tile
@@ -25,6 +31,12 @@ end
 subscribe(t::Tile, name, s::Input; absorb=true) =
     SignalTransport(t, name, s) |>
        (x -> absorb ? stoppropagation(x, name) : x)
+
+render(sig::SignalTransport) =
+    render(sig.tile) <<
+        Elem("signal-transport",
+            attributes=[:name=>sig.name, :signalId => setup_transport(sig.signal)])
+
 
 setup_transport(x) =
     error("Looks like there is no trasport set up")
@@ -62,4 +74,5 @@ end
 function fromid(id)
     id_to_signal[id]
 end
+
 

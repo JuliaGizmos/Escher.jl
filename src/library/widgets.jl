@@ -21,6 +21,11 @@ end
 button(label; name=:_button, raised=false, noink=false) =
     clickable(Button(label, raised, noink), name=name)
 
+render(b::Button) =
+    Elem("paper-button", render(b.label),
+        raised=boolattr(b.raised, "raised"), noink=boolattr(b.raised, "raised"))
+
+
 ## Slider
 
 immutable Slider{T <: Real} <: Widget
@@ -43,6 +48,17 @@ slider{T}(range::Range{T};
         Slider(convert(T, value), range, editable, pin, disabled, secondaryprogress),
         name=name)
 
+render(s::Slider) =
+    Elem("paper-slider",
+        min=first(s.range),
+        max=last(s.range),
+        step=step(s.range),
+        value=s.value,
+        editable=s.editable,
+        disabled=s.disabled,
+        secondaryProgress=s.secondaryprogress)
+
+
 
 ## Boolean widgets: Checkbox and Toggle Button
 
@@ -61,6 +77,12 @@ checkbox(;
         BoolWidget{:checkbox}(value, label, disabled),
         name=name, attr="checked", trigger="change")
 
+render(c::BoolWidget{:checkbox}) =
+    Elem("paper-checkbox",
+        checked=c.value,
+        disabled=boolattr(c.disabled, "disabled"))
+
+
 togglebutton(;
              name=:_togglebutton,
              value=false,
@@ -69,6 +91,11 @@ togglebutton(;
     hasstate(
         BoolWidget{:toggle}(value, label, disabled),
         name=name, attr="checked", trigger="change")
+
+render(t::BoolWidget{:toggle}) =
+    Elem("paper-toggle-button",
+        checked=t.value,
+        disabled=boolattr(t.disabled, "disabled"))
 
 
 ## Text input
@@ -89,12 +116,23 @@ textinput(value::String="";
         TextInput(value, label, floatinglabel, disabled),
         name=name, attr="value", trigger="keyup")
 
+render(t::TextInput) =
+    Elem("paper-input",
+        label=t.label,
+        value=t.value,
+        floatingLabel=boolattr(t.floatinglabel, "floatingLabel"),
+        disabled=boolattr(t.disabled, "disabled"))
+
 ## Dropdown
 
 immutable SelectionItem{T} <: Tile
     value::T
     item::Tile
 end
+
+render(t::SelectionItem) =
+    Elem("paper-item", render(t.tile), value=t.value)
+
 
 immutable Dropdown <: Widget
     value::String
@@ -103,6 +141,16 @@ immutable Dropdown <: Widget
     disabled::Bool
 end
 
+render(d::Dropdown) =
+    Elem("paper-dropdown-menu",
+        value=d.value,
+        label=d.label,
+        floatingLabel=boolattr(d.floatinglabel, "floatingLabel"),
+        disabled=boolattr(d.disabled, "disabled")) |>
+    (wrap -> reduce(<<, wrap, map(render, d.items)))
+
+
+## TODO: Look into this stuff again!
 makeitems(xs) =
     [SelectionItem(k, v) for (k, v) in xs]
 

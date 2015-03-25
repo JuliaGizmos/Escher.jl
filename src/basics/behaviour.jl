@@ -2,6 +2,7 @@ import Base: |>
 
 export hasstate,
        clickable,
+       selectable,
        draggable,
        resizable,
        leftbutton,
@@ -21,26 +22,36 @@ immutable WithState{attr} <: Behaviour
     trigger::String
 end
 
+render{attr}(t::WithState{attr}) =
+    render(t.tile) << Elem("watch-state",
+        attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
+
+
 hasstate(tile::Tile; name=:_state, attr="value", trigger="change") =
     WithState{symbol(attr)}(name, tile, trigger)
 
 # Sample a bunch of signals upon changes to another bunch of signals
 # Returns a signal of dict of signal values
-immutable SignalSampler <: Behaviour
-    name::Symbol
-    signals::AbstractArray
-    triggers::AbstractArray
-    tile::Tile
+@api samplesignals => SignalSampler <: Behaviour begin
+    arg(signals::AbstractArray)
+    arg(triggers::AbstractArray)
+    curry(tile::Tile)
+    typedkwarg(name::Symbol=:_sampler)
 end
 
-samplesignals(tosample, triggers, tile; name=:_sampler) =
-    SignalSampler(name, tosample, triggers, tile)
-samplesignals(tosample::Symbol, triggers::Symbol, tile; name=:_sampler) =
-    SignalSampler(name, [tosample], [triggers], tile)
-samplesignals(tosample::Symbol, triggers, tile; name=:_sampler) =
-    SignalSampler(name, [tosample], triggers, tile)
-samplesignals(tosample, triggers::Symbol, tile; name=:_sampler) =
-    SignalSampler(name, tosample, [triggers], tile)
+samplesignals(tosample::Symbol, triggers::Symbol, x...; name=:_sampler) =
+    samplesignals([tosample], [triggers], x...; name=name)
+samplesignals(tosample::Symbol, triggers, x...; name=:_sampler) =
+    samplesignals([tosample], [triggers], x...; name=name)
+samplesignals(tosample, triggers::Symbol, x...; name=:_sampler) =
+    samplesignals(tosample, [triggers], x...; name=name)
+
+render(sig::SignalSampler) =
+    render(sig.tile) <<
+        Elem("signal-sampler",
+            name=sig.name,
+            signals=sig.signals,
+            triggers=sig.triggers)
 
 abstract MouseButton
 
@@ -50,23 +61,34 @@ abstract MouseButton
     scrollbutton => ScrollButton
 end
 
-immutable Clickable <: Behaviour
-    name::Symbol
-    buttons::AbstractArray
-    tile::Tile
+@api clickable => Clickable <: Behaviour begin
+    typedarg(buttons::AbstractArray=[leftbutton])
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_clicks)
 end
+
+button_number(::LeftButton) = 1
+button_number(::RightButton) = 2
+button_number(::ScrollButton) = 3
+
+render(c::Clickable) =
+    render(c.tile) << Elem("clickable-behaviour", name=c.name,
+                        buttons=string(map(button_number, c.buttons)))
+
+
+@api selectable => Selectable <: Behaviour begin
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_clicks)
+end
+
+render(s::Selectable) =
+    render(s.tile) << Elem("selectable-behaviour", name=s.name)
+
 
 convert(::Type{MouseButton}, x::Int) =
     try [leftbutton, rightbutton, scrollbutton][x]
     catch error("Invalid mouse button code: $x")
     end
-
-clickable(t; name=:_clicks) =
-    Clickable(name, [leftbutton], t)
-clickable(buttons::AbstractArray, t; name=:_clicks) =
-    Clickable(name, buttons, t)
-clickable(buttons::AbstractArray{MouseButton}; name=:_clicks) =
-    t -> clickable(buttons, t, name=name)
 
 abstract MouseState
 
@@ -75,18 +97,16 @@ abstract MouseState
     mouseup => MouseUp
 end
 
-immutable Hoverable <: Behaviour
-    name::Symbol
-    tile::Tile
-    get_coords::Bool
+@api hoverable => Hoverable <: Behaviour begin
+    typedarg(get_coords::Bool=false)
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_hover)
 end
 
 immutable Hover
     state::MouseState
     position::(Float64, Float64)
 end
-
-hoverable(t::Tile, get_coords=false; name=:_hover) = Hoverable(name, t, get_coords)
 
 immutable Resizable <: Behaviour
     name::Symbol
@@ -126,3 +146,37 @@ immutable Editable <: Behaviour
     tile::Tile
 end
 
+## UI-side global channels
+import Base: send, recv
+export send, recv, wire
+
+immutable ChanSend <: Tile
+    chan::Symbol
+    watch::Symbol
+    tile::Tile
+end
+send(chan::Symbol, b::Behaviour) =
+    ChanSend(chan, b.name, b)
+
+render(chan::ChanSend) =
+    render(chan.tile) <<
+        Elem("chan-send",
+            chan=chan.chan, watch=chan.watch)
+
+
+immutable ChanRecv <: Tile
+    chan::Symbol
+    attr::Symbol
+    tile::Tile
+end
+recv(chan::Symbol, t, attr) =
+    ChanRecv(chan, attr, t)
+
+render(chan::ChanRecv) =
+    render(chan.tile) <<
+        Elem("chan-recv",
+            chan=chan.chan, attr=chan.attr)
+
+
+wire(a::Behaviour, b, chan, attribute) =
+    send(chan, a), recv(chan, b, attribute)

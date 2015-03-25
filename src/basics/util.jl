@@ -27,3 +27,7 @@ function intersperse(x, xs, enclose=false)
     end
     enclose ? [x, res, x] : res
 end
+
+getproperty(el::Elem, prop, default) =
+    hasproperties(el) ? get(properties(el), prop, default) : default
+
