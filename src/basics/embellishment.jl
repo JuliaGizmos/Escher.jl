@@ -11,11 +11,14 @@ export noborder,
        shadow,
        fillcolor
 
+render_color(c) = string("#" * hex(c))
+
 ## Borders
 
 abstract BorderProperty
 
 abstract StrokeStyle <: BorderProperty
+
 @terms StrokeStyle begin
     noborder => NoStroke
     dotted => Dotted
@@ -23,88 +26,87 @@ abstract StrokeStyle <: BorderProperty
     solid => Solid
 end
 
-immutable StrokeWidth <: BorderProperty
-    thickness::Length
-end
-strokewidth(x) = StrokeWidth(x)
+propname(::StrokeStyle) = "Style"
 
-immutable BorderColor <: BorderProperty
-    color::ColorValue
-end
-bordercolor(c) = BorderColor(c)
+name(::NoStroke) = "none"
+name(::Solid) = "solid"
+name(::Dotted) = "dotted"
+name(::Dashed) = "dashed"
 
-immutable WithBorder{P <: BorderProperty} <: Tile
-    sides::AbstractArray{Side}
-    prop::P
-    tile::Tile
+
+@api strokewidth => StrokeWidth <: BorderProperty begin
+    arg(thickness::Length)
 end
 
+propname(::StrokeWidth) = "Width"
+name(p::StrokeWidth) = p.thickness
+
+
+@api bordercolor => BorderColor <: BorderProperty begin
+    arg(color::ColorValue)
+end
+
+propname(::BorderColor) = "Color"
+name(p::BorderColor) = render_color(p.color)
+
+
+@api border => WithBorder{P <: BorderProperty} <: Tile begin
+    typedarg(sides::AbstractArray=Side[])
+    typedarg(prop::P)
+    curry(tile::Tile)
+end
+
+render(t::WithBorder) =
+    render(t.tile) &
+        (isempty(t.sides) ? # Apply padding to all sides if none specified
+                [:style => ["border" * propname(t.prop) => name(t.prop)]] :
+                [:style => ["border" * name(s) * propname(t.prop) => name(t.prop) for s=t.sides]])
+
+
+# Autopromote some types to border property
 border(sides::AbstractArray, p::Length, x) =
-    WithBorder(sides, strokewidth(p), convert(Tile, x))
-
-border(sides::AbstractArray, p::BorderProperty, x) =
-    WithBorder(sides, p, convert(Tile, x))
-
+    WithBorder(sides, strokewidth(p), x)
 border(sides::AbstractArray, p::ColorValue, x) =
-    WithBorder(sides, bordercolor(p), convert(Tile, x))
-
-border(p::Union(BorderProperty, ColorValue, Length), x) =
-    border(Side[], p, convert(Tile, x))
-
-border(t::Union(Tile, String), props::BorderProperty...) =
-    foldr(border, t, props)
-
-border(sides::AbstractArray, t::Union(Tile, String), props::BorderProperty...) =
-    foldr((x, y) -> border(sides, x, y), t, props)
-
-border(sides::AbstractArray, props::BorderProperty...) =
-    t -> border(sides, t, props...)
-
-border(props::BorderProperty...) =
-    t -> border(t, props...)
+    WithBorder(sides, bordercolor(p), x)
+border(p::Union(ColorValue, Length), x) =
+    border(Side[], p, x)
+border(sides::AbstractArray, ps::BorderProperty...) =
+    t -> foldl((acc, p) -> border(sides, p, acc), t, ps)
+border(ps::BorderProperty...) =
+    border(Side[], ps...)
 
 ## RoundRects
 
-immutable RoundedRect <: Tile
-    corners::AbstractArray{Corner}
-    radius::Length
-    tile::Tile
+@api roundcorner => RoundedRect <: Tile begin
+    arg(radius::Length)
+    curry(tile::Tile)
+    kwarg(corners::AbstractArray=Corner[])
 end
 
-roundcorner(radius, tile; corners=Corner[]) =
-    RoundedRect(corners, radius, tile)
-roundcorner(radius::Length; corners=Corner[]) =
-    t -> roundcorner(radius, t; corners=Corner[]) =
+render(t::RoundedRect) =
+    render(t.tile) &
+        (isempty(t.corners) ? # Apply padding to all sides if none specified
+                [:style => ["borderRadius" => t.radius]] :
+                [:style => ["borderRadius" * name(c) => t.radius for c=t.corners]])
+
 
 ## Box shadow
 
-immutable Shadow <: Tile
-    inset::Bool
-    offset::(Length, Length)
-    blur_radius::Length
-    spread_radius::Length
-    color::ColorValue
-    tile::Tile
+@api shadow => Shadow <: Tile begin
+    curry(tile::Tile)
+    kwarg(inset::Bool=false)
+    kwarg(offset::(Length, Length)=(0px, 0px))
+    kwarg(blur_radius::Length=5px)
+    kwarg(spread_radius::Length=5px)
+    kwarg(color::ColorValue=color("black"))
 end
-
-shadow(tile;
-    inset=false,
-    offset=(0px, 0px),
-    blur_radius=5px,
-    spread_radius=5px,
-    color=color("black")) =
-    Shadow(inset, offset, blur_radius, spread_radius, color, tile)
 
 ## Fill color
 
-immutable FillColor <: Tile
-    color::ColorValue
-    tile::Tile
+@api fillcolor => FillColor <: Tile begin
+    arg(color::ColorValue)
+    curry(tile::Tile)
 end
 
-fillcolor(color::ColorValue, t) =
-    FillColor(color, t)
-
-fillcolor(color::ColorValue) =
-    t -> fillcolor(color, t)
-
+render(t::FillColor) =
+    render(t.tile) & [:style => [:backgroundColor => render_color(t.color)]]

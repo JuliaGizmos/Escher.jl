@@ -52,19 +52,19 @@ nowrap(tile) = NoTextWrap(tile)
 
 abstract FontProperty
 
-immutable WithFont{P <: FontProperty} <: Tile
-    prop::P
-    tile::Tile
+@api font => WithFont{P <: FontProperty} <: Tile begin
+    typedarg(prop::P)
+    curry(tile::Tile)
 end
-
-font(w::FontProperty, x) =
-    WithFont(w, convert(Tile, x))
 
 font(t::Union(Tile, String), args::FontProperty...) =
     foldr(font, t, props)
 
 font(props::FontProperty...) =
     t -> foldr(font, t, props)
+
+render(t::WithFont) =
+    addclasses(render(t.tile), classes(t))
 
 abstract NamedFontProperty <: FontProperty
 abstract AbsFontProperty <: FontProperty
@@ -74,6 +74,10 @@ type FontFamily <: AbsFontProperty
 end
 fontfamily(f) = FontFamily(f)
 
+render(t::WithFont{FontFamily}) =
+    render(t.tile) & [:style => [:fontFamily => t.prop.family]]
+
+
 abstract FontType <: NamedFontProperty
 
 @terms FontType begin
@@ -82,6 +86,10 @@ abstract FontType <: NamedFontProperty
     slabserif => SlabSerif
     monospace => Monospace
 end
+classes(::WithFont{Serif}) = "font-serif"
+classes(::WithFont{SansSerif}) = "font-sansserif"
+classes(::WithFont{SlabSerif}) = "font-serif font-slab"
+classes(::WithFont{Monospace}) = "font-monospace"
 
 abstract FontStyle <: NamedFontProperty
 
@@ -90,13 +98,18 @@ abstract FontStyle <: NamedFontProperty
     slanted => Slanted
     italic => Italic
 end
+classes(::WithFont{Normal}) = "font-normal"
+classes(::WithFont{Slanted}) = "font-slanted"
+classes(::WithFont{Italic}) = "font-italic"
 
 abstract FontCase <: NamedFontProperty
 
 @terms FontCase begin
-    uppercase => Uppercase
-    lowercase => Lowercase
+    ucase => Uppercase
+    lcase => Lowercase
 end
+classes(::WithFont{Uppercase}) = "font-uppercase"
+classes(::WithFont{Lowercase}) = "font-lowercase"
 
 abstract FontSize <: NamedFontProperty
 @terms FontSize begin
@@ -108,11 +121,23 @@ abstract FontSize <: NamedFontProperty
     xlarge => XLarge
     xxlarge => XXLarge
 end
+classes(::WithFont{XXSmall}) = "font-xx-small"
+classes(::WithFont{XSmall}) = "font-x-small"
+classes(::WithFont{Small}) = "font-small"
+classes(::WithFont{Medium}) = "font-medium"
+classes(::WithFont{Large}) = "font-large"
+classes(::WithFont{XLarge}) = "font-x-large"
+classes(::WithFont{XXLarge}) = "font-xx-large"
+
 
 immutable AbsFontSize <: AbsFontProperty
     size::Length
 end
 fontsize(size::Length) = AbsFontSize(size)
+
+render(t::WithFont{AbsFontSize}) =
+    render(t.tile) & [:style => [:fontSize => t.prop.size]]
+
 
 abstract FontWeight <: NamedFontProperty
 
@@ -121,9 +146,15 @@ abstract FontWeight <: NamedFontProperty
     bolder => Bolder
     lighter => Lighter
 end
+classes(::WithFont{Bold}) = "font-bold"
+classes(::WithFont{Bolder}) = "font-bolder"
+classes(::WithFont{Lighter}) = "font-lighter"
 
 immutable NumericFontWeight{n} <: AbsFontProperty
 end
+
+render{n}(t::WithFont{NumericFontWeight{n}}) =
+    render(t.tile) & [:style => [:fontWeight => n]]
 
 const allowed_font_weights = 100:100:900
 
@@ -143,20 +174,28 @@ abstract TextAlignment
     centertext => CenterText
 end
 
-immutable AlignText{T <: TextAlignment}
-    tile::Tile
+@api textalign => AlignText{T <: TextAlignment} begin
+    typedarg(alignment::T)
+    curry(tile::Tile)
 end
 
-textalign{T <: TextAlignment}(a::T, t) =
-    AlignText{T}(t)
-textalign{T <: TextAlignment}(a::T) =
-    t -> textalign(a, t)
+render(t::AlignText{RaggedRight}) =
+    render(t.tile) & [:style => [:textAlign => :left]]
+render(t::AlignText{RaggedLeft}) =
+    render(t.tile) & [:style => [:textAlign => :right]]
+render(t::AlignText{JustifyText}) =
+    render(t.tile) & [:style => [:textAlign => :justify]]
+render(t::AlignText{CenterText}) =
+    render(t.tile) & [:style => [:textAlign => :center]]
 
 # Themable fonts
 
 immutable TextClass{tag, class} <: Tile
     tile::Union(Tile, String)
 end
+render{tag, class}(p::TextClass{tag, class}) =
+    addclasses(Elem(tag, render(p.tile)), string(class))
+
 
 heading(n::Int, txt) = TextClass{symbol("h$n"), symbol("heading-$n")}(txt)
 
@@ -171,17 +210,18 @@ caption(txt) = TextClass{:p, :caption}(txt)
 emph(txt) = TextClass{:em, :emphasis}(txt)
 codeblock(txt) = TextClass{:pre, :codeblock}(txt)
 
-immutable Code <: Tile
-    language::String
-    code::Union(Tile, String)
+@api code => Code <: Tile begin
+    arg(language::String="julia")
+    arg(code::Any)
 end
 
-code(language, c) = Code(language, c)
-code(c) = code("julia", c)
+render(x::Code) = Elem(:code, x.code)
 
-immutable BlockQuote <: Tile
-    tile::Tile
+@api blockquote => BlockQuote <: Tile begin
+    arg(tile::Tile)
 end
-blockquote(txt) = BlockQuote(txt)
+
+render(b::BlockQuote) =
+    Elem("blockquote", render(b.tile))
 
 # colsize

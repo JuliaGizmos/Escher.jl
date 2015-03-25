@@ -14,6 +14,7 @@ import Base: convert, writemime
 custom_elements() =
     readall(Pkg.dir("Canvas", "assets", "basics/basics.html"))
 
+include("basics/macros.jl")
 include("basics/tile.jl")
 include("basics/util.jl")
 include("basics/length.jl")
@@ -33,7 +34,5 @@ include("library/markdown.jl")
 include("library/latex.jl")
 include("library/layout2.jl")
 
-
-include("basics/render.jl")
 end
 

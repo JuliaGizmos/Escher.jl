@@ -71,9 +71,9 @@ replaceparam(x::Symbol, params) = x
 function replaceparam(x, params)
     if x.head === :(::)
         typ = get(params, x.args[2], x.args[2])
-        return Expr(x.head, x.args[1], typ)
+        return Expr(x.head, x.args[1], esc(typ))
     else
-        return x
+        return Expr(x.head, x.args[1], esc(typ))
     end
 end
 
@@ -83,12 +83,12 @@ function states(arg, params)
     if hasdefault(arg)
         val = arg.args[2].args[2]
 
-        return [(false, var, striptype(var)), (false, nothing, esc(val))]
+        return Any[(false, var, striptype(var)), (false, nothing, esc(val))]
     else
-        if argtype(arg) === : curry
-            return [(false, var, striptype(var)), (true, striptype(var), var)]
+        if argtype(arg) === :curry
+            return Any[(false, var, striptype(var)), (true, striptype(var), striptype(var))]
         else
-            return [(false, var, striptype(var))]
+            return Any[(false, var, striptype(var))]
         end
     end
 end
@@ -114,6 +114,11 @@ function prependarg(state, method)
     end
     constructor_args = vcat(val, constructor_args)
     ApiMethod(args, lambda_args, constructor_args)
+end
+
+function teeprint(x, fn=println)
+    fn(x)
+    x
 end
 
 function makeapimethods(arglist, params)

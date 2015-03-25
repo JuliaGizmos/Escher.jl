@@ -55,36 +55,32 @@ export inset,
 
 # 0. Width and height
 
-immutable Width{stage} <: Tile
-    w::Length
-    tile::Tile
+@api width => Width <: Tile begin
+    typedarg(prefix::String="")
+    arg(w::Length)
+    curry(tile::Tile)
 end
 
-immutable Height{stage} <: Tile
-    h::Length
-    tile::Tile
+render(t::Width) =
+    render(t.tile) & [:style => [(t.prefix == "" ? "width" : t.prefix * "Width")=> t.w]]
+
+@api height => Height <: Tile begin
+    typedarg(prefix::String="")
+    arg(h::Length)
+    curry(tile::Tile)
 end
 
-width(w, t) = Width{:natural}(w, t)
-height(h, t) = Height{:natural}(h, t)
+render(t::Height) =
+    render(t.tile) & [:style => [(t.prefix == "" ? "height" : t.prefix * "Height")=> t.h]]
 
-width(w)  = t -> width(w, t)
-height(h) = t -> height(h, t)
+minwidth(w, x...) = width("min", w, x...)
+minheight(h, x...) = height("min", h, x...)
 
-minwidth(w, t) = Width{:min}(w, t)
-minheight(h, t) = Height{:min}(h, t)
-
-minwidth(w)  = t -> minwidth(w, t)
-minheight(h) = t -> minheight(h, t)
-
-maxwidth(w, t) = Width{:max}(w, t)
-maxheight(h, t) = Height{:max}(h, t)
-
-maxwidth(w)  = t -> maxwidth(w, t)
-maxheight(h) = t -> maxheight(h, t)
+maxwidth(w, x...) = width("max", w, x...)
+maxheight(h, x...) = height("max", h, x...)
 
 size(w::Length, h::Length, t) =
-    t |> width(w) |> height(h)
+    width(w, height(h, t))
 size(w::Length, h::Length) =
     t -> size(w, h, t)
 
@@ -107,33 +103,62 @@ abstract Corner <: Position
     bottomright => BottomRight
 end
 
+render{C <: Corner}(::C) = string(C)
+
 immutable Relative{T <: Corner} <: Position
     x::Length
     y::Length
     # z::Length
 end
 
-immutable Inset <: Tile
-    position::Position
-    containing::Tile
-    contained::Tile
+@api inset => Inset <: Tile begin
+    typedarg(position::Position=topleft)
+    arg(containing::Tile)
+    curry(contained::Tile)
 end
 
-offset{T <: Corner}(corner::T, x, y) =
-    Relative{T}(x, y)
-offset(x, y) = offset(TopLeft(), x, y)
+render_position(p::TopLeft, x, y) =
+    [:top => y, :left => x]
+render_position(p::MidTop, x, y) =
+    [:left =>  50cent, :top => y,
+     :transform => "translate(-50%)",
+     :marginLeft => x]
+render_position(p::TopRight, x, y) =
+    [:top => x, :right => y]
+render_position(p::MidLeft, x, y) =
+    [:top => 50cent, :left => x,
+     :marginTop => y,
+     :transform => "translate(0, -50%)"]
+render_position(p::Middle, x, y) =
+    [:top => 50cent, :left=>50cent,
+     :marginLeft => x, :marginTop => y,
+     :transform => "translate(-50%, -50%)"]
+render_position(p::MidRight, x, y) =
+    [:top => 50cent,
+    :transform => "translate(0, -50%)",
+    :marginTop => y, :right => x]
+render_position(p::BottomLeft, x, y) =
+    [:bottom => y, :left => x]
+render_position(p::MidBottom, x, y) =
+    [:left => 50cent, :bottom => y,
+     :marginLeft => x,
+     :transform => "translate(-50%)"]
+render_position(p::BottomRight, x, y) =
+    [:bottom => y, :right => x]
 
-inset(pos::Position, outer, inner) =
-    Inset(pos, outer, inner)
+render_position(c::Corner) = [:style => render_position(c, 0, 0)]
+render_position{C <: Corner}(p::Relative{C}) =
+    [:style => render_position(C(), p.x, p.y)]
 
-inset(outer, inner) =
-    Inset(topleft, outer, inner)
+function render(tile::Inset)
+    outer = render(tile.containing)
+    inner = render(tile.contained)
 
-inset(x::Length, y::Length, a, b) =
-    Inset(offset(x, y), a, b)
+    outer &= [:style => [:position => :relative]]
+    inner &= [:style => [:position => :absolute]]
 
-inset(p::Position) = (x...) -> inset(p, x...)
-inset(p::Position, outer) = inner -> inset(p, outer, inner)
+    outer << (inner & render_position(tile.position))
+end
 
 # 2. Axes, Directions and Flow
 
@@ -147,7 +172,6 @@ abstract FixedAxis <: Axis
 end
 
 abstract  Side{Perpendicular <: Axis}
-
 @terms Side{Horizontal} begin
     left => Left
     right => Right
@@ -158,10 +182,17 @@ end
     bottom => Bottom
 end
 
+name(s::Left) = "Left"
+name(s::Right) = "Right"
+name(s::TopSide) = "Top"
+name(s::Bottom) = "Bottom"
+
 @terms Side{Depth} begin
     inward => Inward
     outward => Outward
 end
+
+# TODO: render inward, outward flow
 
 abstract FlowRelativeAxis <: Axis
 @terms FlowRelativeAxis begin
@@ -179,85 +210,99 @@ end
     crossend => CrossEnd
 end
 
-abstract FlexContainer <: Tileset
-immutable Flow{Along <: FixedAxis, reverse} <: FlexContainer
-    tiles::TileList
+abstract FlexContainer <: Tile
+
+addclasses(t, cs) =
+    t & [:className => cs * " " * getproperty(t, :className, "")]
+render(f::FlexContainer) =
+    addclasses(render(f.tile), classes(f))
+
+
+@api flow => Flow{A <: FixedAxis} <: FlexContainer begin
+    typedarg(axis::A)
+    curry(tiles::AbstractArray)
+    kwarg(reverse::Bool=false)
 end
 
-flow{T <: FixedAxis}(axis::T, tiles; reverse=false) =
-    Flow{T, reverse}(tiles)
-
 flow(axis::FixedAxis, tiles...; reverse=false) =
-    flow(axis, tiles; reverse=reverse)
+    flow(axis, [t for t in tiles]; reverse=reverse)
 
-Base.reverse{T, x}(flow::Flow{T, x}) =
-    Flow{T, (!x)}(flow.tiles)
+Base.reverse(flow::Flow) =
+    Flow(flow.axis, flow.tiles, !flow.reverse)
+
+
+classes(f::Flow{Horizontal}) =
+    f.reverse ? "flow flow-reverse horizontal" : "flow horizontal"
+classes(f::Flow{Vertical}) =
+    f.reverse ? "flow flow-reverse vertical" : "flow vertical"
+
+render(f::Flow) =
+    addclasses(render(f.tiles), classes(f))
+
 
 hbox(args...) = flow(horizontal, args...)
 vbox(args...) = flow(vertical, args...)
 
+hbox(arg) = flow(horizontal, [arg])
+vbox(arg) = flow(vertical, [arg])
+
 vskip(y) = size(0px, y, empty)
 hskip(x) = size(x, 0px, empty)
 
-immutable FlowOrder <: FlexContainer
-    ordering::AbstractArray{Integer}
-    flow::Flow
+
+@api ordering => FlowOrder <: FlexContainer begin
+    arg(ordering::AbstractArray)
+    curry(flow::FlexContainer)
 end
 
-ordering(ord, flw) = FlowOrder(ord, flw)
+# TODO: render ordering
 
-immutable Wrap{reverse} <: FlexContainer
-    tile::FlexContainer
+@api wrap => Wrap <: FlexContainer begin
+    arg(tile::FlexContainer)
+    kwarg(reverse::Bool=false)
 end
-wrap(t) = Wrap{false}(t)
-wrapreverse(t) = Wrap(t)
+wrapreverse(t) = wrap(t, reverse=true)
+
+classes(f::Wrap) =
+    f.reverse ? "flex-wrap-reverse" : "flex-wrap"
 
 # 3. Flexing and alignment
 
-immutable FloatingTile{T <: Side{Horizontal}} <: Tile
-    tile::Tile
+@api float => FloatingTile{T <: Side{Horizontal}} <: Tile begin
+    typedarg(side::T)
+    curry(tile::Tile)
 end
 
-float{T <: Side{Horizontal}}(d::T, tile) =
-    FloatingTile{T}(tile)
-float(d::Side{Horizontal}) =
-    t -> float(d, t)
+render(f::FloatingTile) =
+    render(tile) & [:style => [:float => lowercase(name(f.side))]]
 
-immutable Grow <: Tile
-    factor::Float64
-    tile::Tile
+@api grow => Grow <: Tile begin
+    arg(factor::Float64)
+    curry(tile::Tile)
+end
+grow(t::Tile) = grow(1.0, t)
+grow(t::AbstractVector) = map(grow, t)
+
+render(t::Grow) =
+    render(t.tile) & [:style => [:flexGrow => t.factor]]
+
+@api shrink => Shrink <: Tile begin
+    arg(factor::Float64)
+    curry(tile::Tile)
+end
+shrink(t::Tile) = shrink(1.0, t)
+shrink(t::AbstractVector) = map(shrink, t)
+
+render(t::Shrink) =
+    render(t.tile) & [:style => [:flexShrink => t.factor]]
+
+@api flexbasis => FlexBasis <: Tile begin
+    arg(basis::Union(Length, Symbol))
+    curry(tile::Tile)
 end
 
-grow(factor::Real, t) = Grow(factor, t)
-
-# TODO: make a macro for this
-grow{T <: Real}(factor::AbstractVector{T}, t) =
-    map(grow, factor, t)
-grow(t) = grow(1.0, t)
-grow(t::AbstractVector) =
-    map(grow, t)
-
-grow(factor::Real) = t -> grow(factor, t)
-
-immutable Shrink <: Tile
-    factor::Float64
-    tile::Tile
-end
-shrink(factor::Real, t) = Shrink(factor, t)
-shrink(factor::Real) = t -> shrink(factor, t)
-
-# TODO: make a macro for this
-shrink{T <: Real}(factor::AbstractVector{T}, t) =
-    map(shrink, factor, t)
-shrink(t) = shrink(1.0, t)
-shrink(t::AbstractVector) =
-    map(shrink, t)
-
-immutable FlexBasis <: Tile
-    basis::Union(Length, Symbol)
-    tile::Tile
-end
-flexbasis(basis, tile) = FlexBasis(basis, tile)
+render(t::FlexBasis) =
+    render(t.tile) & [:style => [:flexBasis => t.basis]]
 
 # Flex ignores the width and distributes forcefully
 flex(factor::Real, t) =
@@ -285,35 +330,42 @@ abstract Packing
     spacearound => SpaceAround
 end
 
-immutable PackedLines{T <: Packing} <: FlexContainer
-    tile::FlexContainer
+@api packlines => PackedLines{T <: Packing} <: FlexContainer begin
+    typedarg(packing::T)
+    curry(tile::FlexContainer)
 end
 
-packlines{T <: Packing}(packing::T, tile::Wrap) =
-    PackedLines{T}(w)
+classes(t::PackedLines{AxisStart}) = "pack-lines-start"
+classes(t::PackedLines{AxisEnd}) = "pack-lines-end"
+classes(t::PackedLines{AxisCenter}) = "pack-lines-center"
+classes(t::PackedLines{Stretch}) = "pack-lines-stretch"
+classes(t::PackedLines{SpaceBetween}) = "pack-lines-space-between"
+classes(t::PackedLines{SpaceAround}) = "pack-lines-space-around"
 
-packlines(p::Packing) =
-    t -> packlines(p, t)
 
-immutable PackedItems{T <: Packing} <: FlexContainer
-    tile::FlexContainer
+@api packitems => PackedItems{T <: Packing} <: FlexContainer begin
+    typedarg(packing::T)
+    curry(tile::FlexContainer)
 end
 
-packitems{T <: Packing}(packing::T, tile::FlexContainer) =
-    PackedItems{T}(tile)
+classes(t::PackedItems{AxisStart}) = "pack-start"
+classes(t::PackedItems{AxisEnd}) = "pack-end"
+classes(t::PackedItems{AxisCenter}) = "pack-center"
+classes(t::PackedItems{SpaceBetween}) = "pack-space-between"
+classes(t::PackedItems{SpaceAround}) = "pack-space-around"
 
-packitems(p::Packing) =
-    t -> packitems(p, t)
 
-immutable PackedAcross{T <: Packing} <: FlexContainer
-    tile::FlexContainer
+@api packacross => PackedAcross{T <: Packing} <: FlexContainer begin
+    typedarg(packing::T)
+    curry(tile::FlexContainer)
 end
 
-packacross{T <: Packing}(pack::T, tile::FlexContainer) =
-    PackedAcross{T}(tile)
+classes(t::PackedAcross{AxisStart}) = "pack-across-start"
+classes(t::PackedAcross{AxisEnd}) = "pack-across-end"
+classes(t::PackedAcross{AxisCenter}) = "pack-across-center"
+classes(t::PackedAcross{Stretch}) = "pack-across-stretch"
+classes(t::PackedAcross{Baseline}) = "pack-across-baseline"
 
-packacross(p::Packing) =
-    t -> packacross(p, t)
 
 # 4. Padding
 
@@ -321,22 +373,32 @@ immutable Container <: Tile
     tile::Tile
 end
 
+render(cont::Container) = Elem(:div, render(cont.tile))
+
+
 immutable Padded <: Tile
-    sides::AbstractVector{Side}
+    sides::AbstractVector
     length::Length
     tile::Tile
 end
 
+render(padded::Padded) =
+    render(padded.tile) &
+        (isempty(padded.sides) ? # Apply padding to all sides if none specified
+                [:style => ["padding" => padded.length]] :
+                [:style => ["padding" * name(p) => padded.length for p=padded.sides]])
+
+
 padcontent(len::Length, tile) =
     Padded(Side[], len, tile)
 
-padcontent(sides::AbstractVector{Side}, len::Length, tile) =
+padcontent(sides::AbstractVector, len::Length, tile) =
     Padded(sides, len, tile)
 
 pad(len::Length, tile) =
     padcontent(len, Container(tile))
 
-pad(sides::AbstractVector{Side}, len::Length, tile) =
+pad(sides::AbstractVector, len::Length, tile) =
     padcontent(len, Container(tile))
 
 pad(len::Length) =
@@ -345,8 +407,9 @@ pad(len::Length) =
 pad(d::AbstractVector{Side}, len::Length) =
     t -> pad(d, len, t)
 
-immutable Inline <: Tile
-    tiles::TileList
+@api inline => Inline <: Tile begin
+    arg(tiles::AbstractArray)
 end
 
-inline(ts) = Inline(ts)
+render(inl::Inline) =
+    render(inl.tiles, "span")
