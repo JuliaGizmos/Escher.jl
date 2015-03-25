@@ -25,7 +25,6 @@ include("basics/layout.jl")
 include("basics/typography.jl")
 include("basics/embellishment.jl")
 include("basics/behaviour.jl")
-include("basics/ui-messages.jl")
 include("basics/window.jl")
 
 include("library/widgets.jl")

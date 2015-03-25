@@ -1,0 +1,117 @@
+/* The Box model
+ *
+ * - Each box has 4 edges: the margin edge, the border edge, padding edge and the content edge
+ */
+
+/* Flow */
+
+body {
+    margin: 0;
+}
+
+.rendered_html .flow > *, .flow > * {
+   /* Make these things take exactly as much space as they need */
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+.flow {
+    display: flex;
+    align-content: stretch;
+    justify-content: flex-start;
+}
+
+.flow.horizontal {
+    flex-direction: row;
+}
+
+.flow.horizontal.flow-reverse {
+    flex-direction: row-reverse;
+}
+
+.flow.vertical {
+    flex-direction: column;
+}
+
+.flow.vertical.flow-reverse {
+    flex-direction: column-reverse;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+.flex-wrap-reverse {
+    flex-wrap: wrap-reverse;
+}
+
+.flow-inward {
+}
+
+.flow-outward {
+}
+
+.pack-start {
+    justify-content: flex-start;
+}
+
+.pack-end {
+    justify-content: flex-end;
+}
+
+.pack-center {
+    justify-content: center;
+}
+
+.pack-space-around {
+    justify-content: space-around;
+}
+
+.pack-space-between {
+    justify-content: space-between;
+}
+
+.pack-lines-start {
+    justify-content: flex-start;
+}
+
+.pack-lines-end {
+    justify-content: flex-end;
+}
+
+.pack-lines-center {
+    justify-content: center;
+}
+
+.pack-lines-space-around {
+    justify-content: space-around;
+}
+
+.pack-lines-space-between {
+    justify-content: space-between;
+}
+
+.pack-lines-stretch {
+    justify-content: center;
+}
+
+.pack-across-start {
+    align-items: flex-start;
+}
+
+.pack-across-end {
+    align-items: flex-end;
+}
+
+.pack-across-center {
+    align-items: center;
+}
+
+.pack-across-stretch {
+    align-items: stretch;
+}
+
+.pack-across-baseline {
+    align-items: baseline;
+}
+
