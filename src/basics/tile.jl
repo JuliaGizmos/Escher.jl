@@ -68,7 +68,7 @@ const empty = Empty()
 render(t::Empty) = Elem(:div)
 
 writemime(io::IO, m::MIME"text/html", x::Tile) =
-    writemime(io, m, div(Canvas.render(x), className="canvasRoot"))
+    writemime(io, m, Elem(:div, Canvas.render(x), className="canvasRoot"))
 
 writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
     writemime(io, m, lift(Canvas.render, Patchwork.Elem, x))
@@ -76,3 +76,20 @@ writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
 render{T <: Tile}(s::Signal{T}) =
     render(value(s))
 
+# Note a TileList is NOT a Tile
+immutable TileList
+    tiles::AbstractArray
+end
+
+convert(::Type{TileList}, xs::AbstractArray) =
+    TileList(xs)
+convert(::Type{TileList}, xs::Tuple) =
+    TileList([x for x in xs])
+convert(::Type{TileList}, x) =
+    TileList([x])
+
+render(t::TileList) =
+    map(render, t.tiles)
+
+render(t::TileList, wrap) =
+    Elem(wrap, map(render, t.tiles))

@@ -212,17 +212,16 @@ end
 
 abstract FlexContainer <: Tile
 
-addclasses(t, cs) =
-    t & [:className => cs * " " * getproperty(t, :className, "")]
 render(f::FlexContainer) =
     addclasses(render(f.tile), classes(f))
 
 
 @api flow => Flow{A <: FixedAxis} <: FlexContainer begin
     typedarg(axis::A)
-    curry(tiles::AbstractArray)
+    curry(tiles::TileList)
     kwarg(reverse::Bool=false)
 end
+Flow{T}(x::T, y, z) = Flow{T}(x, y, z) # Julia issue 10641
 
 flow(axis::FixedAxis, tiles...; reverse=false) =
     flow(axis, [t for t in tiles]; reverse=reverse)
@@ -237,7 +236,7 @@ classes(f::Flow{Vertical}) =
     f.reverse ? "flow flow-reverse vertical" : "flow vertical"
 
 render(f::Flow) =
-    addclasses(render(f.tiles), classes(f))
+    addclasses(render(f.tiles, :div), classes(f))
 
 
 hbox(args...) = flow(horizontal, args...)
@@ -406,10 +405,3 @@ pad(len::Length) =
 
 pad(d::AbstractVector{Side}, len::Length) =
     t -> pad(d, len, t)
-
-@api inline => Inline <: Tile begin
-    arg(tiles::AbstractArray)
-end
-
-render(inl::Inline) =
-    render(inl.tiles, "span")

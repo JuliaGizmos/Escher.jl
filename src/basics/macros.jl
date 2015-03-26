@@ -86,7 +86,8 @@ function states(arg, params)
         return Any[(false, var, striptype(var)), (false, nothing, esc(val))]
     else
         if argtype(arg) === :curry
-            return Any[(false, var, striptype(var)), (true, striptype(var), striptype(var))]
+            return Any[(false, striptype(var), striptype(var)),
+                       (true, striptype(var), striptype(var))]
         else
             return Any[(false, var, striptype(var))]
         end

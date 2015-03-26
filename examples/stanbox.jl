@@ -17,7 +17,7 @@ function inputsui(inputsignal; code="", data="", config="")
                                    button("Run model", name=:run_model))),
     )
 
-    samplesignals([:code, :data, :config], [:run_model, :check_input], form) |> inputsignal
+    samplesignals([:code, :data, :config], [:run_model, :check_input], form) >>> inputsignal
 end
 
 function process(input)

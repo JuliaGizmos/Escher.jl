@@ -42,20 +42,19 @@ plaintext(x) = div(x)
 
 # nowrap
 
-immutable NoTextWrap <: Tile
-    tile::Tile
+@api nowrap => NoTextWrap <: Tile begin
+    arg(tile::Tile)
 end
-
-nowrap(tile) = NoTextWrap(tile)
 
 # Font properties
 
 abstract FontProperty
 
-@api font => WithFont{P <: FontProperty} <: Tile begin
-    typedarg(prop::P)
-    curry(tile::Tile)
+@api font => WithFont{T <: FontProperty} <: Tile begin
+    typedarg(prop::T)
+    curry(tile::TileList)
 end
+WithFont{T}(prop::T, t) = WithFont{T}(prop, t)
 
 font(t::Union(Tile, String), args::FontProperty...) =
     foldr(font, t, props)
@@ -64,12 +63,9 @@ font(props::FontProperty...) =
     t -> foldr(font, t, props)
 
 render(t::WithFont) =
-    addclasses(render(t.tile), classes(t))
+    addclasses(wrapmany(t.tile, :span), classes(t))
 
-abstract NamedFontProperty <: FontProperty
-abstract AbsFontProperty <: FontProperty
-
-type FontFamily <: AbsFontProperty
+type FontFamily <: FontProperty
     family::String
 end
 fontfamily(f) = FontFamily(f)
@@ -78,7 +74,7 @@ render(t::WithFont{FontFamily}) =
     render(t.tile) & [:style => [:fontFamily => t.prop.family]]
 
 
-abstract FontType <: NamedFontProperty
+abstract FontType <: FontProperty
 
 @terms FontType begin
     serif => Serif
@@ -91,7 +87,7 @@ classes(::WithFont{SansSerif}) = "font-sansserif"
 classes(::WithFont{SlabSerif}) = "font-serif font-slab"
 classes(::WithFont{Monospace}) = "font-monospace"
 
-abstract FontStyle <: NamedFontProperty
+abstract FontStyle <: FontProperty
 
 @terms FontStyle begin
     normal => Normal
@@ -102,7 +98,7 @@ classes(::WithFont{Normal}) = "font-normal"
 classes(::WithFont{Slanted}) = "font-slanted"
 classes(::WithFont{Italic}) = "font-italic"
 
-abstract FontCase <: NamedFontProperty
+abstract FontCase <: FontProperty
 
 @terms FontCase begin
     ucase => Uppercase
@@ -111,7 +107,7 @@ end
 classes(::WithFont{Uppercase}) = "font-uppercase"
 classes(::WithFont{Lowercase}) = "font-lowercase"
 
-abstract FontSize <: NamedFontProperty
+abstract FontSize <: FontProperty
 @terms FontSize begin
     xxsmall => XXSmall
     xsmall => XSmall
@@ -130,7 +126,7 @@ classes(::WithFont{XLarge}) = "font-x-large"
 classes(::WithFont{XXLarge}) = "font-xx-large"
 
 
-immutable AbsFontSize <: AbsFontProperty
+immutable AbsFontSize <: FontProperty
     size::Length
 end
 fontsize(size::Length) = AbsFontSize(size)
@@ -139,7 +135,7 @@ render(t::WithFont{AbsFontSize}) =
     render(t.tile) & [:style => [:fontSize => t.prop.size]]
 
 
-abstract FontWeight <: NamedFontProperty
+abstract FontWeight <: FontProperty
 
 @terms FontWeight begin
     bold => Bold
@@ -150,7 +146,7 @@ classes(::WithFont{Bold}) = "font-bold"
 classes(::WithFont{Bolder}) = "font-bolder"
 classes(::WithFont{Lighter}) = "font-lighter"
 
-immutable NumericFontWeight{n} <: AbsFontProperty
+immutable NumericFontWeight{n} <: FontProperty
 end
 
 render{n}(t::WithFont{NumericFontWeight{n}}) =
@@ -190,38 +186,30 @@ render(t::AlignText{CenterText}) =
 
 # Themable fonts
 
-immutable TextClass{tag, class} <: Tile
-    tile::Union(Tile, String)
-end
-render{tag, class}(p::TextClass{tag, class}) =
-    addclasses(Elem(tag, render(p.tile)), string(class))
-
-
-heading(n::Int, txt) = TextClass{symbol("h$n"), symbol("heading-$n")}(txt)
+heading(n::Int, txt) = class("heading-$n", txt, forcewrap=true, wrap=:h1)
 
 h1(txt) = heading(1, txt)
 h2(txt) = heading(2, txt)
 h3(txt) = heading(3, txt)
 h4(txt) = heading(4, txt)
 
-title(n::Int, txt) = TextClass{symbol("h$n"), symbol("title-$n")}(txt)
-paragraph(txt) = TextClass{:p, :paragraph}(txt)
-caption(txt) = TextClass{:p, :caption}(txt)
-emph(txt) = TextClass{:em, :emphasis}(txt)
-codeblock(txt) = TextClass{:pre, :codeblock}(txt)
+paragraph(txt) = class("paragraph", txt, forcewrap=true, wrap=:p)
+blockquote(txt) = class("blockquote", txt, forcewrap=true, wrap=:blockquote)
+caption(txt) = class("caption", txt, wrap=:span)
+emph(txt) = class("emph", txt, forcewrap=true, wrap=:em)
 
 @api code => Code <: Tile begin
-    arg(language::String="julia")
     arg(code::Any)
+    kwarg(language::String="julia")
 end
 
 render(x::Code) = Elem(:code, x.code)
 
-@api blockquote => BlockQuote <: Tile begin
-    arg(tile::Tile)
+@api codeblock => CodeBlock <: Tile begin
+    arg(code::Any)
+    kwarg(language::String="julia")
 end
 
-render(b::BlockQuote) =
-    Elem("blockquote", render(b.tile))
+render(x::CodeBlock) = Elem(:pre, x.code)
 
 # colsize

@@ -1,4 +1,4 @@
-import Base: |>
+import Base: >>>
 
 export hasstate,
        clickable,
@@ -14,7 +14,7 @@ abstract Behaviour <: Tile
 subscribe(t::Behaviour, s::Input; absorb=true) =
     subscribe(t, t.name, s, absorb=absorb)
 
-(|>)(t::Behaviour, s::Input) = subscribe(t, s)
+(>>>)(t::Behaviour, s::Input) = subscribe(t, s)
 
 immutable WithState{attr} <: Behaviour
     name::Symbol

@@ -1,26 +1,25 @@
 import Markdown
 
-# Paragraph
-# Header{level}
-# Code(language, code)
-# BlockQuote
-# List(items, ordered)
-# Italic
-# Bold
-# Image(url, alt)
-# Link(text, url)
-# LaTeX
+convert(::Type{Tile}, md::Markdown.MD) = blocktile(md)
 
-totile(x) = x
-convert(::Type{Tile}, md::Markdown.MD) = totile(md)
-convert(::Type{Union(Tile, String)}, md::Markdown.MD) = totile(md)
+blocktile(md::Markdown.MD) = vbox(map(blocktile, md.content))
+inlinetile(x::String) = x
 
-totile(xs::AbstractArray) = inline(map(totile, xs))
-totile(md::Markdown.MD) = totile(md.content)
-totile{n}(md::Markdown.Header{n}) = heading(n, totile(md.text))
-totile(md::Markdown.Code) = code(md.language, totile(md.code))
-totile(md::Markdown.BlockQuote) = blockquote(totile(md.content))
-totile(md::Markdown.List) = map(totile, md.items)
-totile(md::Markdown.Paragraph) = paragraph(totile(md.content))
-totile(md::Markdown.Italic) = emph(totile(md.text))
-totile(md::Markdown.Bold) = font(bold, totile(md.text))
+blocktile{n}(md::Markdown.Header{n}) = heading(n, map(inlinetile, md.text))
+
+inlinetile(md::Markdown.Code) = code(md.code, language=md.language)
+blocktile(md::Markdown.Code)  = codeblock(md.code, language=md.language)
+
+blocktile(md::Markdown.BlockQuote) = blockquote(map(blocktile, md.content))
+blocktile(md::Markdown.List) = list(map(item -> map(inlinetile, item), md.items), ordered=md.ordered)
+blocktile(md::Markdown.Paragraph) = paragraph(map(inlinetile, md.content))
+
+inlinetile(md::Markdown.Italic) = emph(map(inlinetile, md.text))
+inlinetile(md::Markdown.Bold) = font(bold, map(inlinetile, md.text))
+inlinetile(md::Markdown.Link) = link(md.url, map(inlinetile, md.text))
+
+inlinetile(md::Markdown.Image) = img(md.url, alt=md.alt)
+blocktile(md::Markdown.Image) = img(md.url, alt=md.alt)
+
+inlinetile(md::Markdown.LaTeX) = latex(md.formula, block=false)
+blocktile(md::Markdown.LaTeX) = latex(md.formula, block=true)
