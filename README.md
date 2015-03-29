@@ -26,11 +26,13 @@ npm install -g bower
 bower install
 ```
 
-_On the command line, from within the Canvas.jl directory_
+_On the command line, from within the `Canvas.jl/examples` directory_
 
 ```sh
-./bin/canvasd
+../bin/canvasd
 ```
+
+and navigate to `http://localhost:8000/layout.jl`
 
 This library uses `html import` functionality that is not enabled by default in Firefox. Either use Chrome, or enable the `dom.webcomponents.enabled` setting in Firefox's `about:config`. 
 
