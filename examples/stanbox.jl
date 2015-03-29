@@ -2,7 +2,7 @@ using Markdown
 using Color
 
 codewindow(name, code; w=400px, h=200px, language="julia") =
-    roundcorner(1mm, codemirror(code=code, language=language, name=name) |> size(w, h))
+    roundcorner(1mm, watch(codemirror(code, language=language, name=name)) |> size(w, h))
 
 section(title, content) = vbox(vskip(1em), title, vskip(1em), content)
 
@@ -51,3 +51,4 @@ function main(window)
 
     lift(input -> hbox(flex(), fullui(inputs, outputsui(process(input))), flex()), inputsignal)
 end
+

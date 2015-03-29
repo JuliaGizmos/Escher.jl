@@ -71,7 +71,7 @@ end
 fontfamily(f) = FontFamily(f)
 
 render(t::WithFont{FontFamily}) =
-    render(t.tile) & [:style => [:fontFamily => t.prop.family]]
+    wrapmany(t.tile, :span) & [:style => [:fontFamily => t.prop.family]]
 
 
 abstract FontType <: FontProperty
@@ -132,7 +132,7 @@ end
 fontsize(size::Length) = AbsFontSize(size)
 
 render(t::WithFont{AbsFontSize}) =
-    render(t.tile) & [:style => [:fontSize => t.prop.size]]
+    wrapmany(t.tile, :span) & [:style => [:fontSize => t.prop.size]]
 
 
 abstract FontWeight <: FontProperty
@@ -150,7 +150,7 @@ immutable NumericFontWeight{n} <: FontProperty
 end
 
 render{n}(t::WithFont{NumericFontWeight{n}}) =
-    render(t.tile) & [:style => [:fontWeight => n]]
+    wrapmany(t.tile, :span) & [:style => [:fontWeight => n]]
 
 const allowed_font_weights = 100:100:900
 

@@ -1,23 +1,17 @@
 
 export codemirror
 
-immutable CodeMirror <: Widget
-    code::String
-    language::String
-    theme::String
-    linenumbers::Bool
-    tabsize::Int
+@api codemirror => CodeMirror <: Widget begin
+    arg(code::String="")
+    kwarg(name::Symbol=:_code)
+    kwarg(language::String="julia")
+    kwarg(theme::String="elegant")
+    kwarg(linenumbers::Bool=true)
+    kwarg(tabsize::Int=4)
 end
 
-codemirror(;
-            name=:_code,
-            code="",
-            language="julia",
-            theme="elegant",
-            linenumbers=true,
-            tabsize=4) =
-    CodeMirror(code, language, theme, linenumbers, tabsize) |>
-        c -> hasstate(c, name=name, attr="currentValue", trigger="change")
+watch(c::CodeMirror) =
+    hasstate(c, name=c.name, attr="currentValue", trigger="change")
 
 # Render to virtual DOM
 render(c::CodeMirror) =

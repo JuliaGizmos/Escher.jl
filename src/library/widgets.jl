@@ -20,14 +20,17 @@ abstract Widget <: Tile
 
 @api button => Button <: Widget begin
     arg(label::Tile)
-    kwarg(raised::Bool)
-    kwarg(noink::Bool)
+    kwarg(name::Symbol=:_button)
+    kwarg(raised::Bool=false)
+    kwarg(noink::Bool=false)
 end
 
 render(b::Button) =
     Elem("paper-button", render(b.label),
         raised=boolattr(b.raised, "raised"), noink=boolattr(b.raised, "raised"))
 
+watch(b::Button) =
+    clickable(s, name=b.name)
 
 ## Slider
 
