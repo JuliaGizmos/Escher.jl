@@ -57,3 +57,7 @@ render(c::Class) =
                            wrapmany(c.content, c.wrap),
                c.class)
 
+function teeprint(x)
+    println(x)
+    x
+end

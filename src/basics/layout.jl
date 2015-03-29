@@ -31,6 +31,7 @@ export inset,
        bottom,
        inward,
        outward,
+       floating,
        flow,
        hbox,
        vbox,
@@ -267,13 +268,13 @@ classes(f::Wrap) =
 
 # 3. Flexing and alignment
 
-@api float => FloatingTile{T <: Side{Horizontal}} <: Tile begin
+@api floating => FloatingTile{T <: Side{Horizontal}} <: Tile begin
     typedarg(side::T)
     curry(tile::Tile)
 end
 
 render(f::FloatingTile) =
-    render(tile) & [:style => [:float => lowercase(name(f.side))]]
+    render(f.tile) & [:style => [:float => lowercase(name(f.side))]]
 
 @api grow => Grow <: Tile begin
     arg(factor::Float64)

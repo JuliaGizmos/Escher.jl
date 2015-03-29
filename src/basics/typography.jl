@@ -187,6 +187,7 @@ render(t::AlignText{CenterText}) =
 # Themable fonts
 
 heading(n::Int, txt) = class("heading-$n", txt, forcewrap=true, wrap=:h1)
+title(n::Int, txt) = class("title-$n", txt)
 
 h1(txt) = heading(1, txt)
 h2(txt) = heading(2, txt)

@@ -1,6 +1,7 @@
 import Base: >>>
 
 export hasstate,
+       keypress,
        clickable,
        selectable,
        draggable,
@@ -52,6 +53,18 @@ render(sig::SignalSampler) =
             name=sig.name,
             signals=sig.signals,
             triggers=sig.triggers)
+
+
+@api keypress => Keypress <: Behaviour begin
+    arg(keys::String)
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_keys)
+    kwarg(onpress::String="")
+end
+
+render(k::Keypress) =
+    render(k.tile) << (Elem("keypress-behaviour", keys=k.keys) &
+        (k.onpress != "" ? [:onPress=>k.onpress] : Dict()))
 
 abstract MouseButton
 

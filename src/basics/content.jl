@@ -1,3 +1,5 @@
+export list, image, link
+
 @api list => List <: Tile begin
     curry(tiles::AbstractArray)
     kwarg(ordered::Bool=false)
@@ -7,13 +9,13 @@ render(l::List) =
     Elem(l.ordered ? :ol : :ul,
          map(x -> Elem(:li, render(x)), l.tiles))
 
-@api img => Image <: Tile begin
+@api image => Image <: Tile begin
     arg(url::String)
-    kwarg(alt::String=nothing)
+    kwarg(alt::String="")
 end
 
 render(i::Image) =
-    Elem(:img, src=i.url, alt=i.alt)
+    Elem(:div, Elem(:img, src=i.url, alt=i.alt))
 
 @api link => Hyperlink <: Tile begin
     arg(url::String)
