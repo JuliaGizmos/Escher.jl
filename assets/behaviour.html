@@ -127,7 +127,6 @@ Polymer({
         var self = this
 
         this.elem = this.elem || this.parentNode
-        var elem = this.elem
 
         this.elem.addEventListener("core-select", function (ev) {
             self.value = self.elem.selected || (self.elem.multi ? [] : 0)
@@ -139,3 +138,4 @@ Polymer({
 </script>
 
 </polymer-element>
+

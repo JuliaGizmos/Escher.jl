@@ -1,15 +1,21 @@
 @import url(http://fonts.googleapis.com/css?family=RobotoDraft:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic);
 @import url(http://fonts.googleapis.com/css?family=Quattrocento+Sans:400italic,400,700italic,700);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700italic,700);
 @import url(http://fonts.googleapis.com/css?family=Quattrocento:400,700);
 @import url(http://fonts.googleapis.com/css?family=Inconsolata:400,700);
 @import url(http://fonts.googleapis.com/css?family=Crimson+Text:400,700italic,700,600italic,600,400italic);
 
 body {
-    font-family: 'Quattrocento Sans', RobotoDraft, sans-serif;
+    font-family: 'Open Sans', sans-serif;
     color: rgb(45, 46, 48);
     font-size: 100%;
     line-height: 24px;
+    font-size: 14px;
     text-indent: -0.074em;
+}
+
+p {
+    margin: 0.5em 0;
 }
 
 .font-serif {
@@ -76,10 +82,10 @@ body {
 }
 
 .heading-1 {
-  font-family: 'Quattrocento Sans';
+  font-family: 'Crimson Text';
   color: #454648;
-  font-size: 25px;
-  font-weight: 300;
+  font-size: 28px;
+  font-weight: bold;
   letter-spacing: -.012em;
   line-height: 36px;
   text-indent: -0.078em;
@@ -87,10 +93,10 @@ body {
 }
 
 .heading-2 {
-  font-family: 'Quattrocento Sans';
+  font-family: 'Crimson Text';
   color: #656669;
-  font-size: 18px;
-  font-weight: 300;
+  font-size: 20px;
+  font-weight: bold;
   letter-spacing: -.012em;
   line-height: 36px;
   text-indent: -0.078em;
@@ -98,23 +104,15 @@ body {
 }
 .heading-3 {
   font-family: 'Quattrocento Sans';
-  font-size: 1.25em;
+  color: #949894;
+  font-size: 1em;
   font-weight: 300;
+  text-transform: uppercase;
   letter-spacing: -.012em;
   line-height: 1.4rem;
   text-indent: -0.078em;
   text-rendering: optimizeLegibility;
 }
-.heading-3 {
-  font-family: 'Quattrocento Sans';
-  font-size: 1em;
-  font-weight: 300;
-  letter-spacing: -.012em;
-  line-height: 1.2rem;
-  text-indent: -0.078em;
-  text-rendering: optimizeLegibility;
-}
-
 .caption {
   color: #757575;
   font-size: 12px;
