@@ -30,7 +30,7 @@ render(b::Button) =
         raised=boolattr(b.raised, "raised"), noink=boolattr(b.raised, "raised"))
 
 watch(b::Button) =
-    clickable(s, name=b.name)
+    clickable(b, name=b.name)
 
 ## Slider
 
