@@ -17,19 +17,19 @@ subscribe(t::Behaviour, s::Input; absorb=true) =
 
 (>>>)(t::Behaviour, s::Input) = subscribe(t, s)
 
-immutable WithState{attr} <: Behaviour
-    name::Symbol
-    tile::Tile
-    trigger::String
+@api hasstate => WithState <: Behaviour begin
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_state)
+    kwarg(attr::String="value")
+    kwarg(trigger::String="change")
+    kwarg(source::String="")
 end
 
-render{attr}(t::WithState{attr}) =
-    render(t.tile) << Elem("watch-state",
-        attributes=[:name=>t.name, :attr=>attr, :trigger=>t.trigger])
-
-
-hasstate(tile::Tile; name=:_state, attr="value", trigger="change") =
-    WithState{symbol(attr)}(name, tile, trigger)
+render(t::WithState) =
+    render(t.tile) <<
+        Elem("watch-state", name=t.name,
+             attr=t.attr, trigger=t.trigger,
+             source=t.source)
 
 # Sample a bunch of signals upon changes to another bunch of signals
 # Returns a signal of dict of signal values

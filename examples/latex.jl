@@ -11,7 +11,7 @@ function main(window)
         vbox(h1("LaTeX"),
              hbox("LaTeX support is via ", hskip(1em), latex("\\KaTeX")),
              textinput(t) >>> tex,
-             hbox("Show as a block", hskip(1em), checkbox(value=m) >>> mode),
+             hbox("Show as a block", hskip(1em), checkbox(m) >>> mode),
              vskip(1em),
              latex(t, block=m)) |> pad(1em) |> maxwidth(800px)
     end

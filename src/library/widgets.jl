@@ -62,7 +62,7 @@ render(s::Slider) =
 ## Boolean widgets: Checkbox and Toggle Button
 
 for (typ, fn, elem) in [(:Checkbox, :checkbox, "paper-checkbox"),
-                        (:ToggleButton, :togglebutton, "toggle-button")]
+                        (:ToggleButton, :togglebutton, "paper-toggle-button")]
 
     @eval begin
         @api $fn => $typ <: Widget begin
@@ -88,32 +88,60 @@ end
     arg(value::String="")
     kwarg(name::Symbol=:_textinput)
     kwarg(label::String="")
+    kwarg(format::String="")
+    kwarg(error::String="")
     kwarg(floatinglabel::Bool=true)
+    kwarg(multiline::Bool=false)
+    kwarg(rows::Int=1)
+    kwarg(maxrows::Int=0)
+    kwarg(maxlength::Int=0)
+    kwarg(charcounter::Bool=false)
+    kwarg(pattern::String="")
+    kwarg(autovalidate::Bool=true)
     kwarg(disabled::Bool=false)
 end
 
-watch(t::TextInput, event="keyup") =
-    hasstate(t, name=t.name, attr="value", trigger=event)
+watch(t::TextInput, event="input") =
+    hasstate(t, name=t.name, attr="value", trigger=event, source="target")
 
-render(t::TextInput) =
-    Elem("paper-input",
-        label=t.label,
-        name=t.name,
-        value=t.value,
-        floatingLabel=boolattr(t.floatinglabel, "floatingLabel"),
-        disabled=boolattr(t.disabled, "disabled"))
+function render(t::TextInput)
+    if t.multiline
+        if length(t.pattern) > 0
+            warn_once("Multi-line text input does not support pattern validation")
+        end
+        base = Elem("paper-input-decorator",
+            Elem("paper-autogrow-textarea",
+                Elem("textarea", t.value,
+                    attributes=[:maxlength => t.maxlength],
+                    name=t.name,
+                    id=t.name,
+                )
+            , maxRows=t.maxrows, rows=t.rows))
+    else
+        inner = Elem("input",
+            name=t.name,
+            id=t.name,
+            value=t.value,
+            attributes = [:is => "core-input", :maxlength=>t.maxlength],
+        )
+        if t.pattern != ""
+            inner &= [:attributes => [:pattern => t.pattern]]
+        end
+        base = Elem("paper-input-decorator", inner)
+    end
 
-@api textarea => TextArea <: Widget begin
-    arg(value::String="")
-    kwarg(rows::Int=1)
-    kwarg(maxrows::Int=0)
+    base &= [:label => t.label,
+             :error => t.error,
+             :floatingLabel => t.floatinglabel,
+             :autoValidate => t.autovalidate,
+             :disabled => boolattr(t.disabled, "disabled")]
+
+    if t.charcounter
+        base <<= Elem("polymer-char-counter", target=t.name)
+    end
+
+    base
 end
-
-render(t::TextArea) =
-    Elem("paper-autogrow-textarea", rows=t.rows, maxRows=t.maxrows)
-
-watch(t::TextArea, event="keyup") =
-    hasstate(t, name=t.name, attr="value", trigger=event)
 
 ## Dropdown
 

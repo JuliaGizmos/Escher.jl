@@ -19,8 +19,13 @@ Polymer({
         // initialize
         this.value = elem[self.attr] || elem.getAttribute(self.attr)
 
-        elem.addEventListener(this.trigger, function () {
-            self.value = elem[self.attr] || elem.getAttribute(self.attr)
+        elem.addEventListener(this.trigger, function (ev) {
+            if (self.source == "target") {
+                e = ev.target
+                self.value = e[self.attr] || e.getattribute(self.attr)
+            } else {
+                self.value = elem[self.attr] || elem.getattribute(self.attr)
+            }
             self.update()
         })
         this.super()

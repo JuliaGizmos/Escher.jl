@@ -18,7 +18,7 @@ stoppropagation(tile::Tile, name::Symbol) =
 render(tile::StopPropagation) =
     render(tile.tile) <<
         Elem("stop-propagation",
-            attributes=[:name=>tile.name])
+            name=tile.name)
 
 
 # Send a signal update to the Julia side
@@ -35,7 +35,7 @@ subscribe(t::Tile, name, s::Input; absorb=true) =
 render(sig::SignalTransport) =
     render(sig.tile) <<
         Elem("signal-transport",
-            attributes=[:name=>sig.name, :signalId => setup_transport(sig.signal)])
+            name=sig.name, signalId=setup_transport(sig.signal))
 
 
 setup_transport(x) =
