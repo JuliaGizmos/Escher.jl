@@ -2,6 +2,8 @@ import Base: >>>
 
 export hasstate,
        keypress,
+       Key,
+       nokey,
        clickable,
        selectable,
        draggable,
@@ -63,8 +65,21 @@ render(sig::SignalSampler) =
 end
 
 render(k::Keypress) =
-    render(k.tile) << (Elem("keypress-behaviour", keys=k.keys) &
-        (k.onpress != "" ? [:onPress=>k.onpress] : Dict()))
+    render(k.tile) << (Elem("keypress-behaviour", keys=k.keys, name=k.name) &
+        (k.onpress != "" ? [:onpress=>k.onpress] : Dict()))
+
+immutable Key
+    key::String
+    alt::Bool
+    ctrl::Bool
+    meta::Bool
+    shift::Bool
+end
+
+const nokey = Key("", false, false, false, false)
+
+decodeJSON(sig::Input{Key}, d::Dict) =
+    Key(d["key"], d["alt"], d["ctrl"], d["meta"], d["shift"])
 
 abstract MouseButton
 

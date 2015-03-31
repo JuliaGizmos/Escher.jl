@@ -1,3 +1,5 @@
+<link rel="import" href="bower_components/core-a11y-keys/core-a11y-keys.html">
+
 <polymer-element
     name="watch-state"
     attributes="attr trigger"
@@ -144,3 +146,30 @@ Polymer({
 
 </polymer-element>
 
+
+<polymer-element
+    name="keypress-behaviour"
+    attributes="name keys onpress"
+    extends="reactive-signal" >
+
+<template><core-a11y-keys id="keys" keys="{{keys}}"></core-a11y-keys></template>
+
+<script>
+Polymer({
+    domReady: function () {
+        var self = this
+
+        this.elem = this.elem || this.parentNode
+
+        this.$.keys.target = this.elem
+        this.$.keys.addEventListener("keys-pressed", function (ev) {
+            self.value = ev.detail
+            self.update()
+        })
+
+        this.super()
+    }
+})
+</script>
+
+</polymer-element>
