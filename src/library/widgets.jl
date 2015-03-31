@@ -22,12 +22,14 @@ abstract Widget <: Tile
     arg(label::Tile)
     kwarg(name::Symbol=:_button)
     kwarg(raised::Bool=false)
+    kwarg(disabled::Bool=false)
     kwarg(noink::Bool=false)
 end
 
 render(b::Button) =
     Elem("paper-button", render(b.label),
-        raised=boolattr(b.raised, "raised"), noink=boolattr(b.raised, "raised"))
+        raised=boolattr(b.raised, "raised"), noink=boolattr(b.noink, "noink"), 
+        disabled=boolattr(b.disabled, "disabled"))
 
 watch(b::Button) =
     clickable(b, name=b.name)
