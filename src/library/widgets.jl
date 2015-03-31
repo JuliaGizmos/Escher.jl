@@ -156,8 +156,9 @@ render(t::SelectionItem) =
 
 @api dropdown => Dropdown <: Widget begin
     arg(items::AbstractArray)
+    kwarg(name::Symbol=:_dropdown)
     kwarg(value::Int=0)
-    kwarg(label::String)
+    kwarg(label::String="Choose")
     kwarg(disabled::Bool=false)
 end
 
@@ -170,7 +171,7 @@ render(d::Dropdown) =
         value=d.value,
         name=d.name,
         label=d.label,
-        floatingLabel=boolattr(d.floatinglabel, "floatingLabel"),
+        value=d.value,
         disabled=boolattr(d.disabled, "disabled"))
 
 watch(d::Dropdown) = hasstate(d, name=d.name)
@@ -186,7 +187,7 @@ watch(d::Dropdown) = hasstate(d, name=d.name)
 end
 
 render(r::RadioButton) =
-    Elem("paper-radio", label=r.label,
+    Elem("paper-radio-button", label=r.label,
          name=r.name, toggles=r.toggles, disabled=r.disabled)
 
 @api radiogroup => RadioGroup <: Widget begin

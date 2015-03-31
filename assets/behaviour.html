@@ -22,9 +22,9 @@ Polymer({
         elem.addEventListener(this.trigger, function (ev) {
             if (self.source == "target") {
                 e = ev.target
-                self.value = e[self.attr] || e.getattribute(self.attr)
+                self.value = e[self.attr] || e.getAttribute(self.attr)
             } else {
-                self.value = elem[self.attr] || elem.getattribute(self.attr)
+                self.value = elem[self.attr] || elem.getAttribute(self.attr)
             }
             self.update()
         })
