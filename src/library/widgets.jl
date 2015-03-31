@@ -92,7 +92,7 @@ end
     kwarg(error::String="")
     kwarg(floatinglabel::Bool=true)
     kwarg(multiline::Bool=false)
-    kwarg(rows::Int=1)
+    kwarg(rows::Int=0)
     kwarg(maxrows::Int=0)
     kwarg(maxlength::Int=0)
     kwarg(charcounter::Bool=false)
@@ -109,14 +109,19 @@ function render(t::TextInput)
         if length(t.pattern) > 0
             warn_once("Multi-line text input does not support pattern validation")
         end
+        text = Elem("textarea", t.value,
+            name=t.name,
+            id=t.name,
+        )
+
+        if t.maxlength > 0
+            text &= [:attributes => [:maxlength => t.maxlength]]
+        end
+        if t.rows > 0
+            text &= [:attributes => [:rows => t.rows]]
+        end
         base = Elem("paper-input-decorator",
-            Elem("paper-autogrow-textarea",
-                Elem("textarea", t.value,
-                    attributes=[:maxlength => t.maxlength],
-                    name=t.name,
-                    id=t.name,
-                )
-            , maxRows=t.maxrows, rows=t.rows))
+            Elem("paper-autogrow-textarea", text, maxRows=t.maxrows))
     else
         inner = Elem("input",
             name=t.name,
