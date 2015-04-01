@@ -6,6 +6,8 @@ Composable web UIs in Julia
 
 This package is not ready for mainstream use. However, if you want to help develop this package, use the following instructions to get started: 
 
+Currently Canvas works with Julia v0.3.
+
 _In a Julia REPL_
 
 ```julia
