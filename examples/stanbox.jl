@@ -13,8 +13,8 @@ function inputsui(inputsignal; code="", data="", config="")
         section(h2("Stan Code"), codewindow(:code, code)),
         section(h2("Data"), codewindow(:data, data)),
         section(h2("Config Input"), codewindow(:config, data)),
-        section(empty, hbox(button("Check inputs", name=:check_input),
-                                   button("Run model", name=:run_model))),
+        section(empty, hbox(watch(button("Check inputs", name=:check_input)),
+                                   watch(button("Run model", name=:run_model)))),
     )
 
     samplesignals([:code, :data, :config], [:run_model, :check_input], form) >>> inputsignal
