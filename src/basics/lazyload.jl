@@ -62,7 +62,7 @@ end
 @require Gadfly begin
     import Gadfly: Compose
 
-    function convert(::Type{Tile}, p::Gadfly.Plot)
+    function convert(::Type{Tile}, p::Union(Gadfly.Plot, Compose.Context))
         backend = Compose.Patchable(
                      Compose.default_graphic_width,
                      Compose.default_graphic_height)
@@ -72,4 +72,10 @@ end
 
 @require DataFrames begin
     include(Pkg.dir("Canvas", "src", "library", "table.jl"))
+
+    import DataFrames: AbstractDataFrame
+
+    function convert(::Type{Tile}, df::AbstractDataFrame)
+        table(df)
+    end
 end
