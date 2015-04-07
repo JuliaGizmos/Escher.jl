@@ -28,8 +28,9 @@ end
 
 render(b::Button) =
     Elem("paper-button", render(b.label),
-        raised=boolattr(b.raised, "raised"), noink=boolattr(b.noink, "noink"), 
-        disabled=boolattr(b.disabled, "disabled"))
+        attributes = [:raised => boolattr(b.raised, "raised"),
+                      :noink => boolattr(b.noink, "noink"),
+                      :disabled => boolattr(b.disabled, "disabled")])
 
 watch(b::Button) =
     clickable(b, name=b.name)
@@ -111,43 +112,46 @@ function render(t::TextInput)
         if length(t.pattern) > 0
             warn_once("Multi-line text input does not support pattern validation")
         end
-        text = Elem("textarea", t.value,
+        base = Elem("textarea", t.value,
             name=t.name,
             id=t.name,
         )
 
         if t.maxlength > 0
-            text &= [:attributes => [:maxlength => t.maxlength]]
+            base &= [:attributes => [:maxlength => t.maxlength]]
         end
         if t.rows > 0
-            text &= [:attributes => [:rows => t.rows]]
+            base &= [:attributes => [:rows => t.rows]]
         end
-        base = Elem("paper-input-decorator",
-            Elem("paper-autogrow-textarea", text, maxRows=t.maxrows))
+        elem = Elem("paper-input-decorator",
+            Elem("paper-autogrow-textarea", base, maxRows=t.maxrows))
     else
-        inner = Elem("input",
+        base = Elem("input",
             name=t.name,
             id=t.name,
             value=t.value,
-            attributes = [:is => "core-input", :maxlength=>t.maxlength],
+            attributes=[:is => "core-input"]
         )
         if t.pattern != ""
-            inner &= [:attributes => [:pattern => t.pattern]]
+            base &= [:attributes => [:pattern => t.pattern]]
         end
-        base = Elem("paper-input-decorator", inner)
+        if t.maxlength > 0
+            base &= [:attributes => [:maxlength => t.maxlength]]
+        end
+        elem = Elem("paper-input-decorator", base)
     end
 
-    base &= [:label => t.label,
+    elem &= [:label => t.label,
              :error => t.error,
              :floatingLabel => t.floatinglabel,
              :autoValidate => t.autovalidate,
              :disabled => boolattr(t.disabled, "disabled")]
 
     if t.charcounter
-        base <<= Elem("polymer-char-counter", target=t.name)
+        elem <<= Elem("polymer-char-counter", target=t.name)
     end
 
-    base
+    elem
 end
 
 ## Dropdown

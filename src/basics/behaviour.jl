@@ -65,8 +65,9 @@ render(sig::SignalSampler) =
 end
 
 render(k::Keypress) =
-    render(k.tile) << (Elem("keypress-behaviour", keys=k.keys, name=k.name) &
-        (k.onpress != "" ? [:onpress=>k.onpress] : Dict()))
+    (render(k.tile) & [:attributes => [:tabindex => 1]]) <<
+        (Elem("keypress-behaviour", keys=k.keys, name=k.name) &
+            (k.onpress != "" ? [:onpress=>k.onpress] : Dict()))
 
 immutable Key
     key::String
