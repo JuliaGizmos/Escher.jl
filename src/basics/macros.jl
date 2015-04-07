@@ -36,11 +36,21 @@ macro terms(parent, terms)
             for arg in args])...)
 end
 
+@doc """
+separate out arguments and keyword arguments in a vector of field definitions
+""" ->
 function argskwargs(exps)
     kwargs = filter(exp -> exp.args[1] in [:kwarg, :typedkwarg], exps)
     args = filter(exp -> !(exp.args[1] in [:kwarg, :typedkwarg]), exps)
     args, kwargs
 end
+
+@doc """
+Convert a field definition into a field definition inside a type declaration
+    e.g. arg(x::Number=42)
+will just become
+    x::Number
+""" ->
 function typebody(exp::Expr)
     if exp.head == :call
         if exp.args[2].head == :(::)
@@ -52,21 +62,51 @@ function typebody(exp::Expr)
     error("Invalid API definition")
 end
 
+@doc """
+Convert a vector of field definition into a vector of field definition inside a type declaration
+    e.g. [:(arg(x::Number=42)), :(typedarg(y::String="a")), :(kwarg(z::Complex=1+im))]
+will just become
+    [:(x::Number), :(y::String), :(z::Complex)]
+
+""" ->
 function typebody(args::AbstractArray)
     map(typebody, args)
 end
 
+@doc """
+does this field definition contain a default value?
+""" ->
 hasdefault(exp) = exp.args[2].head == :kw
+
+@doc """
+What kind of a field is it?
+
+returns on of :arg, :typedarg, :kwarg, :typedkwarg
+""" ->
 argtype(exp) = exp.args[1]
+
+@doc """
+given a field definition, returns the name[::Type] to be used in method arguments
+""" ->
 function getvar(exp)
     decl = exp.args[2]
     hasdefault(exp) ?
         (argtype(exp) === :typedarg ? decl.args[1] : decl.args[1].args[1]) :
         (argtype(exp) === :typedarg ? decl : decl.args[1])
 end
+
+@doc """
+If given a (::), remove the type annotation and just return the name of the variable
+""" ->
 striptype(exp::Symbol) = exp
 striptype(exp) = exp.head == :(::) ? exp.args[1] : exp
 
+@doc """
+Given an expression possibly of the form x::T
+and a dictionary of type parameters e.g. Dict(:T => :Number)
+
+returns an expression of the form x::Number
+""" ->
 replaceparam(x::Symbol, params) = x
 function replaceparam(x, params)
     if x.head === :(::)
@@ -77,6 +117,15 @@ function replaceparam(x, params)
     end
 end
 
+@doc """
+Given an argument definition and a dictionary of type parameters,
+returns different states the arguments can be in in a method definition
+
+the returned value is a Vector of 3-tuples with the following elements
+1. Bool: Should the argument be curried?
+2. Variable name (or a variable name with a type in case of typedarg)
+3. value to use while constructing the underlying type.
+""" ->
 function states(arg, params)
     var = replaceparam(getvar(arg), params)
 
@@ -94,11 +143,18 @@ function states(arg, params)
     end
 end
 
+@doc """
+Internal representation of the method definition sans kwargs
+""" ->
 immutable ApiMethod
     args
     lambda_args
     constructor_args
 end
+
+@doc """
+used by makeapimethods to prepend an argument to a method object
+""" ->
 
 function prependarg(state, method)
     curried, var, val = state
@@ -122,6 +178,13 @@ function teeprint(x, fn=println)
     x
 end
 
+@doc """
+Given a list of field definitions (see @api) and a dictionary of type parameters
+(e.g. T <: Number would have an entry :T => :Number in the dict),
+returns a list of ApiMethod objects representing the various methods emerging from
+the API definition. Keyword arguments are to be added in when actually creating the
+method definitions.
+""" ->
 function makeapimethods(arglist, params)
     if length(arglist) == 0
         return Any[ApiMethod(Any[], Any[], Any[])]
@@ -133,6 +196,22 @@ function makeapimethods(arglist, params)
     end
 end
 
+@doc """
+Takes a field defintioin of the form
+
+    typedkwarg(x::T=default)
+or
+    kwarg(x::T=default)
+
+And returns a kw expression of the form
+
+    x::T=default
+or
+    x=default
+
+respectively. The returned expression is of the form Expr(:kw, key, value)
+
+""" ->
 function kwize(argdef)
     @assert argdef.args[1] in [:typedkwarg, :kwarg]
 
@@ -172,6 +251,46 @@ paramdict(typ) =
     [param.args[1] => param.args[2] for param in typ.args[2:end]] :
         (typ.head === :(<:) ?
             paramdict(typ.args[1]) : Dict())
+
+@doc """
+From a field definition, generate metadata for documenting the field
+""" ->
+function argdoc(arg, params, iskwarg=false)
+    name, typ = typebody(arg).args
+
+    dict = Dict()
+    dict[:name] = name
+    dict[:type] = get(params, typ, typ)
+    dict[:coerced] = true
+    dict[:curried] = false
+    dict[:kwarg] = iskwarg
+
+    if hasdefault(arg)
+        dict[:default] = arg.args[2].args[2]
+    else
+        if argtype(arg) === :curry
+            dict[:curried] = true
+        elseif argtype(arg) in [:typedarg, :typedkwarg]
+            dict[:coerced] = false
+        end
+    end
+    dict
+end
+
+@doc """
+Given field definitions (both args and kwargs),
+return the documentation object for an API
+""" ->
+argdocs(args, kwargs, params) =
+    vcat(map(arg -> argdoc(arg, params), args),
+         map(kwarg -> argdoc(kwarg, params, true), kwargs))
+
+@doc """
+Take doc(...) field defs, concatenate their contents
+""" ->
+getdocstring(docs) =
+    join(map(d -> join(d.args[2:end], " "), docs), " ")
+
 @doc """
 `@api` is used to create new tile types and associated constructors
 
@@ -196,7 +315,9 @@ macro api(names, body)
     fn, typ = names.args
     fields = body.args
 
-    argdefs = filter(f -> f.head != :line, fields)
+    nolines = filter(f -> f.head != :line, fields)
+    argdefs = filter(f -> f.args[1] != :doc, nolines)
+    docs = filter(f -> f.args[1] == :doc, nolines)
 
     typedef = Expr(:type, false, esc(typexpr(typ)),
         Expr(:block, typebody(argdefs)...))
@@ -204,10 +325,18 @@ macro api(names, body)
     dict = paramdict(typexpr(typ))
 
     args, kwargs = argskwargs(argdefs)
+
     methoddefs = makeapimethods(args, dict)
     kws = map(kwize, kwargs)
     kwnames = map(x -> striptype(x.args[1]), kws)
     ms = map(m -> methodexpr(fn, typename(typ), kws, kwnames, m), methoddefs)
 
-    Expr(:block, typedef, ms...)
+    doc = meta(
+        getdocstring(docs),
+        name=fn,
+        typ=typ,
+        args=argdocs(args, kwargs, dict)
+    )
+
+    Expr(:block, typedef, :(@doc* $doc -> $(ms[1])), ms[2:end]...)
 end
