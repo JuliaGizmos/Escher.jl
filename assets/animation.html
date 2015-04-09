@@ -12,14 +12,17 @@
 <link rel="import" href="bower_components/core-animated-pages/transitions/tile-cascade.html">
 
 <style>
-  slide-show {
+  slide-show, core-animated-pages {
     opacity: 1;
     transition: opacity 300ms;
+    overflow: hidden;
+  }
+  slide-show:unresolved, core-animated-pages:unresolved {
+    opacity: 0;
+  }
+  slide-show {
     width: 100vw;
     height: 100vh;
-  }
-  slide-show:unresolved {
-    opacity: 0;
   }
 </style>
 
