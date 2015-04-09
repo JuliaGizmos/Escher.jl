@@ -1,0 +1,69 @@
+<link rel="import" href="bower_components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/cascade-transition.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/core-transition-pages.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/cross-fade.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/hero-transition.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/list-cascade.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/scale-up.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/slide-down.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/slide-from-bottom.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/slide-from-right.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/slide-up.html">
+<link rel="import" href="bower_components/core-animated-pages/transitions/tile-cascade.html">
+
+<style>
+  slide-show {
+    opacity: 1;
+    transition: opacity 300ms;
+    width: 100vw;
+    height: 100vh;
+  }
+  slide-show:unresolved {
+    opacity: 0;
+  }
+</style>
+
+<polymer-element
+    name="slide-show"
+    extends="core-animated-pages"
+    transitions="cross-fade-all slide-from-right scale-up"
+    tabindex="0"
+    >
+
+<template>
+<style>
+    :host {
+        position: relative;
+        outline: none;
+    }
+</style>
+    <shadow></shadow>
+    <!-- TODO: touch guestures, esc for overview -->
+    <core-a11y-keys target="{{}}" keys="up down left right" on-keys-pressed="{{arrowHandler}}"></core-a11y-keys>
+</template>
+
+<script>
+Polymer({
+    domReady: function () {
+        var children = [].slice.call(this.children),
+            self = this
+        this.super()
+    },
+    arrowHandler: function (ev) {
+        // TODO: fragments and custom transition
+        switch(ev.detail.key) {
+        case "left":
+        case "up":
+            this.selectPrevious()
+            break;
+        case "right":
+        case "down":
+            this.selectNext()
+            break;
+        }
+    }
+})
+</script>
+
+</polymer-element>
+

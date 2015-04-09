@@ -30,11 +30,12 @@ include("basics/embellishment.jl")
 include("basics/behaviour.jl")
 include("basics/window.jl")
 
-include("library/widgets.jl")
-include("library/codemirror.jl")
 include("library/markdown.jl")
 include("library/latex.jl")
+include("library/widgets.jl")
 include("library/layout2.jl")
+include("library/slideshow.jl")
+include("library/codemirror.jl")
 
 end
 
