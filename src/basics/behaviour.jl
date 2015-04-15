@@ -14,10 +14,21 @@ export hasstate,
 
 abstract Behaviour <: Tile
 
+identity(x) = x
 subscribe(t::Behaviour, s::Input; absorb=true) =
+    subscribe(t, t.name, (identity, s), absorb=absorb)
+subscribe(t::Behaviour, s::(Function, Input); absorb=true) =
     subscribe(t, t.name, s, absorb=absorb)
 
-(>>>)(t::Behaviour, s::Input) = subscribe(t, s)
+(>>>)(t::Behaviour, s::Input) = subscribe(t, (identity, s))
+
+@api applyfunction => ApplyFunction <: Behaviour begin
+    arg(f::Function)
+    arg(tile::Behaviour)
+end
+
+(>>>)(t::Behaviour, f::Function) = applyfunction(f, t)
+(>>>)(t::ApplyFunction, s::Input) = subscribe(t, (t.f, s))
 
 @api hasstate => WithState <: Behaviour begin
     curry(tile::Tile)

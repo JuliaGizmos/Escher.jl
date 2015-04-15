@@ -25,10 +25,10 @@ render(tile::StopPropagation) =
 immutable SignalTransport <: Tile
     tile::Tile
     name::Symbol
-    signal::Input
+    signal::(Function, Input)
 end
 
-subscribe(t::Tile, name, s::Input; absorb=true) =
+subscribe(t::Tile, name, s; absorb=true) =
     SignalTransport(t, name, s) |>
        (x -> absorb ? stoppropagation(x, name) : x)
 
@@ -60,7 +60,7 @@ import Base.Random: UUID, uuid4
 const signal_to_id = Dict()
 const id_to_signal = Dict()
 
-function makeid(sig::Signal)
+function makeid(sig)
     if haskey(signal_to_id, sig)
         # todo ensure connection
         return signal_to_id[sig]

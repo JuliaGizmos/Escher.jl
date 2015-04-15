@@ -68,15 +68,15 @@ swap!(tilestream, next) =
     push!(tilestream, Input(next))
 
 const signals = Dict()
-function Canvas.setup_transport(x::Input)
+function Canvas.setup_transport(x)
     Canvas.makeid(x)
 end
 
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
         id = msg["data"]["signalId"]
-        sig = Canvas.fromid(id)
-        push!(sig, Canvas.decodeJSON(sig, msg["data"]["value"]))
+        f, sig = Canvas.fromid(id)
+        push!(sig, f(Canvas.decodeJSON(sig, msg["data"]["value"])))
     end),
     ("window-size", (window, msg) -> begin
         dim = (msg["data"][1] * px, msg["data"][1] * px)
