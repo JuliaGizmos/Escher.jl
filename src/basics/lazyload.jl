@@ -62,7 +62,17 @@ end
 @require Gadfly begin
     import Gadfly: Compose
 
-    function convert(::Type{Tile}, p::Union(Gadfly.Plot, Compose.Context))
+    function convert(::Type{Tile}, p::Gadfly.Plot)
+        backend = Compose.Patchable(
+                     Compose.default_graphic_width,
+                     Compose.default_graphic_height)
+        convert(Tile, Compose.draw(backend, p))
+    end
+end
+
+@require Compose begin
+
+    function convert(::Type{Tile}, p::Compose.Context)
         backend = Compose.Patchable(
                      Compose.default_graphic_width,
                      Compose.default_graphic_height)

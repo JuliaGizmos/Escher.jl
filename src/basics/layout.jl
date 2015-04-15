@@ -57,15 +57,16 @@ export inset,
 # 0. Width and height
 
 @api width => Width <: Tile begin
-    typedarg(prefix::String="")
-    arg(w::Length)
+    doc("Set the width of a tile")
+    typedarg(prefix::String="", hidedoc=true)
+    arg(w::Length, doc="The width")
     curry(tile::Tile)
 end
-
 render(t::Width) =
     render(t.tile) & [:style => [(t.prefix == "" ? "width" : t.prefix * "Width")=> t.w]]
 
 @api height => Height <: Tile begin
+    doc("Set the height of a tile")
     typedarg(prefix::String="")
     arg(h::Length)
     curry(tile::Tile)

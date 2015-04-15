@@ -2,6 +2,9 @@ import Markdown
 
 convert(::Type{Tile}, md::Markdown.MD) = blocktile(md)
 
+blocktile(x::Tile) = x
+inlinetile(x::Tile) = x
+
 blocktile(md::Markdown.MD) = vbox(map(blocktile, md.content))
 inlinetile(x::String) = x
 

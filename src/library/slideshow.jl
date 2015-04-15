@@ -1,9 +1,9 @@
 export slideshow
 
-@api slideshow => SlideShow <: Tile begin
+@api slideshow => SlideShow <: Selection begin
     curry(tiles::TileList)
     kwarg(selected::Int=0)
-    kwarg(transitions::AbstractArray=["slide-from-right", "cross-fade-all"])
+    kwarg(transitions::String="slide-from-right cross-fade-all")
 end
 
 render_slide(x) =
@@ -11,4 +11,5 @@ render_slide(x) =
         (t -> render(t) & [:attributes => [:fit => :fit]])
 
 render(x::SlideShow) =
-    Elem("slide-show", map(render_slide, x.tiles.tiles))
+    Elem("slide-show", map(render_slide, x.tiles.tiles),
+        transitions=x.transitions)
