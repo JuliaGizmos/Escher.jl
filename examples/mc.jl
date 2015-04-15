@@ -8,7 +8,7 @@ btn = Input(false)
 it = Input([0])
 val = Input([1.0])
 running = Input(false)
-result = lift(st -> run_simulate() , btn; init=false)
+result = lift(st -> run_simulate() , Any, btn; init=nothing)
 
 f(u) = exp(-u^2/2)/√(2pi)
 
@@ -16,12 +16,11 @@ function main(window)
     push!(window.assets, "latex")
     push!(window.assets, "widgets")
 
-    
-
     lift( it, val, running) do  i, v, r
         vbox(h1("Interactive Simulations"),
             hbox(vbox(
-                     md"""We want to estimate the following integral using a *Monte Carlo* Simulation""",
+                     md"""We want to estimate the following integral using a
+                     *Monte Carlo* Simulation""",
                      hbox(latex("\\int_{-5}^{5} \\frac{exp(-u^2/2)}{\\sqrt{2pi}}du" , block=true) ),
                      ),
                 plot(f, -5, +5, Theme(line_width=2Gadfly.mm, major_label_font_size=40Gadfly.px, minor_label_font_size=25Gadfly.px)) |> size(60em, 60em),

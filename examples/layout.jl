@@ -28,6 +28,7 @@ directions = [
     (horizontal, false)
 ]
 
-main(win) = inset(middle,
+main(win) = inset(Canvas.middle,
              size(100vw, 100vh, empty),
-             stack(80vmin, 80vmin, directions, 14))
+             stack(80vmin, 80vmin, directions, 24) |> paper(2))
+

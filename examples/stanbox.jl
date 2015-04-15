@@ -1,7 +1,7 @@
 using Markdown
 using Color
 
-codewindow(name, code; w=400px, h=200px, language="julia") =
+codewindow(name, code; w=40em, h=20em, language="julia") =
     roundcorner(1mm, watch(codemirror(code, language=language, name=name)) |> size(w, h))
 
 section(title, content) = vbox(vskip(1em), title, vskip(1em), content)
@@ -38,15 +38,16 @@ inputsignal = Input(Dict())
 inputs = inputsui(inputsignal)
 
 fullui(inputs, output) =
-    vbox(hbox(title(3, "Stan playground") |> font(fontweight(600)), hskip(1em), caption(md" beta")),
+    vbox(hbox(title(3, "Stan playground"), hskip(1em), caption(md" beta")),
         vskip(2em),
         md"""Hello from **Markdown**. This is an interface to the `Stan` package.""",
 
-        hbox(flex(inputs), hskip(1em), flex(output))) |> pad(2em) |> width(960px)
+        hbox(flex(inputs), hskip(1em), flex(output))) |> pad(2em) |> width(96em)
 
 
 function main(window)
     push!(window.assets, "widgets")
+    push!(window.assets, "icons")
     push!(window.assets, "codemirror")
 
     lift(input -> hbox(flex(), fullui(inputs, outputsui(process(input))), flex()), inputsignal)
