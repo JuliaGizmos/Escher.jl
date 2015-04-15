@@ -1,7 +1,7 @@
 <script src="bower_components/interact/interact.js"></script>
 
 <polymer-element
-    name="interact-draggable"
+    name="drag-able"
     attributes="max maxPerElement snap restrict inertia autoScroll axis dx dy"
     extends="reactive-signal" >
 <template></template>
@@ -52,6 +52,43 @@ Polymer({
     }
 });
 
+</script>
+
+</polymer-element>
+
+<polymer-element
+    name="resize-able"
+    attributes="name max snap restrict inertia autoscroll square startaxis"
+    extends="reactive-signal" >
+
+<template><content></content></template>
+
+<script>
+Polymer({
+    domReady: function () {
+        var self = this
+
+        var elem = this.elem = (this.elem || this.parentNode),
+            x=0, y=0
+        interact(this.elem).resizable({
+            edges: {
+                left: true,
+                right: true,
+                bottom: true,
+                top: true
+            }
+        }).on("resizemove", function (ev) {
+            elem.style.width  = ev.rect.width + 'px';
+            elem.style.height = ev.rect.height + 'px';
+
+            x += ev.deltaRect.left;
+            y += ev.deltaRect.top;
+
+            elem.style.webkitTransform = elem.style.transform =
+                'translate(' + x + 'px,' + y + 'px)';
+        })
+    }
+})
 </script>
 
 </polymer-element>
