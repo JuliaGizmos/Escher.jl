@@ -404,5 +404,8 @@ pad(sides::AbstractVector, len::Length, tile) =
 pad(len::Length) =
     t -> pad(len, t)
 
-pad(d::AbstractVector{Side}, len::Length) =
+pad(d::AbstractVector, len::Length) =
     t -> pad(d, len, t)
+
+pad(side::Side, len::Length) =
+    pad([side], len)

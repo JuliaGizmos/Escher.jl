@@ -19,8 +19,8 @@ render(i::Image) =
 
 @api link => Hyperlink <: Tile begin
     arg(url::String)
-    curry(tile::Tile)
+    curry(tiles::TileList)
 end
 
 render(a::Hyperlink) =
-    Elem(:a, render(tile), href=a.url)
+    Elem(:a, render(a.tiles), href=a.url)

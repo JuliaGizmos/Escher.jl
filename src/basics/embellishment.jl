@@ -7,6 +7,7 @@ export noborder,
        strokewidth,
        border,
        bordercolor,
+       hline, vline,
        roundcorner,
        shadow,
        fillcolor
@@ -74,6 +75,14 @@ border(sides::AbstractArray, ps::BorderProperty...) =
     t -> foldl((acc, p) -> border(sides, p, acc), t, ps)
 border(ps::BorderProperty...) =
     border(Side[], ps...)
+
+line(args...) = border([bottom], color("lightgray"), empty) |>
+    x -> border([bottom], solid, x) |>
+    x -> border([bottom], 1px, x) |>
+    border([bottom], args...) |>
+    flex
+hline(args...) = line(args...) |> height(0px)
+vline(args...) = line(args...) |> width(0px)
 
 ## RoundRects
 
