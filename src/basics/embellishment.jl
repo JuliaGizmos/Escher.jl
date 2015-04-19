@@ -16,9 +16,25 @@ render_color(c) = string("#" * hex(c))
 
 ## Borders
 
-abstract BorderProperty
+const allsides = Side[]
 
-abstract StrokeStyle <: BorderProperty
+@api bordercolor => BorderColor <: Tile begin
+    typedarg(sides::AbstractArray=allsides)
+    arg(color::ColorValue)
+    curry(tile::Tile)
+end
+render(t::BorderColor) =
+    render(t.tile) & [:style => mapparts(allsides, t.sides, "border", "Color", render_color(t.color))]
+
+@api borderwidth => BorderWidth <: Tile begin
+    typedarg(sides::AbstractArray=allsides)
+    arg(width::Length)
+    curry(tile::Tile)
+end
+render(t::BorderWidth) =
+    render(t.tile) & [:style => mapparts(allsides, t.sides, "border", "Width", t.width)]
+
+abstract StrokeStyle
 
 @terms StrokeStyle begin
     noborder => NoStroke
@@ -27,76 +43,49 @@ abstract StrokeStyle <: BorderProperty
     solid => Solid
 end
 
-propname(::StrokeStyle) = "Style"
-
 name(::NoStroke) = "none"
 name(::Solid) = "solid"
 name(::Dotted) = "dotted"
 name(::Dashed) = "dashed"
 
-
-@api strokewidth => StrokeWidth <: BorderProperty begin
-    arg(thickness::Length)
-end
-
-propname(::StrokeWidth) = "Width"
-name(p::StrokeWidth) = p.thickness
-
-
-@api bordercolor => BorderColor <: BorderProperty begin
-    arg(color::ColorValue)
-end
-
-propname(::BorderColor) = "Color"
-name(p::BorderColor) = render_color(p.color)
-
-
-@api border => WithBorder{P <: BorderProperty} <: Tile begin
-    typedarg(sides::AbstractArray=Side[])
-    typedarg(prop::P)
+@api borderstyle => BorderStyle begin
+    typedarg(sides::AbstractArray=allsides)
+    arg(style::StrokeStyle)
     curry(tile::Tile)
 end
+render(t::BorderStyle) =
+    render(t.tile) & [:style => mapparts(allsides, t.sides, "border", "Style", name(t.style))]
 
-render(t::WithBorder) =
-    render(t.tile) &
-        (isempty(t.sides) ? # Apply padding to all sides if none specified
-                [:style => ["border" * propname(t.prop) => name(t.prop)]] :
-                [:style => ["border" * name(s) * propname(t.prop) => name(t.prop) for s=t.sides]])
+border(sides::AbstractArray, style::StrokeStyle, width::Length, color::ColorValue, tile) =
+    borderstyle(sides, style, borderwidth(sides, width, bordercolor(sides, color, tile)))
 
+border(sides::AbstractArray, style, width, color) =
+    tile -> border(sides, style, width, color, tile)
 
-# Autopromote some types to border property
-border(sides::AbstractArray, p::Length, x) =
-    WithBorder(sides, strokewidth(p), x)
-border(sides::AbstractArray, p::ColorValue, x) =
-    WithBorder(sides, bordercolor(p), x)
-border(p::Union(ColorValue, Length), x) =
-    border(Side[], p, x)
-border(sides::AbstractArray, ps::BorderProperty...) =
-    t -> foldl((acc, p) -> border(sides, p, acc), t, ps)
-border(ps::BorderProperty...) =
-    border(Side[], ps...)
+border(style::StrokeStyle, width::Length, color::ColorValue, tile) =
+    borderstyle(allsides, style, borderwidth(allsides, width, bordercolor(allsides, color, tile)))
 
-line(args...) = border([bottom], color("lightgray"), empty) |>
-    x -> border([bottom], solid, x) |>
-    x -> border([bottom], 1px, x) |>
-    border([bottom], args...) |>
-    flex
-hline(args...) = line(args...) |> height(0px)
-vline(args...) = line(args...) |> width(0px)
+border(style::StrokeStyle, width, color) =
+    tile -> border(style, width, color, tile)
+
+hline(style=solid, width=1px, color=color("lightgray")) =
+    border([bottom], style, width, color, height(empty, 0px))
+
+vline(style=solid, width=1px, color=color("lightgray")) =
+    border([bottom], style, width, color, width(empty, 0px))
 
 ## RoundRects
 
+const allcorners = Corner[]
 @api roundcorner => RoundedRect <: Tile begin
+    typedarg(corners::AbstractArray=allcorners)
     arg(radius::Length)
     curry(tile::Tile)
-    kwarg(corners::AbstractArray=Corner[])
 end
 
 render(t::RoundedRect) =
     render(t.tile) &
-        (isempty(t.corners) ? # Apply padding to all sides if none specified
-                [:style => ["borderRadius" => t.radius]] :
-                [:style => ["borderRadius" * name(c) => t.radius for c=t.corners]])
+        [:style => mapparts(allcorners, t.corners, "border", "Radius", t.radius)]
 
 
 ## Box shadow
@@ -119,3 +108,4 @@ end
 
 render(t::FillColor) =
     render(t.tile) & [:style => [:backgroundColor => render_color(t.color)]]
+

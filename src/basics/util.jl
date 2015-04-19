@@ -57,6 +57,22 @@ render(c::Class) =
                            wrapmany(c.content, c.wrap),
                c.class)
 
+@doc """
+given a sentinal, vector of parts, prefix, suffix and a value,
+
+if the vector of parts is referentially equal, then returns
+    [prefix * suffix => value]
+otherwise returns
+    [prefix * name(part) * suffix => value for part in parts]
+
+Can be used while rendering border/padding for different sides, or border
+radius for different corners etc.
+""" ->
+mapparts(sentinal, parts, prefix, suffix, value) =
+   parts === sentinal ?
+       [prefix * suffix => value] :
+       [prefix * name(part) * suffix => value for part in parts]
+
 function teeprint(x, fn=println)
     fn(x)
     x

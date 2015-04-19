@@ -105,7 +105,7 @@ abstract Corner <: Position
     bottomright => BottomRight
 end
 
-render{C <: Corner}(::C) = string(C)
+name{C <: Corner}(::C) = string(C)
 
 immutable Relative{T <: Corner} <: Position
     x::Length
@@ -228,8 +228,8 @@ Flow{T}(x::T, y, z) = Flow{T}(x, y, z) # Julia issue 10641
 flow(axis::FixedAxis, tiles...; reverse=false) =
     flow(axis, [t for t in tiles]; reverse=reverse)
 
-Base.reverse(flow::Flow) =
-    Flow(flow.axis, flow.tiles, !flow.reverse)
+Base.reverse(f::Flow) =
+    flow(f.axis, f.tiles, !f.reverse)
 
 
 classes(f::Flow{Horizontal}) =
@@ -377,24 +377,15 @@ end
 render(cont::Container) = Elem(:div, render(cont.tile))
 
 
-immutable Padded <: Tile
-    sides::AbstractVector
-    length::Length
-    tile::Tile
+@api padcontent => PadContent <: Tile begin
+    typedarg(sides::AbstractVector=allsides)
+    arg(length::Length)
+    curry(tile::Tile)
 end
 
-render(padded::Padded) =
-    render(padded.tile) &
-        (isempty(padded.sides) ? # Apply padding to all sides if none specified
-                [:style => ["padding" => padded.length]] :
-                [:style => ["padding" * name(p) => padded.length for p=padded.sides]])
-
-
-padcontent(len::Length, tile) =
-    Padded(Side[], len, tile)
-
-padcontent(sides::AbstractVector, len::Length, tile) =
-    Padded(sides, len, tile)
+render(t::PadContent) =
+    render(t.tile) &
+        [:style => mapparts(allsides, t.sides, "padding", "", t.length)]
 
 pad(len::Length, tile) =
     padcontent(len, Container(tile))
@@ -402,11 +393,11 @@ pad(len::Length, tile) =
 pad(sides::AbstractVector, len::Length, tile) =
     padcontent(len, Container(tile))
 
+pad(sides::AbstractVector, len::Length) =
+    tile -> padcontent(len, Container(tile))
+
 pad(len::Length) =
     t -> pad(len, t)
 
 pad(d::AbstractVector, len::Length) =
     t -> pad(d, len, t)
-
-pad(side::Side, len::Length) =
-    pad([side], len)

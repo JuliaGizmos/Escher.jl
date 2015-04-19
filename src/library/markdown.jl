@@ -18,7 +18,7 @@ blocktile(md::Markdown.List) = list(map(item -> map(inlinetile, item), md.items)
 blocktile(md::Markdown.Paragraph) = paragraph(map(inlinetile, md.content))
 
 inlinetile(md::Markdown.Italic) = emph(map(inlinetile, md.text))
-inlinetile(md::Markdown.Bold) = font(bold, map(inlinetile, md.text))
+inlinetile(md::Markdown.Bold) = fontweight(bold, map(inlinetile, md.text))
 inlinetile(md::Markdown.Link) = link(md.url, map(inlinetile, md.text))
 
 inlinetile(md::Markdown.Image) = img(md.url, alt=md.alt)
