@@ -1,4 +1,5 @@
 using Docile
+
 make_term(term, typ, parent) =
     [:(immutable $typ <: $parent end),
      :(const $(esc(term))  = $typ())]
@@ -286,12 +287,6 @@ argdocs(args, kwargs, params) =
          map(kwarg -> argdoc(kwarg, params, true), kwargs))
 
 @doc """
-Take doc(...) field defs, concatenate their contents
-""" ->
-getdocstring(docs) =
-    join(map(d -> join(d.args[2:end], " "), docs), " ")
-
-@doc """
 `@api` is used to create new tile types and associated constructors
 
     @api border => Bordered{T <: Side} <: Tile begin
@@ -332,11 +327,44 @@ macro api(names, body)
     ms = map(m -> methodexpr(fn, typename(typ), kws, kwnames, m), methoddefs)
 
     doc = meta(
-        getdocstring(docs),
+        get(docs, 1, :(doc(""))).args[2],
         name=fn,
         typ=typ,
         args=argdocs(args, kwargs, dict)
     )
 
     Expr(:block, typedef, :(@doc* $doc -> $(ms[1])), ms[2:end]...)
+end
+
+macro apidoc(names, expr)
+
+    body, obj = expr.args
+
+    fn, typ = names.args
+    fields = body.args
+
+    nolines = filter(f -> f.head != :line, fields)
+    argdefs = filter(f -> f.args[1] != :doc, nolines)
+    docs = filter(f -> f.args[1] == :doc, nolines)
+
+    typedef = Expr(:type, false, esc(typexpr(typ)),
+        Expr(:block, typebody(argdefs)...))
+
+    dict = paramdict(typexpr(typ))
+
+    args, kwargs = argskwargs(argdefs)
+
+    methoddefs = makeapimethods(args, dict)
+    kws = map(kwize, kwargs)
+    kwnames = map(x -> striptype(x.args[1]), kws)
+    ms = map(m -> methodexpr(fn, typename(typ), kws, kwnames, m), methoddefs)
+
+    doc = meta(
+        get(docs, 1, :(doc(""))).args[2],
+        name=fn,
+        typ=typ,
+        args=argdocs(args, kwargs, dict)
+    )
+
+    :(@doc(*, $(Expr(:->, esc(doc), esc(obj)))))
 end
