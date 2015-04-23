@@ -4,6 +4,10 @@ export plaintext,
        fontfamily,
        fontsize,
        fontweight,
+       fontcolor,
+       fontstyle,
+       fonttype,
+       fontcase,
        serif,
        sansserif,
        slabserif,
@@ -42,9 +46,9 @@ export plaintext,
 
 plaintext(x) = Leaf(Elem(:div, string(x)))
 
-abstract FontSizeName
+abstract FontSize
 # Note: I do not like these terms much. Could be irrational fear.
-@terms FontSizeName begin
+@terms FontSize begin
     xxsmall => XXSmall
     xsmall => XSmall
     small => Small
@@ -61,18 +65,21 @@ classes(::Large) = "font-large"
 classes(::XLarge) = "font-x-large"
 classes(::XXLarge) = "font-xx-large"
 
-@api fontsize => FontSize{T <: Union(FontSizeName, Length)} <: Tile begin
-    arg(size::T)
-    curry(tile::TileList)
+@api fontsize => WithFontSize{T <: Union(FontSize, Length)} <: Tile begin
+    doc("Set the font size of text in one or more tiles")
+    arg(size::T, doc="The font size")
+    curry(tiles::TileList, doc="A tile or a list of tiles")
 end
-render{T <: Length}(t::FontSize{T}) =
-    wrapmany(t.tile, :span) & [:style => [:fontSize => t.size]]
-render{T <: FontSizeName}(t::FontSize{T}) =
-    addclasses(wrapmany(t.tile, :span), classes(t.size))
+WithFontSize{T}(size::T, tiles) = WithFontSize{T}(size, tiles)
 
-abstract RelativeFontWeight
+render{T <: Length}(t::WithFontSize{T}) =
+    wrapmany(t.tiles, :span) & [:style => [:fontSize => t.size]]
+render{T <: FontSize}(t::WithFontSize{T}) =
+    addclasses(wrapmany(t.tiles, :span), classes(t.size))
+
+abstract FontWeight
 # These terms add to the explosion as well.
-@terms RelativeFontWeight begin
+@terms FontWeight begin
     bold => Bold
     bolder => Bolder
     lighter => Lighter
@@ -82,28 +89,35 @@ classes(::Bolder) = "font-bolder"
 classes(::Lighter) = "font-lighter"
 
 const allowed_font_weights = 100:100:900
-@api fontweight => FontWeight{T <: Union(Int, RelativeFontWeight)} <: Tile begin
+@api fontweight => WithFontWeight{T <: Union(Int, FontWeight)} <: Tile begin
     arg(weight::T)
-    curry(tile::TileList)
+    curry(tiles::TileList)
 end
-FontWeight{T}(weight::T, tile) = FontWeight{T}(weight, tile)
+WithFontWeight{T}(weight::T, tile) = WithFontWeight{T}(weight, tile)
 
-function render(t::FontWeight)
-    if !(w in allowed_font_weights)
-        error(string(w, " is not an allowed font weight"))
+function render(t::WithFontWeight)
+    if !(t.weight in allowed_font_weights)
+        error(string(t.weight, " is not an allowed font weight"))
     end
-    wrapmany(t.tile, :span) & [:style => [:fontWeight => t.weight]]
+    wrapmany(t.tiles, :span) & [:style => [:fontWeight => t.weight]]
 end
 
-render{T <: RelativeFontWeight}(t::FontWeight{T}) =
-    addclasses(wrapmany(t.tile, :span), classes(t.weight))
+render{T <: FontWeight}(t::WithFontWeight{T}) =
+    addclasses(wrapmany(t.tiles, :span), classes(t.weight))
 
 @api fontcolor => FontColor <: Tile begin
     arg(color::ColorValue)
-    curry(tile::TileList)
+    curry(tiles::TileList)
 end
+
+fontcolor(c::String) =
+    fontcolor(color(c))
+
+fontcolor(c::String, tiles) =
+    fontcolor(color(c), tiles)
+
 render(t::FontColor) =
-    wrapmany(t.tile, :span) & [:style => [:color => t.color]]
+    wrapmany(t.tiles, :span) & [:style => [:color => render_color(t.color)]]
 
 @api fontfamily => FontFamily <: Tile begin
     arg(family::String)
@@ -120,9 +134,9 @@ abstract FontType
     slabserif => SlabSerif
     monospace => Monospace
 end
-@api fonttype => WithFontType begin
+@api fonttype => WithFontType <: Tile begin
     arg(typ::FontType)
-    curry(tile::Tile)
+    curry(tiles::TileList)
 end
 classes(::Serif) = "font-serif"
 classes(::SansSerif) = "font-sansserif"
@@ -130,7 +144,7 @@ classes(::SlabSerif) = "font-serif font-slab"
 classes(::Monospace) = "font-monospace"
 
 render(t::WithFontType) =
-    addclasses(wrapmany(t.tile, :span), classes(t.typ))
+    addclasses(wrapmany(t.tiles, :span), classes(t.typ))
 
 abstract FontStyle
 
@@ -143,12 +157,12 @@ classes(::Normal) = "font-normal"
 classes(::Slanted) = "font-slanted"
 classes(::Italic) = "font-italic"
 
-@api fontstyle => WithFontStyle begin
+@api fontstyle => WithFontStyle <: Tile begin
     arg(style::FontStyle)
-    curry(tile::Tile)
+    curry(tiles::TileList)
 end
 render(t::WithFontStyle) =
-    addclasses(wrapmany(t.tile, :span), classes(t.style))
+    addclasses(wrapmany(t.tiles, :span), classes(t.style))
 
 abstract FontCase
 
@@ -163,11 +177,11 @@ classes(::Lowercase) = "font-lowercase"
 
 @api fontcase => WithFontCase begin
     arg(case::FontCase)
-    curry(tile::Tile)
+    curry(tiles::TileList)
 end
 
 render(t::WithFontCase) =
-    addclasses(wrapmany(t.tile, :span), classes(t))
+    addclasses(wrapmany(t.tiles, :span), classes(t.case))
 
 abstract TextAlignment
 
@@ -192,26 +206,19 @@ render(t::AlignText{JustifyText}) =
 render(t::AlignText{CenterText}) =
     render(t.tile) & [:style => [:textAlign => :center]]
 
-@api LineHeight => LineHeight begin
-    arg(height::Length)
-    curry(tiles::TileList)
-end
-render(t::LineHeight) =
-    wrapmany(t.tile, :span) & [:style => [:lineHeight => t.size]]
-
 @api lineheight => LineHeight begin
     arg(height::Length)
     curry(tiles::TileList)
 end
 render(t::LineHeight) =
-    wrapmany(t.tile, :span) & [:style => [:lineHeight => t.height]]
+    wrapmany(t.tiles, :span) & [:style => [:lineHeight => t.height]]
 
 @api letterspacing => LetterSpacing begin
     arg(space::Length)
     curry(tiles::TileList)
 end
 render(t::LetterSpacing) =
-    wrapmany(t.tile, :span) & [:style => [:letterSpacing => t.space]]
+    wrapmany(t.tiles, :span) & [:style => [:letterSpacing => t.space]]
 
 # Themable fonts
 
