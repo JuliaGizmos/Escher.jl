@@ -12,8 +12,6 @@ export noborder,
        shadow,
        fillcolor
 
-render_color(c) = string("#" * hex(c))
-
 ## Borders
 
 const allsides = Side[]

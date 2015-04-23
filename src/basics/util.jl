@@ -1,3 +1,10 @@
+using Color
+
+convert(::Type{ColorValue}, s::String) =
+    color(s)
+
+render_color(c) = string("#" * hex(c))
+
 export intersperse
 
 # Utility functions for Elem
@@ -60,7 +67,7 @@ render(c::Class) =
 @doc """
 given a sentinal, vector of parts, prefix, suffix and a value,
 
-if the vector of parts is referentially equal, then returns
+if the vector of parts is referentially equal to the sentinal, then returns
     [prefix * suffix => value]
 otherwise returns
     [prefix * name(part) * suffix => value for part in parts]
