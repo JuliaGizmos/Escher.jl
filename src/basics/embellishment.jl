@@ -48,7 +48,7 @@ name(::Solid) = "solid"
 name(::Dotted) = "dotted"
 name(::Dashed) = "dashed"
 
-@api borderstyle => BorderStyle begin
+@api borderstyle => BorderStyle <: Tile begin
     typedarg(sides::AbstractArray=allsides)
     arg(style::StrokeStyle)
     curry(tile::Tile)
@@ -68,11 +68,11 @@ border(style::StrokeStyle, width::Length, color::ColorValue, tile) =
 border(style::StrokeStyle, width, color) =
     tile -> border(style, width, color, tile)
 
-hline(style=solid, width=1px, color=color("lightgray")) =
-    border([bottom], style, width, color, height(empty, 0px))
+hline(;style=solid, width=1px, color=color("lightgray")) =
+    border([bottom], solid, width, color, empty)
 
-vline(style=solid, width=1px, color=color("lightgray")) =
-    border([bottom], style, width, color, width(empty, 0px))
+vline(;style=solid, width=1px, color=color("lightgray")) =
+    border([left], solid, width, color, empty)
 
 ## RoundRects
 

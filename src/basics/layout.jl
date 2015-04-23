@@ -59,21 +59,21 @@ export inset,
 @api width => Width <: Tile begin
     doc("Set the width of a tile")
     typedarg(prefix::String="", hidedoc=true)
-    arg(w::Length, doc="The width")
+    arg(width::Length, doc="The width")
     curry(tile::Tile)
 end
 render(t::Width) =
-    render(t.tile) & [:style => [(t.prefix == "" ? "width" : t.prefix * "Width")=> t.w]]
+    render(t.tile) & [:style => [(t.prefix == "" ? "width" : t.prefix * "Width")=> t.width]]
 
 @api height => Height <: Tile begin
     doc("Set the height of a tile")
     typedarg(prefix::String="")
-    arg(h::Length)
+    arg(height::Length)
     curry(tile::Tile)
 end
 
 render(t::Height) =
-    render(t.tile) & [:style => [(t.prefix == "" ? "height" : t.prefix * "Height")=> t.h]]
+    render(t.tile) & [:style => [(t.prefix == "" ? "height" : t.prefix * "Height")=> t.height]]
 
 minwidth(w, x...) = width("min", w, x...)
 minheight(h, x...) = height("min", h, x...)
@@ -390,14 +390,12 @@ render(t::PadContent) =
 pad(len::Length, tile) =
     padcontent(len, Container(tile))
 
+pad(len::Length) =
+    t -> pad(len, t)
+
 pad(sides::AbstractVector, len::Length, tile) =
     padcontent(len, Container(tile))
 
 pad(sides::AbstractVector, len::Length) =
-    tile -> padcontent(len, Container(tile))
+    tile -> padcontent(sides, len, Container(tile))
 
-pad(len::Length) =
-    t -> pad(len, t)
-
-pad(d::AbstractVector, len::Length) =
-    t -> pad(d, len, t)
