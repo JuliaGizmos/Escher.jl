@@ -1,7 +1,7 @@
-using Canvas
+using Escher
 using Markdown
 
-import Canvas: @api, render
+import Escher: @api, render
 
 desc = md"""
 # Hello, World!

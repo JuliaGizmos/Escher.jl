@@ -3,8 +3,8 @@ using Requires
 write_patchwork_prelude(io::IO) =
     write(io, "<script>", Patchwork.js_runtime(), "</script>")
 
-write_canvas_prelude(io::IO) = begin
-    write(io, Canvas.custom_elements())
+write_escher_prelude(io::IO) = begin
+    write(io, Escher.custom_elements())
     write_patchwork_prelude(io)
 end
 
@@ -27,7 +27,7 @@ end
 
         io = IOBuffer()
 
-        Canvas.write_canvas_prelude(io)
+        Escher.write_escher_prelude(io)
 
         writemime(io, MIME"text/html"(), render(data))
         prepare_response(takebuf_string(io), req, res)
@@ -42,7 +42,7 @@ end
 
     function setup_transport(sig::Input)
         id = makeid(sig)
-        comm = Comm(:CanvasSignal, data=[:signalId => id])
+        comm = Comm(:EscherSignal, data=[:signalId => id])
         comm.on_msg = (msg) -> push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
         return id
     end
@@ -81,7 +81,7 @@ end
 end
 
 @require DataFrames begin
-    include(Pkg.dir("Canvas", "src", "library", "table.jl"))
+    include(Pkg.dir("Escher", "src", "library", "table.jl"))
 
     import DataFrames: AbstractDataFrame
 

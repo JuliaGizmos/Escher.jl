@@ -1,7 +1,7 @@
 
 # An infinite number of mathematicians walk into a bar...
 
-using Canvas
+using Escher
 using Color
 
 colors = distinguishable_colors(9)
@@ -9,7 +9,7 @@ colors = distinguishable_colors(9)
 box(w, h, n) =
     empty |> fillcolor(colors[n % 9 + 1]) |> size(w, h)
 
-cut(w, h, ::(Canvas.Vertical, Bool)) =
+cut(w, h, ::(Escher.Vertical, Bool)) =
     (w, h/2)
 cut(w, h, ::Any) =
     (w/2, h)
@@ -28,7 +28,7 @@ directions = [
     (horizontal, false)
 ]
 
-main(win) = inset(Canvas.middle,
+main(win) = inset(Escher.middle,
              size(100vw, 100vh, empty),
              stack(80vmin, 80vmin, directions, 24) |> paper(2))
 

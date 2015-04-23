@@ -4,7 +4,7 @@ if (window.IPython && window) {
         var commMgr = IPython.notebook.kernel.comm_manager,
             comms = {}
 
-        commMgr.register_target("CanvasSignal", function (comm, msg) {
+        commMgr.register_target("EscherSignal", function (comm, msg) {
             comms[msg.content.data.signalId] = comm
         })
 

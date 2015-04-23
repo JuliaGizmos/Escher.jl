@@ -1,8 +1,8 @@
 export Tile, render
 
 @doc """
-A `Tile` is the basic currency in Canvas.
-Most of the functions in the Canvas API take `Tile`s
+A `Tile` is the basic currency in Escher.
+Most of the functions in the Escher API take `Tile`s
 among other things as arguments, and return a `Tile` as the result.
 
 Tiles are immutable: once created there is no way to mutate them.
@@ -55,7 +55,7 @@ end
 
 @doc """
 `Empty` is handy tile that is well... Empty.
-use `empty` constant exported by Canvas in your code.
+use `empty` constant exported by Escher in your code.
 """ ->
 immutable Empty <: Tile
 end
@@ -68,10 +68,10 @@ const empty = Empty()
 render(t::Empty) = Elem(:div)
 
 writemime(io::IO, m::MIME"text/html", x::Tile) =
-    writemime(io, m, Elem(:div, Canvas.render(x), className="canvasRoot"))
+    writemime(io, m, Elem(:div, Escher.render(x), className="escherRoot"))
 
 writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
-    writemime(io, m, lift(Canvas.render, Patchwork.Elem, x))
+    writemime(io, m, lift(Escher.render, Patchwork.Elem, x))
 
 render{T <: Tile}(s::Signal{T}) =
     render(value(s))

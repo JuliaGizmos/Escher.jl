@@ -1,11 +1,11 @@
 {
-  "name": "Canvas",
+  "name": "Escher",
   "version": "0.0.0",
-  "homepage": "https://github.com/shashi/Canvas.jl",
+  "homepage": "https://github.com/shashi/Escher.jl",
   "authors": [
     "Shashi Gowda <shashigowda91@gmail.com>"
   ],
-  "description": "Web bits for Canvas.jl",
+  "description": "Web bits for Escher.jl",
   "moduleType": [
     "es6",
     "globals"

@@ -3,7 +3,7 @@
 # Webapp
 using Mux
 using Lazy
-using Canvas
+using Escher
 using JSON
 
 using Reactive
@@ -40,10 +40,10 @@ function setup_socket(file)
         <head>""")
     # Include the basics
     write(io, "<script>", Patchwork.js_runtime(), "</script>")
-    write(io, """<link rel="import" href="$(Canvas.resolve_asset("basics"))">""")
+    write(io, """<link rel="import" href="$(Escher.resolve_asset("basics"))">""")
 
-    write(io, """</head> <body fullbleed unresolved><div id="root" class="canvasRoot"></div>""")
-    write(io, """<script>new Canvasd($(JSON.json(file)), "root");</script></body>""")
+    write(io, """</head> <body fullbleed unresolved><div id="root"></div>""")
+    write(io, """<script>new Escherd($(JSON.json(file)), "root");</script></body>""")
     takebuf_string(io)
 end
 
@@ -54,7 +54,7 @@ mount_cmd(node, id="root") =
 
 import_cmd(asset) =
     [ "command" => "import",
-      "data" => Canvas.resolve_asset(asset) ] 
+      "data" => Escher.resolve_asset(asset) ] 
 
 patch_cmd(diff, id="root") =
    [ "command" => "patch",
@@ -68,15 +68,15 @@ swap!(tilestream, next) =
     push!(tilestream, Input(next))
 
 const signals = Dict()
-function Canvas.setup_transport(x)
-    Canvas.makeid(x)
+function Escher.setup_transport(x)
+    Escher.makeid(x)
 end
 
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
         id = msg["data"]["signalId"]
-        f, sig = Canvas.fromid(id)
-        push!(sig, f(Canvas.decodeJSON(sig, msg["data"]["value"])))
+        f, sig = Escher.fromid(id)
+        push!(sig, f(Escher.decodeJSON(sig, msg["data"]["value"])))
     end),
     ("window-size", (window, msg) -> begin
         dim = (msg["data"][1] * px, msg["data"][1] * px)
@@ -163,7 +163,7 @@ end
 # App
 @app static = (
     Mux.defaults,
-    route("assets", Mux.files(Pkg.dir("Canvas", "assets")), Mux.notfound()),
+    route("assets", Mux.files(Pkg.dir("Escher", "assets")), Mux.notfound()),
     route("/:file", req -> setup_socket(req[:params][:file])),
     route("/", req -> setup_socket("index.jl")),
     Mux.notfound(),

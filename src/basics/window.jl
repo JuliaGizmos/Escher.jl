@@ -15,7 +15,7 @@ Window(;
     Window(Input{Any}(dimension), Input{Any}(route), "ltr", Input("basics"))
 
 function resolve_asset(slug)
-    path = Pkg.dir("Canvas", "assets", slug * ".html")
+    path = Pkg.dir("Escher", "assets", slug * ".html")
     if isfile(path)
         return "/assets/$slug.html"
     else

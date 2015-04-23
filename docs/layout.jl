@@ -9,7 +9,7 @@ $(title(2, "Layout"))
 
 $(vskip(1em))
 
-Canvas provides primitives like `hbox`, `vbox`, `hskip`, `vskip`, and `flex` for laying out tiles into grids. Complex layouts can be composed from smaller parts. For higher-order layouts such as tabs, pages, menus and collapsibles see [here](layout2).
+Escher provides primitives like `hbox`, `vbox`, `hskip`, `vskip`, and `flex` for laying out tiles into grids. Complex layouts can be composed from smaller parts. For higher-order layouts such as tabs, pages, menus and collapsibles see [here](layout2).
 
 $(vskip(1em))
 # Functions

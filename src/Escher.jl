@@ -1,4 +1,4 @@
-module Canvas
+module Escher
 
 if VERSION < v"0.4.0-dev"
     using Docile
@@ -14,7 +14,7 @@ import Base: convert, writemime
 
 # Polymer Setup
 custom_elements() =
-    readall(Pkg.dir("Canvas", "assets", "basics/basics.html"))
+    readall(Pkg.dir("Escher", "assets", "basics/basics.html"))
 
 include("basics/macros.jl")
 include("basics/tile.jl")

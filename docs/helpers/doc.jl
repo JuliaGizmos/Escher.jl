@@ -1,7 +1,7 @@
 using Color
 
 getdoc(fn) =
-    Canvas.__METADATA__.entries[fn]
+    Escher.__METADATA__.entries[fn]
 
 badge(x, bg="#f1f1f1") =
     fontsize(0.8em, x) |>

@@ -1,4 +1,4 @@
-# Canvas
+# Escher
 
 Composable web UIs in Julia
 
@@ -6,7 +6,7 @@ Composable web UIs in Julia
 
 This package is not ready for mainstream use. However, if you want to help develop this package, use the following instructions to get started: 
 
-Currently Canvas works with Julia v0.3.
+Currently Escher works with Julia v0.3.
 
 _In a Julia REPL_
 
@@ -18,7 +18,7 @@ Pkg.add("WebSockets")
 Pkg.add("Markdown")
 Pkg.checkout("Markdown")
 
-Pkg.clone("git@github.com:shashi/Canvas.jl.git")
+Pkg.clone("git@github.com:shashi/Escher.jl.git")
 ```
 
 _On the command line, within the `assets/` subdirectory_
@@ -28,10 +28,10 @@ npm install -g bower
 bower install
 ```
 
-_On the command line, from within the `Canvas.jl/examples` directory_
+_On the command line, from within the `Escher.jl/examples` directory_
 
 ```sh
-../bin/canvasd
+../bin/escherd
 ```
 
 and navigate to `http://localhost:8000/layout.jl`
