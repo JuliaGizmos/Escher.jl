@@ -1,4 +1,4 @@
-export list, image, link
+export list, image, link, abbr
 
 @api list => List <: Tile begin
     curry(tiles::AbstractArray)
@@ -24,3 +24,11 @@ end
 
 render(a::Hyperlink) =
     Elem(:a, render(a.tiles), href=a.url)
+
+@api abbr => Abbr <: Tile begin
+    arg(title::String)
+    arg(tiles::TileList)
+end
+
+render(a::Abbr) =
+    Elem(:abbr, render(a.tiles), title=a.title)
