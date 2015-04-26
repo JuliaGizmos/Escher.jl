@@ -132,10 +132,10 @@ a, a:visited {
 }
 .caption {
   color: #757575;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   letter-spacing: 0.011em;
-  line-height: 20px;  /* guessed */
+  line-height: 22px;  /* guessed */
 }
 
 paper-button {

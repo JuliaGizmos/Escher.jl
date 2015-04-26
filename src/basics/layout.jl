@@ -400,7 +400,7 @@ pad(len::Length) =
     t -> pad(len, t)
 
 pad(sides::AbstractVector, len::Length, tile) =
-    padcontent(len, Container(tile))
+    padcontent(sides, len, Container(tile))
 
 pad(sides::AbstractVector, len::Length) =
     tile -> padcontent(sides, len, Container(tile))

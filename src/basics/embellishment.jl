@@ -67,10 +67,10 @@ border(style::StrokeStyle, width, color) =
     tile -> border(style, width, color, tile)
 
 hline(;style=solid, width=1px, color=color("lightgray")) =
-    border([bottom], solid, width, color, empty)
+    border([bottom], style, width, color, empty)
 
 vline(;style=solid, width=1px, color=color("lightgray")) =
-    border([left], solid, width, color, empty)
+    border([left], style, width, color, empty)
 
 ## RoundRects
 
