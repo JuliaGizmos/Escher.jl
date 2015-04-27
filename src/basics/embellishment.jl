@@ -66,10 +66,12 @@ border(style::StrokeStyle, width::Length, color::ColorValue, tile) =
 border(style::StrokeStyle, width, color) =
     tile -> border(style, width, color, tile)
 
-hline(;style=solid, width=1px, color=color("lightgray")) =
+const default_border_color = RGB(0.6, 0.6, 0.6)
+
+hline(;style=solid, width=1px, color=default_border_color) =
     border([bottom], style, width, color, empty)
 
-vline(;style=solid, width=1px, color=color("lightgray")) =
+vline(;style=solid, width=1px, color=default_border_color) =
     border([left], style, width, color, empty)
 
 ## RoundRects
