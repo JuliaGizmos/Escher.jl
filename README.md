@@ -17,6 +17,8 @@ Pkg.checkout("Lazy")
 Pkg.add("WebSockets")
 Pkg.add("Markdown")
 Pkg.checkout("Markdown")
+Pkg.add("Patchwork")
+Pkg.add("Reactive")
 
 Pkg.clone("git@github.com:shashi/Escher.jl.git")
 ```
