@@ -14,7 +14,8 @@ export watch,
 # A widget can signal some state
 abstract Widget <: Tile
 
-(>>>)(w::Widget, x::Signal) = watch(w) >>> x
+subscribe(w::Widget, x::Signal; absorb=true) = subscribe(watch(w), x, absorb=absorb)
+(>>>)(w::Widget, x::Signal) = suscribe(w, x)
 
 ## Button
 
