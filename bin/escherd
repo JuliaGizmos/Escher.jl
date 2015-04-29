@@ -78,8 +78,8 @@ end
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
         id = msg["data"]["signalId"]
-        f, sig = Escher.fromid(id)
-        push!(sig, f(Escher.decodeJSON(sig, msg["data"]["value"])))
+        dec, sig = Escher.fromid(id)
+        push!(sig, Escher.decode(dec, msg["data"]["value"]))
     end),
     ("window-size", (window, msg) -> begin
         dim = (msg["data"][1] * px, msg["data"][1] * px)

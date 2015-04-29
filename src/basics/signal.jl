@@ -1,59 +1,137 @@
 
+import Base: $
+
 export stoppropagation,
+       constant,
+       pairwith,
+       pairwithindex,
        subscribe,
        samplesignals
 
-# Don't allow a signal to propagate outward
-immutable StopPropagation <: Tile
-    tile::Tile
-    name::Symbol
+
+# First line of decoding.
+
+decodeJSON(x) = x
+
+function decodeJSON(ctr, x)
+    # ctr is the constructor
+    if typ == "Tuple"
+        tuple(x.data...)
+    else
+        x
+    end
 end
 
-@doc """
-Stop a UI signal from propagating further.
-""" ->
-stoppropagation(tile::Tile, name::Symbol) =
-    StopPropagation(tile, name)
+decodeJSON(x::Dict) =
+    haskey(x, "_type") ?
+        decodeJSON(x["_type"], x) : x
 
-render(tile::StopPropagation) =
-    render(tile.tile) <<
-        Elem("stop-propagation",
-            name=tile.name)
+@doc """
+A Behaviour is a tile that denotes that it can
+broadcast some signal
+""" ->
+abstract Behaviour <: Tile
+
+name(b::Behaviour) = b.name
+
+# Second line of decoding - usually in the business logic
+
+abstract Decoder
+
+@api decoder => WithDecoder <: Behaviour begin
+    arg(decoder::Decoder)
+    curry(tile::Behaviour)
+end
+name(d::WithDecoder) = name(d.tile)
+
+render(d::WithDecoder) =
+    render(d.tile)
+
+# Don't change the message
+immutable Id <: Decoder
+end
+const identity = Id()
+
+decode(dec::Id, x) = x
+
+# Pair with a constant
+immutable ConstPair <: Decoder
+    value::Any
+end
+
+decode(dec::ConstPair, x) = (x, dec.value)
+
+pairwith(x, tile::Tile) = decoder(ConstPair(x), tile)
+pairwith(x) = decoder(ConstPair(x))
+pairwith(x::AbstractArray, tiles::AbstractArray) = map(pairwith, x, tiles)
+pairwith(x, tiles::AbstractArray) = map(pairwith(x))
+
+pairwithindex(tiles::AbstractVector) =
+    [pairwith(i, v)
+        for (i, v) in enumerate(tiles)]
+
+pairwithindex(tiles::AbstractMatrix) =
+    [pairwith((i, j), tiles[i, j])
+        for i=1:size(tiles, 1), j=1:size(tiles, 2)]
+
+# Instead of the signal value, use a constant
+immutable Const <: Decoder
+    value::Any
+end
+
+decode(dec::Const, _) = dec.value
+
+constant(x, tile::Tile) = decoder(Const(x), tile)
+constant(x) = decoder(Const(x))
+constant(xs::AbstractArray, tiles::AbstractArray) = map(constant, xs, tiles)
+constant(x, tiles::AbstractArray) = map(constant(x), tiles)
+
+# Apply a function
+immutable DecoderFn <: Decoder
+    f::Function
+end
+decoder(f::Function, tile::Tile) = decoder(DecoderFn(f), tile)
+decode(dec::DecoderFn, x) = dec.f(x)
+
+# Apply a function with some constant partial args
+# For efficiency, the function must be defined outside
+# of any signal functions. i.e. no point creating
+# ad-hoc functions
+
+immutable DecoderPartialFn <: Decoder
+    f::Function
+    args::Tuple
+end
+partial(f::Function, args::Tuple, tile) =
+    decoder(DecoderPartialFn(f, args), tile)
+
+decode(dec::DecoderPartialFn, x) = dec.f(dec.args..., x)
 
 
 # Send a signal update to the Julia side
-immutable SignalTransport <: Tile
+immutable Subscription <: Tile
     tile::Tile
-    name::Symbol
-    signal::(Function, Input)
+    name::Symbol # Name of the signal update on the front-end
+    receiver::(Decoder, Input)
 end
 
 subscribe(t::Tile, name, s; absorb=true) =
-    SignalTransport(t, name, s) |>
+    Subscription(t, name, s) |>
        (x -> absorb ? stoppropagation(x, name) : x)
 
-render(sig::SignalTransport) =
+subscribe(t::Behaviour, s::Input; absorb=true) =
+    subscribe(t, name(t), (identity, s), absorb=absorb)
+subscribe(t::Behaviour, s::(Decoder, Input); absorb=true) =
+    subscribe(t, name(t), s, absorb=absorb)
+
+render(sig::Subscription) =
     render(sig.tile) <<
         Elem("signal-transport",
-            name=sig.name, signalId=setup_transport(sig.signal))
+            name=sig.name, signalId=setup_transport(sig.receiver))
 
 
 setup_transport(x) =
     error("Looks like there is no trasport set up")
-
-# Utility functions for transports
-decodeJSON(sig::Input, val) = val
-decodeJSON{T <: String}(sig::Input{T}, ::Nothing) = ""
-decodeJSON{T <: String}(sig::Input{T}, val) = string(val)
-decodeJSON{T <: Integer}(sig::Input{T}, val) = convert(T, int(val))
-decodeJSON{T <: FloatingPoint}(sig::Input{T}, val) = convert(T, float(val))
-
-istruthy(::Nothing) = false
-istruthy(b::Bool) = b
-istruthy(::None) = false
-istruthy(x) = !isempty(x)
-
-decodeJSON(sig::Input{Bool}, val) = istruthy(val)
 
 import Base.Random: UUID, uuid4
 
@@ -75,4 +153,27 @@ function fromid(id)
     id_to_signal[id]
 end
 
+# Don't allow a signal to propagate outward
+immutable StopPropagation <: Tile
+    tile::Tile
+    name::Symbol
+end
+
+@doc """
+Stop a UI signal from propagating further.
+""" ->
+stoppropagation(tile::Tile, name::Symbol) =
+    StopPropagation(tile, name)
+
+render(tile::StopPropagation) =
+    render(tile.tile) <<
+        Elem("stop-propagation",
+            name=tile.name)
+
+
+(>>>)(t::Behaviour, s::Input) = subscribe(t, (identity, s))
+
+# TODO: Use a different operator with lesser precedence than >>>
+(>>>)(t::Behaviour, f::Function) = decoder(f, t)
+(>>>)(t::WithDecoder, s::Input) = subscribe(t, (t.decoder, s))
 
