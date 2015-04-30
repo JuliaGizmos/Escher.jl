@@ -1,4 +1,5 @@
 using Compat # for Nullable
+using Color
 
 #### Model ####
 
@@ -48,20 +49,22 @@ boardᵗ = flatten(
 
 ### View ###
 
-tile(x) =
+
+colors = ["#fff", colormap("reds", 7)]
+
+box(content, color) =
     inset(Escher.middle,
-        fillcolor("#999", size(4em, 4em, empty)),
-        fontsize(2em, x)) |> paper(2) |> pad(0.5em)
+        fillcolor(color, size(4em, 4em, empty)),
+        fontsize(2em, content)) |> paper(1) |> pad(0.2em)
 
-content(x) = x == -1 ? "" : string(x)
-
-function tile(board::Board{true}, i, j)
-    board.mines[i, j] ? tile("*") :
-        tile(content(board.uncovered[i, j]))
- end
+number(x) = box(x == -1 ? "" : string(x) |> fontweight(800), colors[x+2])
+mine = box(icon("report"), "#e58")
+tile(board::Board{true}, i, j) =
+    board.mines[i, j] ? mine :
+        number(board.uncovered[i, j])
 
 tile(board, i, j) =
-     constant((i, j), clickable(tile(content(board.uncovered[i, j])))) >>> movesᵗ
+     constant((i, j), clickable(number(board.uncovered[i, j]))) >>> movesᵗ
 
 gameover = vbox(
         title(2, "Game Over!") |> pad(1em),
@@ -80,7 +83,9 @@ function main(window)
 
     lift(Tile, boardᵗ) do board
         vbox(
-           title(3, "Minesweeper"),
+           vskip(2em),
+           title(3, "minesweeper"),
+           vskip(2em),
            showboard(board),
         ) |> packacross(center)
     end
