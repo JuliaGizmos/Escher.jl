@@ -7,7 +7,6 @@ export watch,
        radiogroup,
        togglebutton,
        textinput,
-       dropdown,
        progress,
        paper
 
@@ -165,28 +164,6 @@ end
 render(t::SelectionItem) =
     Elem("paper-item", render(t.tile), value=t.value)
 
-
-@api dropdown => Dropdown <: Widget begin
-    arg(items::AbstractArray)
-    kwarg(name::Symbol=:_dropdown)
-    kwarg(value::Int=0)
-    kwarg(label::String="Choose")
-    kwarg(disabled::Bool=false)
-end
-
-wrapitem(x::SelectionItem) = x
-wrapitem(x) = Elem("paper-item", render(x))
-
-render(d::Dropdown) =
-    Elem("paper-dropdown-menu",
-        map(x -> render(wrapitem(x)), d.items),
-        value=d.value,
-        name=d.name,
-        label=d.label,
-        value=d.value,
-        disabled=boolattr(d.disabled, "disabled"))
-
-watch(d::Dropdown) = hasstate(d, name=d.name)
 
 
 ## Radio buttons
