@@ -123,14 +123,14 @@ wrapitem(x) = Elem("paper-item", render(x))
 function render(dm::DropdownMenu)
     # paper-dropdown-menu spec requires these classes
     m = render(menu(map(t -> wrapitem(t), dm.items.tiles))) & [:className => "menu"]
-    d = render(dropdown(m, valign=dm.valign, halign=dm.halign)) & [:className => "dropdown"]
+    d = Elem("paper-dropdown", m) & [:className => "dropdown"]
 
     Elem("paper-dropdown-menu",
         render(d),
         label=dm.label,
     )
 end
-watch(d::DropdownMenu) = hasstate(d, name=d.name)
+watch(d::DropdownMenu) = selectable(d, name=d.name, elem=".menu")
 
 # TODO:
 #

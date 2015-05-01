@@ -11,6 +11,17 @@
 Polymer({
     name: null,
     value: null,
+    elem: null,
+    type: "Any",
+    findElem: function () {
+        var elem = this.elem
+        if (elem === null || elem === "::parent") {
+            elem = this.parentNode
+        } else if (typeof(elem) === "string") {
+            elem = this.parentNode.querySelector(this.elem)
+        }
+        return elem
+    },
     domReady: function () {
         this.setAttribute("id", "signal-" + this.name)
     },

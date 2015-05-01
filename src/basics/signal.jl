@@ -2,6 +2,7 @@
 import Base: $
 
 export stoppropagation,
+       decoder,
        constant,
        pairwith,
        pairwithindex,

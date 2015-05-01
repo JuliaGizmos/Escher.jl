@@ -17,6 +17,7 @@ export hasstate,
     curry(tile::Tile)
     kwarg(name::Symbol=:_state)
     kwarg(attr::String="value")
+    kwarg(elem::String="::parent")
     kwarg(trigger::String="change")
     kwarg(source::String="")
 end
@@ -25,7 +26,7 @@ render(t::WithState) =
     render(t.tile) <<
         Elem("watch-state", name=t.name,
              attr=t.attr, trigger=t.trigger,
-             source=t.source)
+             elem=t.elem, source=t.source)
 
 # Sample a bunch of signals upon changes to another bunch of signals
 # Returns a signal of dict of signal values
@@ -102,10 +103,12 @@ render(c::Clickable) =
 @api selectable => Selectable <: Behaviour begin
     curry(tile::Tile)
     kwarg(name::Symbol=:_clicks)
+    kwarg(elem::String="::parent")
 end
 
-render(s::Selectable) =
-    render(s.tile) << Elem("selectable-behaviour", name=s.name)
+render(t::Selectable) =
+    render(t.tile) <<
+        Elem("selectable-behaviour", name=t.name, elem=t.elem)
 
 
 convert(::Type{MouseButton}, x::Int) =

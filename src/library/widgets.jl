@@ -10,10 +10,12 @@ export watch,
        progress,
        paper
 
-# A widget can signal some state
+# A widget can be coerced into a behavior
+# by calling `watch` on it.
 abstract Widget <: Tile
 
-subscribe(w::Widget, x::Signal; absorb=true) = subscribe(watch(w), x, absorb=absorb)
+subscribe(w::Widget, x::Signal; absorb=true) =
+    subscribe(watch(w), x, absorb=absorb)
 (>>>)(w::Widget, x::Signal) = suscribe(w, x)
 
 ## Button

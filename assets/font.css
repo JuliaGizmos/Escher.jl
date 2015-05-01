@@ -22,7 +22,9 @@ p {
     padding: 0.25;
 }
 
-.font-uppercase { text-transform: uppercase; }
+.font-uppercase {
+    text-transform: uppercase;
+}
 
 .font-lowercase { text-transform: lowercase; }
 
@@ -142,10 +144,6 @@ paper-button {
     border: 1px #C2C2B2 solid;
     padding-left: 1em;
     padding-right: 1em;
-}
-
-code-mirror {
-    border: 1px #C2C2B2 solid;
 }
 
 ul, ol {
