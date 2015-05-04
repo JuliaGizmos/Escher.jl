@@ -16,7 +16,7 @@ abstract Widget <: Tile
 
 subscribe(w::Widget, x::Signal; absorb=true) =
     subscribe(watch(w), x, absorb=absorb)
-(>>>)(w::Widget, x::Signal) = suscribe(w, x)
+(>>>)(w::Widget, x::Signal) = subscribe(w, x)
 
 ## Button
 
