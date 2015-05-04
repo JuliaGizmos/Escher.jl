@@ -14,7 +14,7 @@ end
 table(body; head=Array(Tile, 0)) =
     Table(head, body)
 
-# Behaviours
+# Behaviors
 
 immutable SelectRows
     multi::Bool

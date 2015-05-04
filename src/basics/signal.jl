@@ -28,20 +28,20 @@ decodeJSON(x::Dict) =
         decodeJSON(x["_type"], x) : x
 
 @doc """
-A Behaviour is a tile that denotes that it can
+A Behavior is a tile that denotes that it can
 broadcast some signal
 """ ->
-abstract Behaviour <: Tile
+abstract Behavior <: Tile
 
-name(b::Behaviour) = b.name
+name(b::Behavior) = b.name
 
 # Second line of decoding - usually in the business logic
 
 abstract Decoder
 
-@api decoder => WithDecoder <: Behaviour begin
+@api decoder => WithDecoder <: Behavior begin
     arg(decoder::Decoder)
-    curry(tile::Behaviour)
+    curry(tile::Behavior)
 end
 name(d::WithDecoder) = name(d.tile)
 
@@ -120,9 +120,9 @@ subscribe(t::Tile, name, s; absorb=true) =
     Subscription(t, name, s) |>
        (x -> absorb ? stoppropagation(x, name) : x)
 
-subscribe(t::Behaviour, s::Input; absorb=true) =
+subscribe(t::Behavior, s::Input; absorb=true) =
     subscribe(t, name(t), (identity, s), absorb=absorb)
-subscribe(t::Behaviour, s::(Decoder, Input); absorb=true) =
+subscribe(t::Behavior, s::(Decoder, Input); absorb=true) =
     subscribe(t, name(t), s, absorb=absorb)
 
 render(sig::Subscription) =
@@ -172,9 +172,9 @@ render(tile::StopPropagation) =
             name=tile.name)
 
 
-(>>>)(t::Behaviour, s::Input) = subscribe(t, (identity, s))
+(>>>)(t::Behavior, s::Input) = subscribe(t, (identity, s))
 
 # TODO: Use a different operator with lesser precedence than >>>
-(>>>)(t::Behaviour, f::Function) = decoder(f, t)
+(>>>)(t::Behavior, f::Function) = decoder(f, t)
 (>>>)(t::WithDecoder, s::Input) = subscribe(t, (t.decoder, s))
 

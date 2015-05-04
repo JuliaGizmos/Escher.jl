@@ -13,7 +13,7 @@ export hasstate,
        scrollbutton
 
 
-@api hasstate => WithState <: Behaviour begin
+@api hasstate => WithState <: Behavior begin
     curry(tile::Tile)
     kwarg(name::Symbol=:_state)
     kwarg(attr::String="value")
@@ -30,7 +30,7 @@ render(t::WithState) =
 
 # Sample a bunch of signals upon changes to another bunch of signals
 # Returns a signal of dict of signal values
-@api samplesignals => SignalSampler <: Behaviour begin
+@api samplesignals => SignalSampler <: Behavior begin
     arg(signals::AbstractArray)
     arg(triggers::AbstractArray)
     curry(tile::Tile)
@@ -52,7 +52,7 @@ render(sig::SignalSampler) =
             triggers=sig.triggers)
 
 
-@api keypress => Keypress <: Behaviour begin
+@api keypress => Keypress <: Behavior begin
     arg(keys::String)
     curry(tile::Tile)
     kwarg(name::Symbol=:_keys)
@@ -61,7 +61,7 @@ end
 
 render(k::Keypress) =
     (render(k.tile) & [:attributes => [:tabindex => 1]]) <<
-        (Elem("keypress-behaviour", keys=k.keys, name=k.name) &
+        (Elem("keypress-behavior", keys=k.keys, name=k.name) &
             (k.onpress != "" ? [:onpress=>k.onpress] : Dict()))
 
 immutable Key
@@ -80,27 +80,29 @@ decodeJSON(sig::Input{Key}, d::Dict) =
 abstract MouseButton
 
 @terms MouseButton begin
+    nobutton => NoButton
     leftbutton => LeftButton
     rightbutton => RightButton
     scrollbutton => ScrollButton
 end
 
-@api clickable => Clickable <: Behaviour begin
+@api clickable => Clickable <: Behavior begin
     typedarg(buttons::AbstractArray=[leftbutton])
     curry(tile::Tile)
     kwarg(name::Symbol=:_clicks)
 end
 
+button_number(::NoButton) = 0
 button_number(::LeftButton) = 1
 button_number(::RightButton) = 2
 button_number(::ScrollButton) = 3
 
 render(c::Clickable) =
-    render(c.tile) << Elem("clickable-behaviour", name=c.name,
+    render(c.tile) << Elem("clickable-behavior", name=c.name,
                         buttons=string(map(button_number, c.buttons)))
 
 
-@api selectable => Selectable <: Behaviour begin
+@api selectable => Selectable <: Behavior begin
     curry(tile::Tile)
     kwarg(name::Symbol=:_clicks)
     kwarg(elem::String="::parent")
@@ -108,7 +110,7 @@ end
 
 render(t::Selectable) =
     render(t.tile) <<
-        Elem("selectable-behaviour", name=t.name, elem=t.elem)
+        Elem("selectable-behavior", name=t.name, elem=t.elem)
 
 
 convert(::Type{MouseButton}, x::Int) =
@@ -123,7 +125,7 @@ abstract MouseState
     mouseup => MouseUp
 end
 
-@api hoverable => Hoverable <: Behaviour begin
+@api hoverable => Hoverable <: Behavior begin
     typedarg(get_coords::Bool=false)
     curry(tile::Tile)
     kwarg(name::Symbol=:_hover)
@@ -134,7 +136,7 @@ immutable Hover
     position::(Float64, Float64)
 end
 
-immutable Editable <: Behaviour
+immutable Editable <: Behavior
     name::Symbol
     tile::Tile
 end
@@ -148,7 +150,7 @@ immutable ChanSend <: Tile
     watch::Symbol
     tile::Tile
 end
-send(chan::Symbol, b::Behaviour) =
+send(chan::Symbol, b::Behavior) =
     ChanSend(chan, b.name, b)
 
 render(chan::ChanSend) =
@@ -171,5 +173,5 @@ render(chan::ChanRecv) =
             chan=chan.chan, attr=chan.attr)
 
 
-wire(a::Behaviour, b, chan, attribute) =
+wire(a::Behavior, b, chan, attribute) =
     send(chan, a), recv(chan, b, attribute)

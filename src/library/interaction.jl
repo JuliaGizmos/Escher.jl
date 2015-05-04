@@ -1,4 +1,4 @@
-immutable Resizable <: Behaviour
+immutable Resizable <: Behavior
     name::Symbol
     tile::Tile
 end
@@ -9,7 +9,7 @@ end
 
 resizable(tile, container; name=:_size) = Resizable(name, tile, container)
 
-immutable Draggable <: Behaviour
+immutable Draggable <: Behavior
     name::Symbol
     tile::Tile
     container::Tile
@@ -21,7 +21,7 @@ immutable Drag
     fraction::(Float64, Float64)
 end
 
-immutable Sortable <: Behaviour
+immutable Sortable <: Behavior
     name::Symbol
     tile::AbstractArray
 end

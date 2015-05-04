@@ -27,7 +27,7 @@ include("basics/layout.jl")
 include("basics/content.jl")
 include("basics/typography.jl")
 include("basics/embellishment.jl")
-include("basics/behaviour.jl")
+include("basics/behavior.jl")
 include("basics/window.jl")
 
 include("library/markdown.jl")
