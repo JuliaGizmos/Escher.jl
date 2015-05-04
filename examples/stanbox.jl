@@ -2,7 +2,7 @@ using Markdown
 using Color
 
 codewindow(name, code; w=40em, h=20em, language="julia") =
-    roundcorner(1mm, watch(codemirror(code, language=language, name=name)) |> size(w, h))
+    roundcorner(1mm, broadcast(codemirror(code, language=language, name=name)) |> size(w, h))
 
 section(title, content) = vbox(vskip(1em), title, vskip(1em), content)
 
@@ -13,8 +13,8 @@ function inputsui(inputsignal; code="", data="", config="")
         section(h2("Stan Code"), codewindow(:code, code)),
         section(h2("Data"), codewindow(:data, data)),
         section(h2("Config Input"), codewindow(:config, data)),
-        section(empty, hbox(watch(button("Check inputs", name=:check_input)),
-                                   watch(button("Run model", name=:run_model)))),
+        section(empty, hbox(broadcast(button("Check inputs", name=:check_input)),
+                                   broadcast(button("Run model", name=:run_model)))),
     )
 
     samplesignals([:code, :data, :config], [:run_model, :check_input], form) >>> inputsignal

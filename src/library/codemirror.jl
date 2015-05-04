@@ -10,7 +10,7 @@ export codemirror
     kwarg(tabsize::Int=4)
 end
 
-watch(c::CodeMirror) =
+broadcast(c::CodeMirror) =
     hasstate(c, name=c.name, attr="currentValue", trigger="change")
 
 # Render to virtual DOM

@@ -5,10 +5,10 @@ function main(window)
 
     form = vbox(
         h1("Submit your rating"),
-        watch(textinput("", name=:name, label="Your name")),
-        hbox("Your rating", watch(slider(1:10, name=:rating)))
+        broadcast(textinput("", name=:name, label="Your name")),
+        hbox("Your rating", broadcast(slider(1:10, name=:rating)))
             |> packacross(center),
-        watch(button("Submit", name=:submit))
+        broadcast(button("Submit", name=:submit))
     ) |> maxwidth(400px)
 
     lift(inp) do dict

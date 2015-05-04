@@ -26,7 +26,7 @@ end
 render(i::IconButton) =
     Elem("paper-icon-button") & [(i.url ? :src : :icon) => i.icon]
 
-watch(w::IconButton) =
+broadcast(w::IconButton) =
     clickable(w, name=w.name)
 
 
@@ -89,7 +89,7 @@ render(t::Toolbar) =
     arg(tile::Tile)
 end
 
-watch(i::Item) = clickable(i)
+broadcast(i::Item) = clickable(i)
 
 render(i::Item) =
     Elem("paper-item", render(i.tile), attributes=[:icon=>i.icon])
@@ -130,7 +130,7 @@ function render(dm::DropdownMenu)
         label=dm.label,
     )
 end
-watch(d::DropdownMenu) = selectable(d, name=d.name, elem=".menu")
+broadcast(d::DropdownMenu) = selectable(d, name=d.name, elem=".menu")
 
 # TODO:
 #

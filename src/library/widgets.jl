@@ -1,5 +1,5 @@
 import Base: >>>
-export watch,
+export broadcast,
        button,
        slider,
        checkbox,
@@ -11,11 +11,11 @@ export watch,
        paper
 
 # A widget can be coerced into a behavior
-# by calling `watch` on it.
+# by calling `broadcast` on it.
 abstract Widget <: Tile
 
 subscribe(w::Widget, x::Signal; absorb=true) =
-    subscribe(watch(w), x, absorb=absorb)
+    subscribe(broadcast(w), x, absorb=absorb)
 (>>>)(w::Widget, x::Signal) = subscribe(w, x)
 
 ## Button
@@ -34,7 +34,7 @@ render(b::Button) =
                       :noink => boolattr(b.noink, "noink"),
                       :disabled => boolattr(b.disabled, "disabled")])
 
-watch(b::Button) =
+broadcast(b::Button) =
     clickable(b, name=b.name)
 
 ## Slider
@@ -49,7 +49,7 @@ watch(b::Button) =
     kwarg(secondaryprogress::Real=0)
 end
 
-watch(s::Slider) =
+broadcast(s::Slider) =
     hasstate(s, name=s.name)
 
 render(s::Slider) =
@@ -77,7 +77,7 @@ for (typ, fn, elem) in [(:Checkbox, :checkbox, "paper-checkbox"),
             kwarg(disabled::Bool=false)
         end
 
-        watch(c::$typ) =
+        broadcast(c::$typ) =
             hasstate(c, name=c.name, attr="checked", trigger="change")
 
         render(c::$typ) =
@@ -106,7 +106,7 @@ end
     kwarg(disabled::Bool=false)
 end
 
-watch(t::TextInput, event="input") =
+broadcast(t::TextInput, event="input") =
     hasstate(t, name=t.name, attr="value", trigger=event, source="target")
 
 function render(t::TextInput)
@@ -199,7 +199,7 @@ render(r::RadioGroup) =
         value=r.value,
         name=r.name)
 
-watch(r::RadioGroup) = selectable(r, name=r.name)
+broadcast(r::RadioGroup) = selectable(r, name=r.name)
 
 ## Spinner
 
