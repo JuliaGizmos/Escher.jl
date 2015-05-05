@@ -39,12 +39,11 @@ function next(board, move)
 end
 
 movesᵗ = Input((0, 0))
-initial_boardᵗ = Input{Any}(newboard(10, 10))
-lift(println, initial_boardᵗ)
+initial_boardᵗ = Input{Board}(newboard(10, 10))
 boardᵗ = flatten(
-    lift(Signal, initial_boardᵗ) do b
-        foldl(next, b, movesᵗ; output_type=Board)
-    end, typ=Any
+    lift(initial_boardᵗ) do b
+        foldl(next, b, movesᵗ; typ=Board)
+    end
 )
 
 ### View ###
@@ -81,7 +80,7 @@ function main(window)
     push!(window.assets, "widgets")
     push!(window.assets, "icons")
 
-    lift(Tile, boardᵗ) do board
+    lift(boardᵗ) do board
         vbox(
            vskip(2em),
            title(3, "minesweeper"),

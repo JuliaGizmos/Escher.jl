@@ -124,7 +124,7 @@ function uisocket(req)
         end
     end
 
-    foldl(rendered, flatten(tilestream; typ=Any); output_type=Any) do prev, next
+    foldl(rendered, flatten(tilestream; typ=Any); typ=Any) do prev, next
         rendered_next = render(next)
         try
             write(sock, patch_cmd(
