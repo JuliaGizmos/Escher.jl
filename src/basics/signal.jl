@@ -55,6 +55,18 @@ const identity = Id()
 
 decode(dec::Id, x) = x
 
+# Chain two decoders together.
+immutable Chained <: Decoder
+    decoder1::Decoder
+    decoder2::Decoder
+end
+
+chain(d, t::WithDecoder) =
+    decoder(Chained(d, t.decoder), t.tile)
+
+decode(dec::Chained, x) =
+    decode(dec.decoder1, decode(dec.decoder2, x))
+
 # Pair with a constant
 immutable ConstPair <: Decoder
     value::Any
@@ -176,5 +188,6 @@ render(tile::StopPropagation) =
 
 # TODO: Use a different operator with lesser precedence than >>>
 (>>>)(t::Behavior, f::Function) = decoder(f, t)
+(>>>)(t::WithDecoder, f::Function) = chain(DecoderFn(f), t)
 (>>>)(t::WithDecoder, s::Input) = subscribe(t, (t.decoder, s))
 
