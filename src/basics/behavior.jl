@@ -74,7 +74,7 @@ end
 
 const nokey = Key("", false, false, false, false)
 
-decodeJSON(sig::Input{Key}, d::Dict) =
+decodeJSON(::InputType{:Key}, d::Dict) =
     Key(d["key"], d["alt"], d["ctrl"], d["meta"], d["shift"])
 
 abstract MouseButton
@@ -92,7 +92,6 @@ end
     kwarg(name::Symbol=:_clicks)
 end
 
-button_number(::NoButton) = 0
 button_number(::LeftButton) = 1
 button_number(::RightButton) = 2
 button_number(::ScrollButton) = 3

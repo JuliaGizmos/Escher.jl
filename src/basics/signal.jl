@@ -14,18 +14,18 @@ export stoppropagation,
 
 decodeJSON(x) = x
 
-function decodeJSON(ctr, x)
-    # ctr is the constructor
-    if typ == "Tuple"
-        tuple(x.data...)
-    else
-        x
-    end
+# A type for facilitating dispatch for
+# decodeJSON
+immutable InputType{ctr}
 end
 
+decodeJSON(ctr, x) = x
+decodeJSON(::InputType{:Tuple}, x) = tuple(x.data...)
+
+# If input is a dictionary, call the constructor
 decodeJSON(x::Dict) =
-    haskey(x, "_type") ?
-        decodeJSON(x["_type"], x) : x
+    haskey(x, "_ctr") ?
+        decodeJSON(InputType{symbol(x["_ctr"])}(), x) : x
 
 @doc """
 A Behavior is a tile that denotes that it can

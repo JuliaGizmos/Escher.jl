@@ -164,6 +164,7 @@ Polymer({
         this.$.keys.target = this.elem
         this.$.keys.addEventListener("keys-pressed", function (ev) {
             self.value = ev.detail
+            self.value._ctr = "Key"
             self.update()
         })
 
