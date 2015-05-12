@@ -152,7 +152,7 @@ render_position(c::Corner) = [:style => render_position(c, 0, 0)]
 render_position{C <: Corner}(p::Relative{C}) =
     [:style => render_position(C(), p.x, p.y)]
 
-function render(tile::Inset)
+render(tile::Inset) = begin
     outer = render(tile.containing)
     inner = render(tile.contained)
 

@@ -31,7 +31,7 @@ end
 render_cell(x) =
     Elem(:td, render(x))
 
-function render(t::Table)
+render(t::Table) = begin
     if length(t.head) > 0
         @assert length(t.head) == ncol(t.body)
         head = t.head

@@ -109,7 +109,7 @@ end
 broadcast(t::TextInput, event="input") =
     hasstate(t, name=t.name, attr="value", trigger=event, source="target")
 
-function render(t::TextInput)
+render(t::TextInput) = begin
     if t.multiline
         if length(t.pattern) > 0
             warn_once("Multi-line text input does not support pattern validation")
@@ -188,7 +188,7 @@ render(r::RadioButton) =
 end
 
 wrapradio(x::RadioButton) = x
-function wrapradio(x)
+wrapradio(x) = begin
     name, label = x
     radio(name, label)
 end

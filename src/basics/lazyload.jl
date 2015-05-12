@@ -13,8 +13,9 @@ end
 
     import Meddle: MeddleRequest, Response
 
-    function Morsel.prepare_response{ns, tag}(
-            data::Elem{ns, tag}, req::MeddleRequest, res::Response)
+    Morsel.prepare_response{ns, tag}(
+        data::Elem{ns, tag}, req::MeddleRequest, res::Response,
+    ) = begin
         io = IOBuffer()
         Patchwork.write_patchwork_prelude(io)
 
@@ -22,8 +23,9 @@ end
         prepare_response(takebuf_string(io), req, res)
     end
 
-    function Morsel.prepare_response(
-            data::Tile, req::MeddleRequest, res::Response)
+    Morsel.prepare_response(
+        data::Tile, req::MeddleRequest, res::Response,
+    ) = begin
 
         io = IOBuffer()
 
@@ -40,10 +42,11 @@ end
     using IJulia.CommManager
     import Base.Random: UUID, uuid4
 
-    function setup_transport(sig::Input)
+    setup_transport(sig::Input) = begin
         id = makeid(sig)
         comm = Comm(:EscherSignal, data=[:signalId => id])
-        comm.on_msg = (msg) -> push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
+        comm.on_msg = (msg) ->
+            push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
         return id
     end
 end
@@ -62,20 +65,22 @@ end
 @require Gadfly begin
     import Gadfly: Compose
 
-    function convert(::Type{Tile}, p::Gadfly.Plot)
+    convert(::Type{Tile}, p::Gadfly.Plot) = begin
         backend = Compose.Patchable(
-                     Compose.default_graphic_width,
-                     Compose.default_graphic_height)
+            Compose.default_graphic_width,
+            Compose.default_graphic_height,
+        )
         convert(Tile, Compose.draw(backend, p))
     end
 end
 
 @require Compose begin
 
-    function convert(::Type{Tile}, p::Compose.Context)
+    convert(::Type{Tile}, p::Compose.Context) = begin
         backend = Compose.Patchable(
-                     Compose.default_graphic_width,
-                     Compose.default_graphic_height)
+            Compose.default_graphic_width,
+            Compose.default_graphic_height,
+        )
         convert(Tile, Compose.draw(backend, p))
     end
 end
@@ -85,7 +90,5 @@ end
 
     import DataFrames: AbstractDataFrame
 
-    function convert(::Type{Tile}, df::AbstractDataFrame)
-        table(df)
-    end
+    convert(::Type{Tile}, df::AbstractDataFrame) = table(df)
 end

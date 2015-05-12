@@ -21,7 +21,7 @@ render(x::Leaf) = x.element
 convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
 
-function bestmime(val)
+bestmime(val) = begin
   for mime in ("text/html", "image/svg+xml", "image/png", "text/plain")
     mimewritable(mime, val) && return MIME(symbol(mime))
   end
@@ -29,9 +29,10 @@ function bestmime(val)
 end
 
 render_fallback(m::MIME"text/plain", x) = Elem(:div, stringmime(m, x))
-render_fallback(m::MIME"text/html", x)  = Elem(:div, innerHTML=stringmime(m, x))
-render_fallback(m::MIME"text/svg", x)   = Elem(:div, innerHTML=stringmime(m, x))
-render_fallback(m::MIME"image/png", x)  = Elem(:img, src="data:image/png;base64," * stringmime(m, x))
+render_fallback(m::MIME"text/html", x) = Elem(:div, innerHTML=stringmime(m, x))
+render_fallback(m::MIME"text/svg", x) = Elem(:div, innerHTML=stringmime(m, x))
+render_fallback(m::MIME"image/png", x) =
+    Elem(:img, src="data:image/png;base64," * stringmime(m, x))
 
 render(x::FloatingPoint) = @sprintf "%0.3f" x
 render(x::Symbol) = string(x)
@@ -49,9 +50,7 @@ render{T}(x::T) =
         render(AnyWrap(x))
 
 # Catch-all render
-function render(x::AnyWrap)
-    render_fallback(bestmime(x.value), x.xvalue)
-end
+render(x::AnyWrap) = render_fallback(bestmime(x.value), x.xvalue)
 
 @doc """
 `Empty` is handy tile that is well... Empty.

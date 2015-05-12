@@ -25,7 +25,7 @@ intersperse(0, [1, 2, 3], true)
 # => [0, 1, 0, 2, 0, 3, 0]
 ```
 """ ->
-function intersperse(x, xs, enclose=false)
+intersperse(x, xs, enclose=false) = begin
     if length(xs) > 1
         res = foldl((acc, nxt) -> vcat(acc, x, nxt),
                     Any[xs[1]], xs[2:end])
@@ -80,7 +80,7 @@ mapparts(sentinal, parts, prefix, suffix, value) =
        [prefix * suffix => value] :
        [prefix * name(part) * suffix => value for part in parts]
 
-function teeprint(x, fn=println)
+teeprint(x, fn=println) = begin
     fn(x)
     x
 end

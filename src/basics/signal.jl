@@ -151,7 +151,7 @@ import Base.Random: UUID, uuid4
 const signal_to_id = Dict()
 const id_to_signal = Dict()
 
-function makeid(sig)
+makeid(sig) = begin
     if haskey(signal_to_id, sig)
         # todo ensure connection
         return signal_to_id[sig]
@@ -162,9 +162,7 @@ function makeid(sig)
     end
 end
 
-function fromid(id)
-    id_to_signal[id]
-end
+fromid(id) = id_to_signal[id]
 
 # Don't allow a signal to propagate outward
 immutable StopPropagation <: Tile
@@ -187,7 +185,7 @@ render(tile::StopPropagation) =
 (>>>)(t::Behavior, s::Input) = subscribe(t, (identity, s))
 
 # TODO: Use a different operator with lesser precedence than >>>
-(>>>)(t::Behavior, f::Function) = decoder(f, t)
-(>>>)(t::WithDecoder, f::Function) = chain(DecoderFn(f), t)
-(>>>)(t::WithDecoder, s::Input) = subscribe(t, (t.decoder, s))
+(>>>)(t::Behavior, f::Function) = interpreter(f, t)
+(>>>)(t::WithInterpreter, f::Function) = chain(InterpreterFn(f), t)
+(>>>)(t::WithInterpreter, s::Input) = subscribe(t, (t.interpreter, s))
 

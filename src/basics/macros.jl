@@ -40,7 +40,7 @@ end
 @doc """
 separate out arguments and keyword arguments in a vector of field definitions
 """ ->
-function argskwargs(exps)
+argskwargs(exps) = begin
     kwargs = filter(exp -> exp.args[1] in [:kwarg, :typedkwarg], exps)
     args = filter(exp -> !(exp.args[1] in [:kwarg, :typedkwarg]), exps)
     args, kwargs
@@ -52,7 +52,7 @@ Convert a field definition into a field definition inside a type declaration
 will just become
     x::Number
 """ ->
-function typebody(exp::Expr)
+typebody(exp::Expr) = begin
     if exp.head == :call
         if exp.args[2].head == :(::)
             return exp.args[2]
@@ -70,7 +70,7 @@ will just become
     [:(x::Number), :(y::String), :(z::Complex)]
 
 """ ->
-function typebody(args::AbstractArray)
+typebody(args::AbstractArray) = begin
     map(typebody, args)
 end
 
@@ -89,7 +89,7 @@ argtype(exp) = exp.args[1]
 @doc """
 given a field definition, returns the name[::Type] to be used in method arguments
 """ ->
-function getvar(exp)
+getvar(exp) = begin
     decl = exp.args[2]
     hasdefault(exp) ?
         (argtype(exp) === :typedarg ? decl.args[1] : decl.args[1].args[1]) :
@@ -109,7 +109,7 @@ and a dictionary of type parameters e.g. Dict(:T => :Number)
 returns an expression of the form x::Number
 """ ->
 replaceparam(x::Symbol, params) = x
-function replaceparam(x, params)
+replaceparam(x, params) = begin
     if x.head === :(::)
         typ = get(params, x.args[2], x.args[2])
         return Expr(x.head, x.args[1], esc(typ))
@@ -127,7 +127,7 @@ the returned value is a Vector of 3-tuples with the following elements
 2. Variable name (or a variable name with a type in case of typedarg)
 3. value to use while constructing the underlying type.
 """ ->
-function states(arg, params)
+states(arg, params) = begin
     var = replaceparam(getvar(arg), params)
 
     if hasdefault(arg)
@@ -157,7 +157,7 @@ end
 used by makeapimethods to prepend an argument to a method object
 """ ->
 
-function prependarg(state, method)
+prependarg(state, method) = begin
     curried, var, val = state
     lambda_args = method.lambda_args
     args = method.args
@@ -174,7 +174,7 @@ function prependarg(state, method)
     ApiMethod(args, lambda_args, constructor_args)
 end
 
-function teeprint(x, fn=println)
+teeprint(x, fn=println) = begin
     fn(x)
     x
 end
@@ -186,7 +186,7 @@ returns a list of ApiMethod objects representing the various methods emerging fr
 the API definition. Keyword arguments are to be added in when actually creating the
 method definitions.
 """ ->
-function makeapimethods(arglist, params)
+makeapimethods(arglist, params) = begin
     if length(arglist) == 0
         return Any[ApiMethod(Any[], Any[], Any[])]
     else
@@ -213,7 +213,7 @@ or
 respectively. The returned expression is of the form Expr(:kw, key, value)
 
 """ ->
-function kwize(argdef)
+kwize(argdef) = begin
     @assert argdef.args[1] in [:typedkwarg, :kwarg]
 
     if argdef.args[1] === :typedkwarg
@@ -224,7 +224,7 @@ function kwize(argdef)
     end
 end
 
-function methodexpr(fn, typ, kws, kwnames, m)
+methodexpr(fn, typ, kws, kwnames, m) = begin
     m = isempty(m.lambda_args) ?
         :(foo($(m.args...)) = $(esc(typ))($(m.constructor_args...), $(kwnames...))) :
         :(foo($(m.args...)) = ($(m.lambda_args...)) -> $(esc(typ))($(m.constructor_args...), $(kwnames...)))
@@ -256,7 +256,7 @@ paramdict(typ) =
 @doc """
 From a field definition, generate metadata for documenting the field
 """ ->
-function argdoc(arg, params, iskwarg=false)
+argdoc(arg, params, iskwarg=false) = begin
     name, typ = typebody(arg).args
 
     dict = Dict()

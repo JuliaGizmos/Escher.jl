@@ -95,7 +95,7 @@ const allowed_font_weights = 100:100:900
 end
 WithFontWeight{T}(weight::T, tile) = WithFontWeight{T}(weight, tile)
 
-function render(t::WithFontWeight)
+render(t::WithFontWeight) = begin
     if !(t.weight in allowed_font_weights)
         error(string(t.weight, " is not an allowed font weight"))
     end

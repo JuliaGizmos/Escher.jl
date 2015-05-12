@@ -120,7 +120,7 @@ wrapitem(x::Item) = render(x)
 wrapitem(x::String) = Elem("paper-item", x)
 wrapitem(x) = Elem("paper-item", render(x))
 
-function render(dm::DropdownMenu)
+render(dm::DropdownMenu) = begin
     # paper-dropdown-menu spec requires these classes
     m = render(menu(map(t -> wrapitem(t), dm.items.tiles))) & [:className => "menu"]
     d = Elem("paper-dropdown", m) & [:className => "dropdown"]
