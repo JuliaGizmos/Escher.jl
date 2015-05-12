@@ -2,7 +2,7 @@
 import Base: $
 
 export stoppropagation,
-       decoder,
+       interpreter,
        constant,
        pairwith,
        pairwithindex,
@@ -37,45 +37,45 @@ name(b::Behavior) = b.name
 
 # Second line of decoding - usually in the business logic
 
-abstract Decoder
+abstract Interpreter
 
-@api decoder => WithDecoder <: Behavior begin
-    arg(decoder::Decoder)
+@api interpreter => WithInterpreter <: Behavior begin
+    arg(interpreter::Interpreter)
     curry(tile::Behavior)
 end
-name(d::WithDecoder) = name(d.tile)
+name(d::WithInterpreter) = name(d.tile)
 
-render(d::WithDecoder) =
+render(d::WithInterpreter) =
     render(d.tile)
 
 # Don't change the message
-immutable Id <: Decoder
+immutable Id <: Interpreter
 end
 const identity = Id()
 
-decode(dec::Id, x) = x
+interpret(dec::Id, x) = x
 
-# Chain two decoders together.
-immutable Chained <: Decoder
-    decoder1::Decoder
-    decoder2::Decoder
+# Chain two interpreters together.
+immutable Chained <: Interpreter
+    interpreter1::Interpreter
+    interpreter2::Interpreter
 end
 
-chain(d, t::WithDecoder) =
-    decoder(Chained(d, t.decoder), t.tile)
+chain(d, t::WithInterpreter) =
+    interpreter(Chained(d, t.interpreter), t.tile)
 
-decode(dec::Chained, x) =
-    decode(dec.decoder1, decode(dec.decoder2, x))
+interpret(dec::Chained, x) =
+    interpret(dec.interpreter1, interpret(dec.interpreter2, x))
 
 # Pair with a constant
-immutable ConstPair <: Decoder
+immutable ConstPair <: Interpreter
     value::Any
 end
 
-decode(dec::ConstPair, x) = (x, dec.value)
+interpret(dec::ConstPair, x) = (x, dec.value)
 
-pairwith(x, tile::Tile) = decoder(ConstPair(x), tile)
-pairwith(x) = decoder(ConstPair(x))
+pairwith(x, tile::Tile) = interpreter(ConstPair(x), tile)
+pairwith(x) = interpreter(ConstPair(x))
 pairwith(x::AbstractArray, tiles::AbstractArray) = map(pairwith, x, tiles)
 pairwith(x, tiles::AbstractArray) = map(pairwith(x))
 
@@ -88,44 +88,44 @@ pairwithindex(tiles::AbstractMatrix) =
         for i=1:size(tiles, 1), j=1:size(tiles, 2)]
 
 # Instead of the signal value, use a constant
-immutable Const <: Decoder
+immutable Const <: Interpreter
     value::Any
 end
 
-decode(dec::Const, _) = dec.value
+interpret(dec::Const, _) = dec.value
 
-constant(x, tile::Tile) = decoder(Const(x), tile)
-constant(x) = decoder(Const(x))
+constant(x, tile::Tile) = interpreter(Const(x), tile)
+constant(x) = interpreter(Const(x))
 constant(xs::AbstractArray, tiles::AbstractArray) = map(constant, xs, tiles)
 constant(x, tiles::AbstractArray) = map(constant(x), tiles)
 
 # Apply a function
-immutable DecoderFn <: Decoder
+immutable InterpreterFn <: Interpreter
     f::Function
 end
-decoder(f::Function, tile::Tile) = decoder(DecoderFn(f), tile)
-decode(dec::DecoderFn, x) = dec.f(x)
+interpreter(f::Function, tile::Tile) = interpreter(InterpreterFn(f), tile)
+interpret(dec::InterpreterFn, x) = dec.f(x)
 
 # Apply a function with some constant partial args
 # For efficiency, the function must be defined outside
 # of any signal functions. i.e. no point creating
 # ad-hoc functions
 
-immutable DecoderPartialFn <: Decoder
+immutable InterpreterPartialFn <: Interpreter
     f::Function
     args::Tuple
 end
 partial(f::Function, args::Tuple, tile) =
-    decoder(DecoderPartialFn(f, args), tile)
+    interpreter(InterpreterPartialFn(f, args), tile)
 
-decode(dec::DecoderPartialFn, x) = dec.f(dec.args..., x)
+interpret(dec::InterpreterPartialFn, x) = dec.f(dec.args..., x)
 
+### Send a signal update to the Julia side
 
-# Send a signal update to the Julia side
 immutable Subscription <: Tile
     tile::Tile
     name::Symbol # Name of the signal update on the front-end
-    receiver::(Decoder, Input)
+    receiver::@compat Tuple{Interpreter, Input}
 end
 
 subscribe(t::Tile, name, s; absorb=true) =
@@ -134,7 +134,7 @@ subscribe(t::Tile, name, s; absorb=true) =
 
 subscribe(t::Behavior, s::Input; absorb=true) =
     subscribe(t, name(t), (identity, s), absorb=absorb)
-subscribe(t::Behavior, s::(Decoder, Input); absorb=true) =
+subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input}); absorb=true) =
     subscribe(t, name(t), s, absorb=absorb)
 
 render(sig::Subscription) =
