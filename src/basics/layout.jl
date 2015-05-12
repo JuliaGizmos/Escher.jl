@@ -62,9 +62,10 @@ export inset,
     arg(width::Length, doc="The width")
     curry(tile::Tile)
 end
-render(t::Width) =
-    render(t.tile) &
-        style(@d((t.prefix == "" ? "width" : t.prefix * "Width") => t.width))
+render(t::Width) = begin
+    prefixed = t.prefix == "" ? "width" : t.prefix * "Width"
+    render(t.tile) & style(@d(prefixed => t.width))
+end
 
 @api height => Height <: Tile begin
     doc("Set the height of a tile")
@@ -75,7 +76,7 @@ end
 
 render(t::Height) =
     render(t.tile) &
-        style((t.prefix == "" ? "height" : t.prefix * "Height") => t.height)
+        style(@d((t.prefix == "" ? "height" : t.prefix * "Height") => t.height))
 
 minwidth(w, x...) = width("min", w, x...)
 minheight(h, x...) = height("min", h, x...)

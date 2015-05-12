@@ -1,0 +1,38 @@
+#!/usr/bin/env julia
+
+using ArgParse
+using Escher
+
+include(Pkg.dir("Escher", "src", "cli", "serve.jl"))
+
+function parse_commandline()
+    s = ArgParseSettings()
+    @add_arg_table s begin
+        "--serve"
+            help = "Serve escher UI files"
+            action = :store_true
+        "--make"
+            help = "Compile Escher UI files to HTML. Each file with a main function becomes a .html."
+            action = :store_true
+        "--port"
+            help = "Port to run the HTTP server on"
+            arg_type = Int
+            default = 5555
+        "--dir", "-d"
+            help = "Path to serve from, defaults to `.'"
+            arg_type = String
+            default = "."
+    end
+    parse_args(s)
+end
+
+main() = begin
+    parsed_args = parse_commandline()
+    println(parsed_args)
+    if parsed_args["serve"]
+        escher_serve(parsed_args["port"], parsed_args["dir"])
+    elseif parsed_args["make"]
+    end
+end
+
+main()

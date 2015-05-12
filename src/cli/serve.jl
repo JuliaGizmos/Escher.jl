@@ -2,7 +2,6 @@
 #
 # Webapp
 using Mux
-using Lazy
 using Escher
 using JSON
 
@@ -11,7 +10,6 @@ using Patchwork
 
 function loadfile(filename)
     if isfile(filename)
-
         try
             include(filename)
             return try
@@ -91,8 +89,8 @@ const commands = Dict([
 ])
 
 
-function uisocket(req)
-    file = abspath(req[:params][:file])
+uisocket(dir) = (req) -> begin
+    file = joinpath(abspath(dir), (req[:params][:file]))
 
     if !isfile(file)
         return
@@ -163,7 +161,7 @@ function uisocket(req)
 
 end
 
-function escher_serve()
+function escher_serve(port=5555, dir=".")
     # App
     @app static = (
         Mux.defaults,
@@ -175,10 +173,10 @@ function escher_serve()
 
     @app comm = (
         Mux.wdefaults,
-        route("/socket/:file", uisocket),
+        route("/socket/:file", uisocket(dir)),
         Mux.wclose,
         Mux.notfound(),
     )
 
-    @sync serve(static, comm)
+    @sync serve(static, comm, port)
 end

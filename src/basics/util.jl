@@ -1,8 +1,12 @@
 using Color
 
 # Dict macro
-macro d(args...)
-   :(@compat Dict($(args...)))
+macro d(xs...)
+  if VERSION < v"0.4-"
+    Expr(:dict, map(esc, xs)...)
+  else
+    :(Dict($(map(esc, xs)...)))
+  end
 end
 
 convert(::Type{ColorValue}, s::String) =
@@ -86,6 +90,7 @@ mapparts(sentinal, parts, prefix, suffix, value) =
        [prefix * name(part) * suffix => value for part in parts]
 
 style(x) = @d(:style => x)
+
 teeprint(x, fn=println) = begin
     fn(x)
     x
