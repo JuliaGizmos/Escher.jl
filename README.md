@@ -11,16 +11,10 @@ Currently Escher works with Julia v0.3.
 _In a Julia REPL_
 
 ```julia
-Pkg.clone("https://github.com/one-more-minute/Hiccup.jl.git")
-Pkg.clone("https://github.com/one-more-minute/Mux.jl.git")
-Pkg.checkout("Lazy")
-Pkg.add("WebSockets")
-Pkg.add("Markdown")
-Pkg.checkout("Markdown")
-Pkg.add("Patchwork")
-Pkg.add("Reactive")
-
 Pkg.clone("https://github.com/shashi/Escher.jl.git")
+
+Pkg.checkout("Patchwork")
+Pkg.checkout("Reactive")
 ```
 
 _On the command line, within the `assets/` subdirectory_
