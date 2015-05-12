@@ -44,7 +44,7 @@ end
 
     setup_transport(sig::Input) = begin
         id = makeid(sig)
-        comm = Comm(:EscherSignal, data=[:signalId => id])
+        comm = Comm(:EscherSignal, data=@d(:signalId => id))
         comm.on_msg = (msg) ->
             push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
         return id

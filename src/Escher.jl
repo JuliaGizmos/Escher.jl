@@ -4,8 +4,9 @@ if VERSION < v"0.4.0-dev"
     using Docile
 end
 
-@docstrings
+#@docstrings
 
+using Compat
 using Patchwork
 using Reactive
 using JSON

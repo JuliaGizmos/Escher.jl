@@ -8,7 +8,7 @@ end
 
 render_slide(x) =
     packitems(center, packacross(center, vbox([x]))) |>
-        (t -> render(t) & [:attributes => [:fit => :fit]])
+        (t -> render(t) & @d(:attributes => @d(:fit => :fit)))
 
 render(x::SlideShow) =
     Elem("slide-show", map(render_slide, x.tiles.tiles),

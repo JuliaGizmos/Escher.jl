@@ -178,8 +178,7 @@ stoppropagation(tile::Tile, name::Symbol) =
 
 render(tile::StopPropagation) =
     render(tile.tile) <<
-        Elem("stop-propagation",
-            name=tile.name)
+        Elem("stop-propagation", name=tile.name)
 
 
 (>>>)(t::Behavior, s::Input) = subscribe(t, (identity, s))

@@ -1,5 +1,10 @@
 using Color
 
+# Dict macro
+macro d(args...)
+   :(@compat Dict($(args...)))
+end
+
 convert(::Type{ColorValue}, s::String) =
     color(s)
 
@@ -57,7 +62,7 @@ maybestring(s::TileList) =
 maybestring(s) = render(s)
 
 addclasses(t, cs) =
-    t & [:className => cs * " " * getproperty(t, :className, "")]
+    t & @d(:className => cs * " " * getproperty(t, :className, ""))
 
 render(c::Class) =
     addclasses(c.forcewrap ? Elem(c.wrap, maybestring(c.content)) :
@@ -77,9 +82,10 @@ radius for different corners etc.
 """ ->
 mapparts(sentinal, parts, prefix, suffix, value) =
    parts === sentinal ?
-       [prefix * suffix => value] :
+       @d(prefix * suffix => value) :
        [prefix * name(part) * suffix => value for part in parts]
 
+style(x) = @d(:style => x)
 teeprint(x, fn=println) = begin
     fn(x)
     x

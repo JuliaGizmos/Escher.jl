@@ -24,9 +24,13 @@ end
 
 render(t::WithState) =
     render(t.tile) <<
-        Elem("watch-state", name=t.name,
-             attr=t.attr, trigger=t.trigger,
-             elem=t.elem, source=t.source)
+        Elem(
+            "watch-state",
+            name=t.name,
+            attr=t.attr, trigger=t.trigger,
+            elem=t.elem,
+            source=t.source,
+        )
 
 # Sample a bunch of signals upon changes to another bunch of signals
 # Returns a signal of dict of signal values
@@ -39,8 +43,10 @@ end
 
 samplesignals(tosample::Symbol, triggers::Symbol, x...; name=:_sampler) =
     samplesignals([tosample], [triggers], x...; name=name)
+
 samplesignals(tosample::Symbol, triggers, x...; name=:_sampler) =
     samplesignals([tosample], [triggers], x...; name=name)
+
 samplesignals(tosample, triggers::Symbol, x...; name=:_sampler) =
     samplesignals(tosample, [triggers], x...; name=name)
 
@@ -60,9 +66,9 @@ render(sig::SignalSampler) =
 end
 
 render(k::Keypress) =
-    (render(k.tile) & [:attributes => [:tabindex => 1]]) <<
-        (Elem("keypress-behavior", keys=k.keys, name=k.name) &
-            (k.onpress != "" ? [:onpress=>k.onpress] : Dict()))
+    render(k.tile) & @d(:attributes => @d(:tabindex => 1)) <<
+        Elem("keypress-behavior", keys=k.keys, name=k.name) &
+            (k.onpress != "" ? @d(:onpress => k.onpress) : Dict())
 
 immutable Key
     key::String
@@ -96,10 +102,25 @@ button_number(::LeftButton) = 1
 button_number(::RightButton) = 2
 button_number(::ScrollButton) = 3
 
-render(c::Clickable) =
-    render(c.tile) << Elem("clickable-behavior", name=c.name,
-                        buttons=string(map(button_number, c.buttons)))
+immutable ClickInterpreter <: Interpreter
+end
 
+default_interpreter(c::Clickable) =
+    ClickInterpreter()
+
+interpret(c::ClickInterpreter, x) =
+    try
+        [leftbutton, rightbutton, scrollbutton][x]
+    catch
+        DomainError()
+    end
+
+render(c::Clickable) =
+    render(c.tile) <<
+        Elem("clickable-behavior";
+            name=c.name,
+            buttons=string(map(button_number, c.buttons)),
+        )
 
 @api selectable => Selectable <: Behavior begin
     curry(tile::Tile)
@@ -110,12 +131,6 @@ end
 render(t::Selectable) =
     render(t.tile) <<
         Elem("selectable-behavior", name=t.name, elem=t.elem)
-
-
-convert(::Type{MouseButton}, x::Int) =
-    try [leftbutton, rightbutton, scrollbutton][x]
-    catch error("Invalid mouse button code: $x")
-    end
 
 abstract MouseState
 
@@ -132,7 +147,7 @@ end
 
 immutable Hover
     state::MouseState
-    position::(Float64, Float64)
+    position::@compat Tuple{Float64, Float64}
 end
 
 immutable Editable <: Behavior
@@ -154,8 +169,7 @@ send(chan::Symbol, b::Behavior) =
 
 render(chan::ChanSend) =
     render(chan.tile) <<
-        Elem("chan-send",
-            chan=chan.chan, watch=chan.watch)
+        Elem("chan-send", chan=chan.chan, watch=chan.watch)
 
 
 immutable ChanRecv <: Tile
@@ -168,8 +182,7 @@ recv(chan::Symbol, t, attr) =
 
 render(chan::ChanRecv) =
     render(chan.tile) <<
-        Elem("chan-recv",
-            chan=chan.chan, attr=chan.attr)
+        Elem("chan-recv", chan=chan.chan, attr=chan.attr)
 
 
 wire(a::Behavior, b, chan, attribute) =

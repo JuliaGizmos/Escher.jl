@@ -27,7 +27,7 @@ render(a::Hyperlink) =
 
 @api abbr => Abbr <: Tile begin
     arg(title::String)
-    arg(tiles::TileList)
+    curry(tiles::TileList)
 end
 
 render(a::Abbr) =

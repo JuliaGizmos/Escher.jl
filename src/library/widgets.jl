@@ -29,10 +29,13 @@ subscribe(w::Widget, x::Signal; absorb=true) =
 end
 
 render(b::Button) =
-    Elem("paper-button", render(b.label),
-        attributes = [:raised => boolattr(b.raised, "raised"),
-                      :noink => boolattr(b.noink, "noink"),
-                      :disabled => boolattr(b.disabled, "disabled")])
+    Elem("paper-button", render(b.label);
+        attributes=@d(
+            :raised => boolattr(b.raised, "raised"),
+            :noink => boolattr(b.noink, "noink"),
+            :disabled => boolattr(b.disabled, "disabled")
+        )
+    )
 
 broadcast(b::Button) =
     clickable(b, name=b.name)
@@ -83,7 +86,8 @@ for (typ, fn, elem) in [(:Checkbox, :checkbox, "paper-checkbox"),
         render(c::$typ) =
             Elem($elem,
                 checked=c.value,
-                disabled=boolattr(c.disabled, "disabled"))
+                disabled=boolattr(c.disabled, "disabled"),
+            )
     end
 end
 
@@ -112,18 +116,19 @@ broadcast(t::TextInput, event="input") =
 render(t::TextInput) = begin
     if t.multiline
         if length(t.pattern) > 0
-            warn_once("Multi-line text input does not support pattern validation")
+            warn_once(
+                "Multi-line text input does not support pattern validation")
         end
-        base = Elem("textarea", t.value,
+        base = Elem("textarea", t.value;
             name=t.name,
             id=t.name,
         )
 
         if t.maxlength > 0
-            base &= [:attributes => [:maxlength => t.maxlength]]
+            base &= @d(:attributes => @d(:maxlength => t.maxlength))
         end
         if t.rows > 0
-            base &= [:attributes => [:rows => t.rows]]
+            base &= @d(:attributes => @d(:rows => t.rows))
         end
         elem = Elem("paper-input-decorator",
             Elem("paper-autogrow-textarea", base, maxRows=t.maxrows))
@@ -132,22 +137,22 @@ render(t::TextInput) = begin
             name=t.name,
             id=t.name,
             value=t.value,
-            attributes=[:is => "core-input"]
+            attributes=@d(:is => "core-input")
         )
         if t.pattern != ""
-            base &= [:attributes => [:pattern => t.pattern]]
+            base &= @d(:attributes => @d(:pattern => t.pattern))
         end
         if t.maxlength > 0
-            base &= [:attributes => [:maxlength => t.maxlength]]
+            base &= @d(:attributes => @d(:maxlength => t.maxlength))
         end
         elem = Elem("paper-input-decorator", base)
     end
 
-    elem &= [:label => t.label,
+    elem &= @d(:label => t.label,
              :error => t.error,
              :floatingLabel => t.floatinglabel,
              :autoValidate => t.autovalidate,
-             :disabled => boolattr(t.disabled, "disabled")]
+             :disabled => boolattr(t.disabled, "disabled"))
 
     if t.charcounter
         elem <<= Elem("polymer-char-counter", target=t.name)
@@ -211,14 +216,16 @@ render(s::Spinner) = Elem("paper-spinner", active=s.active)
 
 ## Progress bar
 
-@api progress => ProgressBar begin
+@api progress => ProgressBar <: Tile begin
     arg(value::Real)
     kwarg(secondaryprogress::Real=0)
 end
 
-render(p::ProgressBar) = Elem("paper-progress",
-                              value=p.value,
-                              secondaryProgress=p.secondaryprogress)
+render(p::ProgressBar) =
+    Elem("paper-progress";
+        value=p.value,
+        secondaryProgress=p.secondaryprogress,
+    )
 
 @api paper => PaperShadow <: Tile begin
     arg(z::Int)
@@ -226,4 +233,6 @@ render(p::ProgressBar) = Elem("paper-progress",
     kwarg(animated::Bool=true)
 end
 
-render(p::PaperShadow) = Elem("paper-shadow", render(p.tile), z=p.z, animated=p.animated)
+render(p::PaperShadow) =
+    Elem("paper-shadow", render(p.tile), z=p.z, animated=p.animated)
+

@@ -333,7 +333,7 @@ macro api(names, body)
         args=argdocs(args, kwargs, dict)
     )
 
-    Expr(:block, typedef, :(@doc* $doc -> $(ms[1])), ms[2:end]...)
+    Expr(:block, typedef, :(@doc $doc -> $(ms[1])), ms[2:end]...)
 end
 
 macro apidoc(names, expr)

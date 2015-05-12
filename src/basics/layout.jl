@@ -63,7 +63,8 @@ export inset,
     curry(tile::Tile)
 end
 render(t::Width) =
-    render(t.tile) & [:style => [(t.prefix == "" ? "width" : t.prefix * "Width")=> t.width]]
+    render(t.tile) &
+        style(@d((t.prefix == "" ? "width" : t.prefix * "Width") => t.width))
 
 @api height => Height <: Tile begin
     doc("Set the height of a tile")
@@ -73,7 +74,8 @@ render(t::Width) =
 end
 
 render(t::Height) =
-    render(t.tile) & [:style => [(t.prefix == "" ? "height" : t.prefix * "Height")=> t.height]]
+    render(t.tile) &
+        style((t.prefix == "" ? "height" : t.prefix * "Height") => t.height)
 
 minwidth(w, x...) = width("min", w, x...)
 minheight(h, x...) = height("min", h, x...)
@@ -120,44 +122,44 @@ end
 end
 
 render_position(p::TopLeft, x, y) =
-    [:top => y, :left => x]
+    @d(:top => y, :left => x)
 render_position(p::MidTop, x, y) =
-    [:left =>  50cent, :top => y,
+    @d(:left =>  50cent, :top => y,
      :transform => "translate(-50%)",
-     :marginLeft => x]
+     :marginLeft => x)
 render_position(p::TopRight, x, y) =
-    [:top => x, :right => y]
+    @d(:top => x, :right => y)
 render_position(p::MidLeft, x, y) =
-    [:top => 50cent, :left => x,
+    @d(:top => 50cent, :left => x,
      :marginTop => y,
-     :transform => "translate(0, -50%)"]
+     :transform => "translate(0, -50%)")
 render_position(p::Middle, x, y) =
-    [:top => 50cent, :left=>50cent,
+    @d(:top => 50cent, :left=>50cent,
      :marginLeft => x, :marginTop => y,
-     :transform => "translate(-50%, -50%)"]
+     :transform => "translate(-50%, -50%)")
 render_position(p::MidRight, x, y) =
-    [:top => 50cent,
+    @d(:top => 50cent,
     :transform => "translate(0, -50%)",
-    :marginTop => y, :right => x]
+    :marginTop => y, :right => x)
 render_position(p::BottomLeft, x, y) =
-    [:bottom => y, :left => x]
+    @d(:bottom => y, :left => x)
 render_position(p::MidBottom, x, y) =
-    [:left => 50cent, :bottom => y,
+    @d(:left => 50cent, :bottom => y,
      :marginLeft => x,
-     :transform => "translate(-50%)"]
+     :transform => "translate(-50%)")
 render_position(p::BottomRight, x, y) =
-    [:bottom => y, :right => x]
+    @d(:bottom => y, :right => x)
 
-render_position(c::Corner) = [:style => render_position(c, 0, 0)]
+render_position(c::Corner) = style(render_position(c, 0, 0))
 render_position{C <: Corner}(p::Relative{C}) =
-    [:style => render_position(C(), p.x, p.y)]
+    style(render_position(C(), p.x, p.y))
 
 render(tile::Inset) = begin
     outer = render(tile.containing)
     inner = render(tile.contained)
 
-    outer &= [:style => [:position => :relative]]
-    inner &= [:style => [:position => :absolute]]
+    outer &= style(@d(:position => :relative))
+    inner &= style(@d(:position => :absolute))
 
     outer << (inner & render_position(tile.position))
 end
@@ -281,27 +283,39 @@ classes(f::Wrap) =
 end
 
 render(f::FloatingTile) =
-    render(f.tile) & [:style => [:float => lowercase(name(f.side))]]
+    render(f.tile) & style(@d(:float => lowercase(name(f.side))))
 
 @api grow => Grow <: Tile begin
-    arg(factor::Float64)
-    curry(tile::Tile)
+    doc("Expand a tile along the main axis to fit extra space in the parent `hbox` or `vbox`.")
+
+    arg(
+        factor::Float64,
+        doc="The relative rate at which this tile will expand compared to other tiles that can grow.",
+    )
+
+    curry(
+        tile::Tile,
+        doc="The tile to stretch. This tile should go inside a `vbox` or `hbox`",
+    )
 end
 grow(t::Tile) = grow(1.0, t)
 grow(t::AbstractVector) = map(grow, t)
 
 render(t::Grow) =
-    render(t.tile) & [:style => [:flexGrow => t.factor]]
+    render(t.tile) & style(@d(:flexGrow => t.factor))
 
 @api shrink => Shrink <: Tile begin
-    arg(factor::Float64)
-    curry(tile::Tile)
+    doc("Shrink a tile along the main axis to accomodate space in the parent `hbox` or `vbox`.")
+    arg(factor::Float64,
+        doc="The relative rate at which this tile will shrink compared to other tiles that can shrink.")
+    curry(tile::Tile,
+        doc="The tile to stretch. This tile should go inside a `vbox` or `hbox`")
 end
 shrink(t::Tile) = shrink(1.0, t)
 shrink(t::AbstractVector) = map(shrink, t)
 
 render(t::Shrink) =
-    render(t.tile) & [:style => [:flexShrink => t.factor]]
+    render(t.tile) & style(@d(:flexShrink => t.factor))
 
 @api flexbasis => FlexBasis <: Tile begin
     arg(basis::Union(Length, Symbol))
@@ -309,7 +323,7 @@ render(t::Shrink) =
 end
 
 render(t::FlexBasis) =
-    render(t.tile) & [:style => [:flexBasis => t.basis]]
+    render(t.tile) & style(@d(:flexBasis => t.basis))
 
 # Flex ignores the width and distributes forcefully
 flex(factor::Real, t) =
@@ -391,7 +405,7 @@ end
 
 render(t::PadContent) =
     render(t.tile) &
-        [:style => mapparts(allsides, t.sides, "padding", "", t.length)]
+        style(mapparts(allsides, t.sides, "padding", "", t.length))
 
 pad(len::Length, tile) =
     padcontent(len, Container(tile))

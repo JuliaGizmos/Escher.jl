@@ -22,7 +22,11 @@ const allsides = Side[]
     curry(tile::Tile)
 end
 render(t::BorderColor) =
-    render(t.tile) & [:style => mapparts(allsides, t.sides, "border", "Color", render_color(t.color))]
+    render(t.tile) & (
+        mapparts(
+            allsides, t.sides, "border", "Color", render_color(t.color)
+        ) |> style
+    )
 
 @api borderwidth => BorderWidth <: Tile begin
     typedarg(sides::AbstractArray=allsides)
@@ -30,7 +34,8 @@ render(t::BorderColor) =
     curry(tile::Tile)
 end
 render(t::BorderWidth) =
-    render(t.tile) & [:style => mapparts(allsides, t.sides, "border", "Width", t.width)]
+    render(t.tile) &
+        style(mapparts(allsides, t.sides, "border", "Width", t.width))
 
 abstract StrokeStyle
 
@@ -52,16 +57,27 @@ name(::Dashed) = "dashed"
     curry(tile::Tile)
 end
 render(t::BorderStyle) =
-    render(t.tile) & [:style => mapparts(allsides, t.sides, "border", "Style", name(t.style))]
+    render(t.tile) &
+        style(mapparts(allsides, t.sides, "border", "Style", name(t.style)))
 
-border(sides::AbstractArray, style::StrokeStyle, width::Length, color::ColorValue, tile) =
-    borderstyle(sides, style, borderwidth(sides, width, bordercolor(sides, color, tile)))
+border(
+    sides::AbstractArray,
+    style::StrokeStyle,
+    width::Length,
+    color::ColorValue,
+    tile
+) =
+    borderstyle(sides, style,
+        borderwidth(sides, width,
+            bordercolor(sides, color, tile)))
 
 border(sides::AbstractArray, style, width, color) =
     tile -> border(sides, style, width, color, tile)
 
 border(style::StrokeStyle, width::Length, color::ColorValue, tile) =
-    borderstyle(allsides, style, borderwidth(allsides, width, bordercolor(allsides, color, tile)))
+    borderstyle(allsides, style,
+        borderwidth(allsides, width,
+            bordercolor(allsides, color, tile)))
 
 border(style::StrokeStyle, width, color) =
     tile -> border(style, width, color, tile)
@@ -85,7 +101,7 @@ end
 
 render(t::RoundedRect) =
     render(t.tile) &
-        [:style => mapparts(allcorners, t.corners, "border", "Radius", t.radius)]
+        style(mapparts(allcorners, t.corners, "border", "Radius", t.radius))
 
 
 ## Box shadow
@@ -93,7 +109,7 @@ render(t::RoundedRect) =
 @api shadow => Shadow <: Tile begin
     curry(tile::Tile)
     kwarg(inset::Bool=false)
-    kwarg(offset::(Length, Length)=(0px, 0px))
+    kwarg(offset::(@compat Tuple{Length, Length})=(0px, 0px))
     kwarg(blur_radius::Length=5px)
     kwarg(spread_radius::Length=5px)
     kwarg(color::ColorValue=color("black"))
@@ -107,5 +123,5 @@ end
 end
 
 render(t::FillColor) =
-    render(t.tile) & [:style => [:backgroundColor => render_color(t.color)]]
+    render(t.tile) & style(@d(:backgroundColor => render_color(t.color)))
 

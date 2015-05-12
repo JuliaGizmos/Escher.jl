@@ -16,7 +16,7 @@ export tabs,
     kwarg(url::Bool=false)
 end
 render(i::Icon) =
-    Elem("core-icon") & [(i.url ? :src : :icon) => i.icon]
+    Elem("core-icon") & @d((i.url ? :src : :icon) => i.icon)
 
 @api iconbutton => IconButton <: Widget begin
     typedarg(icon::String="")
@@ -24,7 +24,7 @@ render(i::Icon) =
     kwarg(url::Bool=false)
 end
 render(i::IconButton) =
-    Elem("paper-icon-button") & [(i.url ? :src : :icon) => i.icon]
+    Elem("paper-icon-button") & @d((i.url ? :src : :icon) => i.icon)
 
 broadcast(w::IconButton) =
     clickable(w, name=w.name)
@@ -92,7 +92,7 @@ end
 broadcast(i::Item) = clickable(i)
 
 render(i::Item) =
-    Elem("paper-item", render(i.tile), attributes=[:icon=>i.icon])
+    Elem("paper-item", render(i.tile), attributes=@d(:icon=>i.icon))
 
 @api dropdown => Dropdown <: Widget begin
     arg(tile::Tile)
@@ -122,8 +122,8 @@ wrapitem(x) = Elem("paper-item", render(x))
 
 render(dm::DropdownMenu) = begin
     # paper-dropdown-menu spec requires these classes
-    m = render(menu(map(t -> wrapitem(t), dm.items.tiles))) & [:className => "menu"]
-    d = Elem("paper-dropdown", m) & [:className => "dropdown"]
+    m = render(menu(map(t -> wrapitem(t), dm.items.tiles))) & @d(:className => "menu")
+    d = Elem("paper-dropdown", m) & @d(:className => "dropdown")
 
     Elem("paper-dropdown-menu",
         render(d),

@@ -73,7 +73,7 @@ end
 WithFontSize{T}(size::T, tiles) = WithFontSize{T}(size, tiles)
 
 render{T <: Length}(t::WithFontSize{T}) =
-    wrapmany(t.tiles, :span) & [:style => [:fontSize => t.size]]
+    wrapmany(t.tiles, :span) & style(@d(:fontSize => t.size))
 render{T <: FontSize}(t::WithFontSize{T}) =
     addclasses(wrapmany(t.tiles, :span), classes(t.size))
 
@@ -99,7 +99,7 @@ render(t::WithFontWeight) = begin
     if !(t.weight in allowed_font_weights)
         error(string(t.weight, " is not an allowed font weight"))
     end
-    wrapmany(t.tiles, :span) & [:style => [:fontWeight => t.weight]]
+    wrapmany(t.tiles, :span) & style(@d(:fontWeight => t.weight))
 end
 
 render{T <: FontWeight}(t::WithFontWeight{T}) =
@@ -110,21 +110,18 @@ render{T <: FontWeight}(t::WithFontWeight{T}) =
     curry(tiles::TileList)
 end
 
-fontcolor(c::String) =
-    fontcolor(color(c))
-
-fontcolor(c::String, tiles) =
-    fontcolor(color(c), tiles)
+fontcolor(c::String) = fontcolor(color(c))
+fontcolor(c::String, tiles) = fontcolor(color(c), tiles)
 
 render(t::FontColor) =
-    wrapmany(t.tiles, :span) & [:style => [:color => render_color(t.color)]]
+    wrapmany(t.tiles, :span) & style(@d(:color => render_color(t.color)))
 
 @api fontfamily => FontFamily <: Tile begin
     arg(family::String)
     curry(tile::TileList)
 end
 render(t::FontFamily) =
-    wrapmany(t.tile, :span) & [:style => [:fontFamily => t.family]]
+    wrapmany(t.tile, :span) & style(@d(:fontFamily => t.family))
 
 abstract FontType
 # TODO: Add serif and slab fonts
@@ -198,27 +195,27 @@ end
 end
 
 render(t::AlignText{RaggedRight}) =
-    render(t.tile) & [:style => [:textAlign => :left]]
+    render(t.tile) & style(@d(:textAlign => :left))
 render(t::AlignText{RaggedLeft}) =
-    render(t.tile) & [:style => [:textAlign => :right]]
+    render(t.tile) & style(@d(:textAlign => :right))
 render(t::AlignText{JustifyText}) =
-    render(t.tile) & [:style => [:textAlign => :justify]]
+    render(t.tile) & style(@d(:textAlign => :justify))
 render(t::AlignText{CenterText}) =
-    render(t.tile) & [:style => [:textAlign => :center]]
+    render(t.tile) & style(@d(:textAlign => :center))
 
 @api lineheight => LineHeight begin
     arg(height::Length)
     curry(tiles::TileList)
 end
 render(t::LineHeight) =
-    wrapmany(t.tiles, :span) & [:style => [:lineHeight => t.height]]
+    wrapmany(t.tiles, :span) & style(@d(:lineHeight => t.height))
 
 @api letterspacing => LetterSpacing begin
     arg(space::Length)
     curry(tiles::TileList)
 end
 render(t::LetterSpacing) =
-    wrapmany(t.tiles, :span) & [:style => [:letterSpacing => t.space]]
+    wrapmany(t.tiles, :span) & style(@d(:letterSpacing => t.space))
 
 # Themable fonts
 

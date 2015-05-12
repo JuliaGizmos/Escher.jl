@@ -1,4 +1,9 @@
-import Markdown
+if VERSION < v"0.4.0-dev"
+    import Markdown
+else
+    const Markdown = Base.Markdown
+end
+
 
 convert(::Type{Tile}, md::Markdown.MD) = blocktile(md)
 
