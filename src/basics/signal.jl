@@ -1,31 +1,28 @@
 
-import Base: $
+import Base: >>>
 
 export stoppropagation,
-       interpreter,
+       addinterpreter,
        constant,
        pairwith,
+       sampler,
+       sample,
+       trigger!,
+       watch!,
        pairwithindex,
-       subscribe,
-       samplesignals
+       subscribe
+#=
+   Note: Maybe use
 
+   immutable MessageException <: Exception
+       error::Exception
+       backtrace::String
+   end
 
-# First line of decoding.
+   MessageException(x::Exception) =
+       MessageException(x, sprint(io -> Base.show_backtrace(io, backtrace())))
 
-decodeJSON(x) = x
-
-# A type for facilitating dispatch for
-# decodeJSON
-immutable InputType{ctr}
-end
-
-decodeJSON(ctr, x) = x
-decodeJSON(::InputType{:Tuple}, x) = tuple(x.data...)
-
-# If input is a dictionary, call the constructor
-decodeJSON(x::Dict) =
-    haskey(x, "_ctr") ?
-        decodeJSON(InputType{symbol(x["_ctr"])}(), x) : x
+=#
 
 @doc """
 A Behavior is a tile that denotes that it can
@@ -35,25 +32,18 @@ abstract Behavior <: Tile
 
 name(b::Behavior) = b.name
 
-# Second line of decoding - usually in the business logic
+## Interpreting a message from a behavior ##
 
 abstract Interpreter
 
-@api interpreter => WithInterpreter <: Behavior begin
-    arg(interpreter::Interpreter)
-    curry(tile::Behavior)
+immutable WithInterpreter <: Behavior
+    interpreter::Interpreter
+    tile::Behavior
 end
-name(d::WithInterpreter) = name(d.tile)
 
-render(d::WithInterpreter) =
-    render(d.tile)
-
-# Don't change the message
-immutable Id <: Interpreter
-end
+# Identity interpreter: don't change the message
+immutable Id <: Interpreter end
 const identity = Id()
-
-interpret(dec::Id, x) = x
 
 # Chain two interpreters together.
 immutable Chained <: Interpreter
@@ -61,21 +51,43 @@ immutable Chained <: Interpreter
     interpreter2::Interpreter
 end
 
-chain(d, t::WithInterpreter) =
-    interpreter(Chained(d, t.interpreter), t.tile)
+Chained(::Id, ::Id) = identity
+Chained(a::Interpreter, ::Id) = a
+Chained(::Id, a::Interpreter) = a
+
+addinterpreter(i::Interpreter, tile::Behavior) =
+    # Chained is defined below
+    WithInterpreter(Chained(i, default_interpreter(tile)), tile)
+addinterpreter(i::Interpreter) = t -> addinterpreter(i, t)
+
+default_interpreter(t::WithInterpreter) = t.interpreter
+
+
+# The default interpreter for a behavior is identity
+default_interpreter(::Behavior) = identity
+
+interpret(dec::Id, x) = x
+
+# convert to a type
+immutable ToType{T} <: Interpreter end
+interpret{T}(::ToType{T}, x) = convert(T, x)
+interpret{T<:Integer}(::ToType{T}, x::String) =
+    try parse(T, x) catch ex ex end
+interpret{T<:Real}(::ToType{T}, x::Nothing) = zero(T)
+interpret(::ToType{@compat AbstractString}, x::Nothing) = ""
 
 interpret(dec::Chained, x) =
     interpret(dec.interpreter1, interpret(dec.interpreter2, x))
 
 # Pair with a constant
-immutable ConstPair <: Interpreter
+immutable PairWith <: Interpreter
     value::Any
 end
 
-interpret(dec::ConstPair, x) = (x, dec.value)
+interpret(dec::PairWith, x) = (x, dec.value)
 
-pairwith(x, tile::Tile) = interpreter(ConstPair(x), tile)
-pairwith(x) = interpreter(ConstPair(x))
+pairwith(x) = addinterpreter(PairWith(x))
+pairwith(x, tile::Tile) = addinterpreter(PairWith(x), tile)
 pairwith(x::AbstractArray, tiles::AbstractArray) = map(pairwith, x, tiles)
 pairwith(x, tiles::AbstractArray) = map(pairwith(x))
 
@@ -94,8 +106,8 @@ end
 
 interpret(dec::Const, _) = dec.value
 
-constant(x, tile::Tile) = interpreter(Const(x), tile)
-constant(x) = interpreter(Const(x))
+constant(x, tile::Tile) = addinterpreter(Const(x), tile)
+constant(x) = addinterpreter(Const(x))
 constant(xs::AbstractArray, tiles::AbstractArray) = map(constant, xs, tiles)
 constant(x, tiles::AbstractArray) = map(constant(x), tiles)
 
@@ -103,7 +115,7 @@ constant(x, tiles::AbstractArray) = map(constant(x), tiles)
 immutable InterpreterFn <: Interpreter
     f::Function
 end
-interpreter(f::Function, tile::Tile) = interpreter(InterpreterFn(f), tile)
+addinterpreter(f::Function, tile::Tile) = addinterpreter(InterpreterFn(f), tile)
 interpret(dec::InterpreterFn, x) = dec.f(x)
 
 # Apply a function with some constant partial args
@@ -111,16 +123,23 @@ interpret(dec::InterpreterFn, x) = dec.f(x)
 # of any signal functions. i.e. no point creating
 # ad-hoc functions
 
-immutable InterpreterPartialFn <: Interpreter
+immutable InterpreterThunk <: Interpreter
     f::Function
     args::Tuple
 end
 partial(f::Function, args::Tuple, tile) =
-    interpreter(InterpreterPartialFn(f, args), tile)
+    addinterpreter(InterpreterThunk(f, args), tile)
 
-interpret(dec::InterpreterPartialFn, x) = dec.f(dec.args..., x)
+interpret(dec::InterpreterThunk, x) = dec.f(dec.args..., x)
 
-### Send a signal update to the Julia side
+
+name(d::WithInterpreter) = name(d.tile)
+
+render(d::WithInterpreter) = render(d.tile)
+
+#
+# Subscribe to a signal and register an interpreter
+#
 
 immutable Subscription <: Tile
     tile::Tile
@@ -133,18 +152,78 @@ subscribe(t::Tile, name, s; absorb=true) =
        (x -> absorb ? stoppropagation(x, name) : x)
 
 subscribe(t::Behavior, s::Input; absorb=true) =
-    subscribe(t, name(t), (identity, s), absorb=absorb)
+    subscribe(t, name(t), (default_interpreter(t), s), absorb=absorb)
+
 subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input}); absorb=true) =
     subscribe(t, name(t), s, absorb=absorb)
+
+subscribe(t::WithInterpreter, s::Input; absorb=true) =
+    subscribe(t.tile, name(t), (t.interpreter, s), absorb=absorb)
 
 render(sig::Subscription) =
     render(sig.tile) <<
         Elem("signal-transport",
+            # Note: setup_transport here adds (interpreter, input) pair
+            # to a dict, returns the key - this fn is idempotent
             name=sig.name, signalId=setup_transport(sig.receiver))
 
+(>>>)(b::Behavior, s::Input) = subscribe(b, s)
 
 setup_transport(x) =
     error("Looks like there is no trasport set up")
+
+### Sampling
+
+@api sampler => Sampler <: Interpreter begin
+    arg(triggers::Dict)
+    arg(watched::Dict)
+end
+sampler() = Sampler(Dict(), Dict())
+
+interpret(s::Sampler, msg) = begin
+    try
+        d = Dict()
+        d[:_trigger] = msg["_trigger"]
+
+        for (name, interp) in s.triggers
+           d[name] = interpret(interp, msg[string(name)])
+        end
+
+        for (name, interp) in s.watched
+           d[name] = interpret(interp, msg[string(name)])
+        end
+
+        return d
+    catch ex
+        ex
+    end
+end
+
+watch!(sampler::Sampler, tile) = begin
+    sampler.watched[name(tile)] = default_interpreter(tile)
+    broadcast(tile)
+end
+
+trigger!(sampler::Sampler, tile) = begin
+    sampler.triggers[name(tile)] = default_interpreter(tile)
+    broadcast(tile)
+end
+
+@api sample => Sampled <: Behavior begin
+    arg(sampler::Sampler)
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_sampled)
+end
+render(s::Sampled) =
+    render(s.tile) <<
+        Elem("signal-sampler",
+            name=s.name,
+            signals=collect(keys(s.sampler.watched)),
+            triggers=collect(keys(s.sampler.triggers)))
+
+default_interpreter(s::Sampled) = s.sampler
+
+## Helpers for setup_transport implementers ##
 
 import Base.Random: UUID, uuid4
 
@@ -179,12 +258,3 @@ stoppropagation(tile::Tile, name::Symbol) =
 render(tile::StopPropagation) =
     render(tile.tile) <<
         Elem("stop-propagation", name=tile.name)
-
-
-(>>>)(t::Behavior, s::Input) = subscribe(t, (identity, s))
-
-# TODO: Use a different operator with lesser precedence than >>>
-(>>>)(t::Behavior, f::Function) = interpreter(f, t)
-(>>>)(t::WithInterpreter, f::Function) = chain(InterpreterFn(f), t)
-(>>>)(t::WithInterpreter, s::Input) = subscribe(t, (t.interpreter, s))
-

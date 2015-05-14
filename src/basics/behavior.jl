@@ -1,5 +1,3 @@
-import Base: >>>
-
 export hasstate,
        keypress,
        Key,
@@ -22,6 +20,8 @@ export hasstate,
     kwarg(source::String="")
 end
 
+default_interpreter(::WithState) = identity
+
 render(t::WithState) =
     render(t.tile) <<
         Elem(
@@ -31,32 +31,6 @@ render(t::WithState) =
             elem=t.elem,
             source=t.source,
         )
-
-# Sample a bunch of signals upon changes to another bunch of signals
-# Returns a signal of dict of signal values
-@api samplesignals => SignalSampler <: Behavior begin
-    arg(signals::AbstractArray)
-    arg(triggers::AbstractArray)
-    curry(tile::Tile)
-    typedkwarg(name::Symbol=:_sampler)
-end
-
-samplesignals(tosample::Symbol, triggers::Symbol, x...; name=:_sampler) =
-    samplesignals([tosample], [triggers], x...; name=name)
-
-samplesignals(tosample::Symbol, triggers, x...; name=:_sampler) =
-    samplesignals([tosample], [triggers], x...; name=name)
-
-samplesignals(tosample, triggers::Symbol, x...; name=:_sampler) =
-    samplesignals(tosample, [triggers], x...; name=name)
-
-render(sig::SignalSampler) =
-    render(sig.tile) <<
-        Elem("signal-sampler",
-            name=sig.name,
-            signals=sig.signals,
-            triggers=sig.triggers)
-
 
 @api keypress => Keypress <: Behavior begin
     arg(keys::String)
@@ -80,7 +54,11 @@ end
 
 const nokey = Key("", false, false, false, false)
 
-decodeJSON(::InputType{:Key}, d::Dict) =
+immutable KeyInterpreter <: Interpreter end
+
+default_interpreter(k::Keypress) = KeyInterpreter()
+
+interpret(::KeyInterpreter, d) =
     Key(d["key"], d["alt"], d["ctrl"], d["meta"], d["shift"])
 
 abstract MouseButton
@@ -131,6 +109,9 @@ end
 render(t::Selectable) =
     render(t.tile) <<
         Elem("selectable-behavior", name=t.name, elem=t.elem)
+
+default_interpreter(t::Selectable) = ToType{Int}
+
 
 abstract MouseState
 

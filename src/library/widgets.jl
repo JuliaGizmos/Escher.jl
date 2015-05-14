@@ -12,11 +12,13 @@ export broadcast,
 
 # A widget can be coerced into a behavior
 # by calling `broadcast` on it.
-abstract Widget <: Tile
+abstract Widget <: Behavior
 
-subscribe(w::Widget, x::Signal; absorb=true) =
+subscribe(w::Widget, x::Input; absorb=true) =
     subscribe(broadcast(w), x, absorb=absorb)
-(>>>)(w::Widget, x::Signal) = subscribe(w, x)
+
+default_interpreter(w::Widget) =
+    default_interpreter(broadcast(w))
 
 ## Button
 
@@ -111,7 +113,8 @@ end
 end
 
 broadcast(t::TextInput, event="input") =
-    hasstate(t, name=t.name, attr="value", trigger=event, source="target")
+    hasstate(t, name=t.name, attr="value", trigger=event, source="target") |>
+        addinterpreter(ToType{String}())
 
 render(t::TextInput) = begin
     if t.multiline
