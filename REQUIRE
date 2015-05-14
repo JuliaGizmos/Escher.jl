@@ -1,6 +1,8 @@
 Compat
 JSON
+Markdown
 Reactive
 Patchwork
 ArgParse
 Mux
+WebSockets

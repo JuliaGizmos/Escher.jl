@@ -12,9 +12,6 @@ _In a Julia REPL_
 
 ```julia
 Pkg.clone("https://github.com/shashi/Escher.jl.git")
-
-Pkg.checkout("Patchwork")
-Pkg.checkout("Reactive")
 ```
 
 _On the command line, within the `assets/` subdirectory_
