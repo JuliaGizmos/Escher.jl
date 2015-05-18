@@ -4,8 +4,9 @@ using ArgParse
 using Escher
 
 include(Pkg.dir("Escher", "src", "cli", "serve.jl"))
+include(Pkg.dir("Escher", "src", "cli", "compile.jl"))
 
-function parse_commandline()
+parse_commandline() = begin
     s = ArgParseSettings()
     @add_arg_table s begin
         "--serve"
@@ -19,9 +20,13 @@ function parse_commandline()
             arg_type = Int
             default = 5555
         "--dir", "-d"
-            help = "Path to serve from, defaults to `.'"
+            help = "Path to serve from, defaults to `.' or when compiling, the output directory."
             arg_type = String
             default = "."
+        "files"
+            help = "Files to compile. Ignored in serve mode"
+            nargs = '*'
+            arg_type = String
     end
     parse_args(s)
 end
@@ -31,7 +36,9 @@ main() = begin
     println(parsed_args)
     if parsed_args["serve"]
         escher_serve(parsed_args["port"], parsed_args["dir"])
-    elseif parsed_args["make"]
+    else parsed_args["make"]
+        dir = parsed_args["dir"]
+        Any[escher_make(f, abspath(dir)) for f in parsed_args["files"]]
     end
 end
 
