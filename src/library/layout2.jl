@@ -64,6 +64,8 @@ render(m::Menu) =
     Elem("core-menu", render(m.tiles),
         selected=m.selected-1)
 
+broadcast(m::Menu) = selectable(m, name=m.name)
+
 @api submenu => SubMenu <: Tile begin
     arg(icon::String="")
     arg(label::String)
@@ -87,6 +89,7 @@ render(t::Toolbar) =
 
 @api item => Item <: Widget begin
     arg(tile::Tile)
+    kwarg(icon::String="")
 end
 
 broadcast(i::Item) = clickable(i)

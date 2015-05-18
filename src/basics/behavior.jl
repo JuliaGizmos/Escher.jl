@@ -110,8 +110,7 @@ render(t::Selectable) =
     render(t.tile) <<
         Elem("selectable-behavior", name=t.name, elem=t.elem)
 
-default_interpreter(t::Selectable) = ToType{Int}
-
+default_interpreter(t::Selectable) = ToType{Int}()
 
 abstract MouseState
 
