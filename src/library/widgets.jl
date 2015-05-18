@@ -55,7 +55,8 @@ broadcast(b::Button) =
 end
 
 broadcast(s::Slider) =
-    hasstate(s, name=s.name)
+    addinterpreter(ToType{eltype(s.range)}(),
+        hasstate(s, name=s.name))
 
 render(s::Slider) =
     Elem("paper-slider",
@@ -83,11 +84,13 @@ for (typ, fn, elem) in [(:Checkbox, :checkbox, "paper-checkbox"),
         end
 
         broadcast(c::$typ) =
-            hasstate(c, name=c.name, attr="checked", trigger="change")
+            addinterpreter(ToType{Bool}(),
+                hasstate(c, name=c.name, attr="checked", trigger="change"))
 
         render(c::$typ) =
             Elem($elem,
                 checked=c.value,
+                label=c.label,
                 disabled=boolattr(c.disabled, "disabled"),
             )
     end
@@ -190,7 +193,7 @@ render(r::RadioButton) =
          name=r.name, toggles=r.toggles, disabled=r.disabled)
 
 @api radiogroup => RadioGroup <: Widget begin
-    arg(radios::Any)
+    arg(radios::AbstractArray)
     kwarg(name::Symbol=:_radiogroup)
     kwarg(value::Symbol=:_none)
 end
@@ -209,9 +212,14 @@ render(r::RadioGroup) =
 
 broadcast(r::RadioGroup) = selectable(r, name=r.name)
 
+@api selector => Selector begin
+    arg(items::AbstractArray)
+    kwarg(selected::Int=1)
+end
+
 ## Spinner
 
-@api spinner => Spinner begin
+@api spinner => Spinner <: Tile begin
     arg(active::Bool=true)
 end
 
@@ -238,4 +246,3 @@ end
 
 render(p::PaperShadow) =
     Elem("paper-shadow", render(p.tile), z=p.z, animated=p.animated)
-
