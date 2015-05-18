@@ -110,9 +110,10 @@ end
 
 name{C <: Corner}(::C) = string(C)
 
-immutable Relative{T <: Corner} <: Position
-    x::Length
-    y::Length
+@api offset => Relative{T <: Corner} <: Position begin
+    arg(c::T)
+    arg(x::Length)
+    arg(y::Length)
     # z::Length
 end
 
