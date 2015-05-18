@@ -36,17 +36,17 @@ $(vskip(1em))
 
 An *input signal* is created using the `Input` constructor.
 
-For example,
+For example, in
 
 ```julia
     xᵗ = Input(0)
 ```
 
-here, `xᵗ` is an input signal containing a value of type Float64, initially, 0.
+`xᵗ` is an input signal containing a value of type Int64, initially, 0.
 
 Updates to an input signal can be obtained from a widget in the UI. This is done by *subscribing* the input signal to a widget's updates.
 
-To illustrate this, we will first create a slider widget. The `slider` function takes a range object and returns a slider widget. Here is a slider that can be used to set integer values between 0 to 360.
+To illustrate this, we will first create a slider widget. The `slider` function takes a range object and returns a slider widget. Here is a slider that can be used to select integer values between 0 to 360.
 
 ```julia
     slider(0:360)
