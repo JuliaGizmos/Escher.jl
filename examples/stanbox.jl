@@ -1,23 +1,24 @@
 using Markdown
 using Color
 
-codewindow(name, code; w=40em, h=20em, language="julia") =
-    roundcorner(1mm, broadcast(codemirror(code, language=language, name=name)) |> size(w, h))
+codewindow(s, name, code; w=40em, h=20em, language="julia") =
+    watch!(s, codemirror(code, language=language, name=name)) |> size(w, h)
 
 section(title, content) = vbox(vskip(1em), title, vskip(1em), content)
 
 function inputsui(inputsignal; code="", data="", config="")
+    s = sampler()
     form = vbox(
         vskip(2em),
         hbox(h1("Input"), flex(" ")),
-        section(h2("Stan Code"), codewindow(:code, code)),
-        section(h2("Data"), codewindow(:data, data)),
-        section(h2("Config Input"), codewindow(:config, data)),
-        section(empty, hbox(broadcast(button("Check inputs", name=:check_input)),
-                                   broadcast(button("Run model", name=:run_model)))),
+        section(h2("Stan Code"), codewindow(s, :code, code)),
+        section(h2("Data"), codewindow(s, :data, data)),
+        section(h2("Config Input"), codewindow(s, :config, data)),
+        section(empty, hbox(trigger!(s, button("Check inputs", name=:check_input)),
+                                   watch!(s, button("Run model", name=:run_model)))),
     )
 
-    samplesignals([:code, :data, :config], [:run_model, :check_input], form) >>> inputsignal
+    sample(s, form) >>> inputsignal
 end
 
 function process(input)
