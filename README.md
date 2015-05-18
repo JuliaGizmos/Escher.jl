@@ -24,8 +24,8 @@ bower install
 _On the command line, from within the `Escher.jl/examples` directory_
 
 ```sh
-../bin/escherd
+../bin/escher --serve
 ```
 
-and navigate to `http://localhost:8000/layout.jl`
+and navigate to `http://localhost:5555/layout.jl` (or `http://localhost:5555/<any-other-example-file.jl>`)
 
