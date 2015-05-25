@@ -172,7 +172,7 @@ end
 classes(::Uppercase) = "font-uppercase"
 classes(::Lowercase) = "font-lowercase"
 
-@api fontcase => WithFontCase begin
+@api fontcase => WithFontCase <: Tile begin
     arg(case::FontCase)
     curry(tiles::TileList)
 end
@@ -189,7 +189,7 @@ abstract TextAlignment
     centertext => CenterText
 end
 
-@api textalign => AlignText{T <: TextAlignment} begin
+@api textalign => AlignText{T <: TextAlignment} <: Tile begin
     typedarg(alignment::T)
     curry(tile::Tile)
 end
@@ -203,14 +203,14 @@ render(t::AlignText{JustifyText}) =
 render(t::AlignText{CenterText}) =
     render(t.tile) & style(@d(:textAlign => :center))
 
-@api lineheight => LineHeight begin
+@api lineheight => LineHeight <: Tile begin
     arg(height::Length)
     curry(tiles::TileList)
 end
 render(t::LineHeight) =
     wrapmany(t.tiles, :span) & style(@d(:lineHeight => t.height))
 
-@api letterspacing => LetterSpacing begin
+@api letterspacing => LetterSpacing <: Tile begin
     arg(space::Length)
     curry(tiles::TileList)
 end

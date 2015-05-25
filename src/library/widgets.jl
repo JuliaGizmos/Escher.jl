@@ -212,7 +212,7 @@ render(r::RadioGroup) =
 
 broadcast(r::RadioGroup) = selectable(r, name=r.name)
 
-@api selector => Selector begin
+@api selector => Selector <: Widget begin
     arg(items::AbstractArray)
     kwarg(selected::Int=1)
 end
