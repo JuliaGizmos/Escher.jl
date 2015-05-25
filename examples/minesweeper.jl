@@ -1,5 +1,6 @@
 using Compat # for Nullable
 using Color
+using Lazy
 
 #### Model ####
 
@@ -54,7 +55,7 @@ colors = ["#fff", colormap("reds", 7)]
 box(content, color) =
     inset(Escher.middle,
         fillcolor(color, size(4em, 4em, empty)),
-        fontsize(2em, content)) |> paper(1) |> pad(0.2em)
+        Escher.fontsize(2em, content)) |> paper(1) |> pad(0.2em)
 
 number(x) = box(x == -1 ? "" : string(x) |> fontweight(800), colors[x+2])
 mine = box(icon("report"), "#e58")
@@ -67,7 +68,7 @@ tile(board, i, j) =
 
 gameover = vbox(
         title(2, "Game Over!") |> pad(1em),
-        Escher.decoder(_ -> newboard(10, 10), broadcast(button("Start again"))) >>> initial_boardᵗ
+        addinterpreter(_ -> newboard(10, 10), broadcast(button("Start again"))) >>> initial_boardᵗ
     ) |> pad(1em) |> fillcolor("white")
 
 function showboard{lost}(board::Board{lost})
@@ -77,8 +78,6 @@ function showboard{lost}(board::Board{lost})
 end
 
 function main(window)
-    push!(window.assets, "widgets")
-    push!(window.assets, "icons")
 
     lift(boardᵗ) do board
         vbox(
