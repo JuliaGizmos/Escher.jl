@@ -139,13 +139,18 @@ end
 import Base: send, recv
 export send, recv, wire
 
-immutable ChanSend <: Tile
+immutable ChanSend <: Behavior
     chan::Symbol
     watch::Symbol
     tile::Tile
 end
+
+# expose contained signal to outside
+name(c::ChanSend) = c.watch
+send(chan::Symbol, watch::Symbol, b) =
+    ChanSend(chan, watch, b)
 send(chan::Symbol, b::Behavior) =
-    ChanSend(chan, b.name, b)
+    ChanSend(chan, name(b), b)
 
 render(chan::ChanSend) =
     render(chan.tile) <<
@@ -164,6 +169,6 @@ render(chan::ChanRecv) =
     render(chan.tile) <<
         Elem("chan-recv", chan=chan.chan, attr=chan.attr)
 
-
-wire(a::Behavior, b, chan, attribute) =
+wire(a, b, chan, attribute) =
     send(chan, a), recv(chan, b, attribute)
+
