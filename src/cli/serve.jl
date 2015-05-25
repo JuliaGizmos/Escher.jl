@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
 #
 # Webapp
+using Compat
 using Mux
 using Escher
 using JSON
@@ -80,17 +81,34 @@ const commands = Dict([
         push!(sig, Escher.interpret(interp, msg["data"]["value"]))
     end),
     ("window-size", (window, msg) -> begin
-        dim = (msg["data"][1] * px, msg["data"][1] * px)
+        dim = (msg["data"][1] * Escher.px, msg["data"][2] * Escher.px)
         push!(window.dimension, dim)
     end),
     ("window-route", (window, msg) -> begin
         push!(window.route, msg["data"])
-    end)
+    end),
+    ("window-kill", (window, msg) -> begin
+        push!(window.alive, false)
+    end),
 ])
 
+query_dict(qstr) = begin
+    parts = split(qstr, '&')
+    dict = Dict()
+    for p in parts
+        k, v = split(p, "=")
+        dict[k] = v
+    end
+    dict
+end
 
 uisocket(dir) = (req) -> begin
     file = joinpath(abspath(dir), (req[:params][:file]))
+
+    d = query_dict(req[:query])
+
+    w = @compat parse(Int, d["w"])
+    h = @compat parse(Int, d["h"])
 
     if !isfile(file)
         return
@@ -102,7 +120,7 @@ uisocket(dir) = (req) -> begin
     # TODO: Initialize window with session,
     # window dimensions and what not
 
-    window = Window()
+    window = Window(dimension=(w*px, h*px))
 
     lift(asset -> write(sock, JSON.json(import_cmd(asset))),
          window.assets)

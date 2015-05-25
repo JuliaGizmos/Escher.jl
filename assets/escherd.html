@@ -57,8 +57,11 @@ function teelog(x) {
     function Escherd(suffix, el) {
         this.node = null
         this.websocket = null
+        var w = window.innerWidth,
+            h = window.innerHeight,
+            url = socket_url(suffix) + "?w=" + w + "&h=" + h
 
-        var ws = new WebSocket(socket_url(suffix))
+        var ws = new WebSocket(url)
 
         var self = this
         ws.onmessage = function (msg) {
@@ -74,6 +77,25 @@ function teelog(x) {
             console.log("Error in web socket connection", e)
         }
         this.websocket = ws
+
+        window.addEventListener("resize", function (ev) {
+            // TODO: Throttle
+            commands.message.call(self,
+                { command: "window-size",
+                  data: [ window.innerWidth, window.innerHeight ]
+                }
+            )
+        })
+
+
+        var closeHandler = function () {
+            commands.message.call(self,
+                {command: "window-kill", data: null})
+            // prevent firing twice
+            window.removeEventListener("beforeunload", closeHandler)
+        }
+
+        window.addEventListener("beforeunload", closeHandler)
     }
 
     window.Escherd = Escherd

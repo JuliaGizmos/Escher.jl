@@ -2,6 +2,7 @@ export Window,
        include_asset
 
 immutable Window
+    alive::Input
     dimension::Input
     route::Input
     dir::String
@@ -9,10 +10,11 @@ immutable Window
 end
 
 Window(;
-    dimension=(0mm, 0mm),
+    alive=true,
+    dimension=(0px, 0px),
     route="",
     dir="ltr") =
-    Window(Input{Any}(dimension), Input{Any}(route), "ltr", Input("basics"))
+    Window(Input{Bool}(alive), Input{Any}(dimension), Input{Any}(route), "ltr", Input("basics"))
 
 resolve_asset(slug) = begin
     path = Pkg.dir("Escher", "assets", slug * ".html")
