@@ -65,23 +65,31 @@ end
 @require Gadfly begin
     import Gadfly: Compose
 
-    convert(::Type{Tile}, p::Gadfly.Plot) = begin
-        backend = Compose.Patchable(
-            Compose.default_graphic_width,
-            Compose.default_graphic_height,
-        )
-        convert(Tile, Compose.draw(backend, p))
-    end
+    convert(::Type{Tile}, p::Gadfly.Plot) =
+        drawing(p)
 end
+
+export drawing
 
 @require Compose begin
 
-    convert(::Type{Tile}, p::Compose.Context) = begin
+    @api drawing => ComposeGraphic <: Tile begin
+        arg(width::Compose.Measure)
+        arg(height::Compose.Measure)
+        curry(graphic::Any) # Either a plot or a compose node
+    end
+    drawing(p) =
+        drawing(Compose.default_graphic_width,
+                Compose.default_graphic_height, p)
+
+    convert(::Type{Tile}, p::Compose.Context) =
+        drawing(p)
+
+    render(d::ComposeGraphic) = begin
         backend = Compose.Patchable(
-            Compose.default_graphic_width,
-            Compose.default_graphic_height,
+            d.width, d.height
         )
-        convert(Tile, Compose.draw(backend, p))
+        Elem(:div, Compose.draw(backend, d.graphic), className="graphic-wrap")
     end
 end
 
