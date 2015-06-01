@@ -3,7 +3,6 @@
 # Webapp
 using Compat
 using Mux
-using Escher
 using JSON
 
 using Reactive
@@ -39,7 +38,9 @@ function setup_socket(file)
     io = IOBuffer()
     write(io, """<!doctype html>
     <html>
-        <head>""")
+        <head>
+        <meta charset="utf-8">
+        """)
     # Include the basics
     write(io, "<script>", Patchwork.js_runtime(), "</script>")
     write(io, """<script src="/assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>""")
@@ -113,10 +114,6 @@ uisocket(dir) = (req) -> begin
     w = @compat parse(Int, d["w"])
     h = @compat parse(Int, d["h"])
 
-    if !isfile(file)
-        return
-    end
-
     sock = req[:socket]
     tilestream = Input{Signal}(Input{Tile}(empty))
 
@@ -177,6 +174,9 @@ uisocket(dir) = (req) -> begin
     end
 
     while isopen(sock)
+        if !isfile(file)
+            break
+        end
         fw = watch_file(file)
         wait(fw)
         close(fw)

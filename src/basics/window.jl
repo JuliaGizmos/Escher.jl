@@ -16,10 +16,10 @@ Window(;
     dir="ltr") =
     Window(Input{Bool}(alive), Input{Any}(dimension), Input{Any}(route), "ltr", Input("basics"))
 
-resolve_asset(slug) = begin
+resolve_asset(slug, prefix="/assets", joinfn=(x, y) -> x * "/" * y) = begin
     path = Pkg.dir("Escher", "assets", slug * ".html")
     if isfile(path)
-        return "/assets/$slug.html"
+        return joinfn(prefix, "$slug.html")
     else
         error("Asset file $path doesn't exist")
     end

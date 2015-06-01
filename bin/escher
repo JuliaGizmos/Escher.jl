@@ -22,7 +22,7 @@ parse_commandline() = begin
         "--dir", "-d"
             help = "Path to serve from, defaults to `.' or when compiling, the output directory."
             arg_type = String
-            default = "."
+            default = "build"
         "files"
             help = "Files to compile. Ignored in serve mode"
             nargs = '*'
@@ -33,12 +33,11 @@ end
 
 main() = begin
     parsed_args = parse_commandline()
-    println(parsed_args)
     if parsed_args["serve"]
         escher_serve(parsed_args["port"], parsed_args["dir"])
     else parsed_args["make"]
         dir = parsed_args["dir"]
-        Any[escher_make(f, abspath(dir)) for f in parsed_args["files"]]
+        Any[escher_make(f, dir) for f in parsed_args["files"]]
     end
 end
 
