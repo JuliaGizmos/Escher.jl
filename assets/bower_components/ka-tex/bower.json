@@ -1,0 +1,32 @@
+{
+  "name": "ka-tex",
+  "version": "0.1.0",
+  "homepage": "https://github.com/shashi/ka-tex",
+  "authors": [
+    "Shashi Gowda <shashigowda91@gmail.com>"
+  ],
+  "description": "KaTeX custom element",
+  "main": "ka-tex.html",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "polymer",
+    "element",
+    "web",
+    "component",
+    "katex",
+    "latex"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "katex": "^0.2.0"
+  }
+}

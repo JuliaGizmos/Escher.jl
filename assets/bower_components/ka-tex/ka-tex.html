@@ -1,0 +1,33 @@
+<polymer-element
+    name="ka-tex"
+    attributes="source block" >
+
+<template>
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.2.0/katex.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.2.0/katex.min.js"></script>
+
+<div id="rendered"></div>
+</template>
+
+<script>
+
+Polymer({
+    source: "",
+    block: false,
+    render: function () {
+        katex.render(this.source, this.$.rendered, {displayMode: this.block})
+    },
+    domReady: function () {
+        this.render()
+    },
+    sourceChanged: function () {
+        this.render()
+    },
+    blockChanged: function () {
+            this.render()
+    }
+})
+</script>
+
+</polymer-element>

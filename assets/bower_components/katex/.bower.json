@@ -1,0 +1,14 @@
+{
+  "name": "katex",
+  "homepage": "https://github.com/Khan/KaTeX",
+  "version": "0.2.0",
+  "_release": "0.2.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.2.0",
+    "commit": "c901083e591ddbf86263c5a90446b472111b3d96"
+  },
+  "_source": "git://github.com/Khan/KaTeX.git",
+  "_target": "^0.2.0",
+  "_originalSource": "katex"
+}

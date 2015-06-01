@@ -1,0 +1,17 @@
+{
+  "name": "code-mirror",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.5"
+  },
+  "homepage": "https://github.com/shashi/code-mirror",
+  "_release": "728c7429aa",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "728c7429aa5b63c88461287edb8decafc5baf23a"
+  },
+  "_source": "git://github.com/shashi/code-mirror.git",
+  "_target": "master",
+  "_originalSource": "shashi/code-mirror"
+}
