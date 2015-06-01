@@ -18,7 +18,7 @@ mkoutputdir!(dir) = begin
     end
 end
 
-escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_assets=false) = begin
+escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_assets=false, base="") = begin
 
     opath = output_path(file, output_dir)
     w = Window()
@@ -44,13 +44,14 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         <html>
         <meta charset="utf-8">
         <head>
-            <script> $(Patchwork.js_runtime()) </script>
-           <script src="/assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+           <base href="$base">
+           <script> $(Patchwork.js_runtime()) </script>
+           <script src="$assets_dir/bower_components/webcomponentsjs/webcomponents.min.js"></script>
         </head>
 
         $(
 
-        join(map(x -> """<link rel="import" href="/$(Escher.resolve_asset(x, assets_dir))">""",
+        join(map(x -> """<link rel="import" href="$(Escher.resolve_asset(x, assets_dir))">""",
                       vcat("basics", value(assets))), "\n")
 
         )
