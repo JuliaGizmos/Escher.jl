@@ -32,7 +32,9 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
     asset_dest = joinpath(output_dir, assets_dir) |> abspath
 
     if copy_assets
-        cp(asset_src, asset_dest)
+        if !isfile(asset_dest) && !isdir(asset_dest)
+            cp(asset_src, asset_dest)
+        end
     else
         if !isfile(asset_dest) && !isdir(asset_dest)
             symlink(asset_src, asset_dest)
@@ -45,7 +47,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         <meta charset="utf-8">
         <head>
             <script> $(Patchwork.js_runtime()) </script>
-           <script src="/assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+           <script src="/$assets_dir/bower_components/webcomponentsjs/webcomponents.min.js"></script>
         </head>
 
         $(
