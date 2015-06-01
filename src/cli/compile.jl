@@ -18,7 +18,7 @@ mkoutputdir!(dir) = begin
     end
 end
 
-escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_assets=false) = begin
+escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_assets=false, base="") = begin
 
     opath = output_path(file, output_dir)
     w = Window()
@@ -32,9 +32,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
     asset_dest = joinpath(output_dir, assets_dir) |> abspath
 
     if copy_assets
-        if !isfile(asset_dest) && !isdir(asset_dest)
-            cp(asset_src, asset_dest)
-        end
+        cp(asset_src, asset_dest)
     else
         if !isfile(asset_dest) && !isdir(asset_dest)
             symlink(asset_src, asset_dest)
@@ -46,13 +44,14 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         <html>
         <meta charset="utf-8">
         <head>
-            <script> $(Patchwork.js_runtime()) </script>
-           <script src="/$assets_dir/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+           <base href="$base">
+           <script> $(Patchwork.js_runtime()) </script>
+           <script src="$assets_dir/bower_components/webcomponentsjs/webcomponents.min.js"></script>
         </head>
 
         $(
 
-        join(map(x -> """<link rel="import" href="/$(Escher.resolve_asset(x, assets_dir))">""",
+        join(map(x -> """<link rel="import" href="$(Escher.resolve_asset(x, assets_dir))">""",
                       vcat("basics", value(assets))), "\n")
 
         )
