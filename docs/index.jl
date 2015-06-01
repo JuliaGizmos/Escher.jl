@@ -4,93 +4,268 @@ using Markdown
 
 pkgname(name="Escher") = title(3, name)
 
-intro = md"""
+using Color
+angleᵗ = Input(0) # The angle at any given time
+connected_slider = subscribe(slider(0:360), angleᵗ)
 
-Escher is a [Julia](https://julialang.org) package designed to give its user mastery over the Web UI.
+reactive_eg = lift(angleᵗ) do angle
+    vbox(
+        connected_slider,
+        size(5em, 5em, empty) |>
+            fillcolor(HSV(angle, 1.0, 1.0))
+    )
+end
 
-By abstracting out HTML and CSS into a library of small, single-purpose, pure functions, Escher provides a pleasant API to create browser-based interactive documents while keeping out any boiler-plate or accidental complexity common to traditional tools. Use of Virtual DOM on both the server and the client side makes the front-end, and the back-end dichotomy disappear. In fact, the user only needs to know the basics of Julia, and does not need to know about HTML, CSS, JavaScript, or other web technologies to get started creating rich, interactive UIs with Escher.
+part1 = md"""
 
+$(vskip(1em))
+$(
+
+fontsize(1.33em,
+     "Escher lets you to build beautiful, interactive Web UIs in pure Julia.") |>
+        textalign(centertext) |>
+        fontstyle(italic)
+)
 
 $(vskip(1em))
 
-## Overview of Features
+It comes with:
+
+**A web server for 2015.** the built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.
+
+**A rich functional library of UI components.** the built-in library functions support Markdown, Input widgets, TeX-style Layouts, Styling, LaTeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs.
+ 
 
 $(vskip(1em))
 
-- **A web server for 2015.**
-Escher comes with a sophisticated web server that takes away the pain of working through the various hairy layers of the web. Firstly, it sets up communication directly between widgets on the client and values in the Julia code. This spares you time that you would otherwise have to spend setting up your Ajax / WebSocket endpoints, or doing event-handling. Secondly, it lets you see your UI evolve in real-time as you hack at it -- every time you save a file you are editing, Escher figures out what changes occured and patches up the UI.
-- **A Rich Functional Library.**
-Escher has functions to create most kinds of content you want in a web UI. Markdown, Input widgets, Layouts, Styling, LaTeX, Code, Behaviors, Tabs, Menus, Slideshows, and by way of being in the Julia ecosystem, Plots and Vector Graphics too are supported by the library out-of-the-box. Content created with it also looks great by default. The library is also *Functional* -- UIs are immutable values of the abstract type `Tile`. There are many subtypes of `Tile`, each containing some metadata and possibly other tiles. Library functions take Tiles as arguments, and return Tiles as their result.
-- **Virtual DOM.**
-*DOM (Document Object Model)* is the convention used by web browsers for tracking the state of an open web page by means of a large mutable data structure. A Virtual DOM is a mock representation of the actual DOM. Escher uses the [Patchwork](https://github.com/shashi/Patchwork.jl) package to create Virtual DOM objects on the Julia side and *project* them on the client browser's actual DOM. An update to any input to the Julia code (say, the user interacting with a text widget), triggers an exchange of short messages between the client and the server where the server receives the relevant input, and in return, sends a series of patches to be applied to the browser's DOM.
-- **Reactive.** Reactive programming is a way of programming with inputs that can change over time. The [Reactive](http://julialang.org/Reactive.jl) Julia package reifies the concept of a time-varying value. Building an interactive UI is equivalent to constructing a signal of UIs from Input signals using [Reactive's primitives](http://julialang.org/Reactive.jl). This facilitates a declarative style of programming and spares us the trouble of DOM manipulation.
-- **Built with Web Components.** - Web Components specification allows us to use custom-made HTML elements in through our Virtual DOM. Escher relies on Polymer webcomponents framework and library to provide higher-order layouts (like tabs, menus, pages), and widgets. Since complex widgets can be represented by a single custom element, it is lightweight to create and modify things on the fly once the assets are loaded. For example, a code editor widget will manifest as a single node in the Virtual DOM. Virtual DOM and Web Components hence make for a powerful combination, while supporting appealingly modular front-end code.
-"""
-
-quickguide = md"""
+# Installation
 
 $(vskip(1em))
 
-## Installation
+```julia
+Pkg.add("Escher")
+```
+
+$(vskip(1em))
+You might want to link escher executable to `/usr/local/bin` so that it goes in your PATH.
+
+$(vskip(1em))
+```sh
+ln -s ~/.julia/v0.4/Escher/bin/escher /usr/local/bin/
+```
+
+$(vskip(1em))
+## Starting the server
+$(vskip(1em))
+
+A great way to get started is by looking at the examples.
+
+From the `examples/` directory in `~/.julia/v0.3/Escher`, run the following command to bring up the escher server:
+
+```
+../bin/escher --serve
+```
+
+This will start a web server on port 5555. See `escher --help` for other options to this command. You can now point your browser to `http://localhost:5555/` to access the examples viewer interface. Or you can also visit `http://localhost:5555/<file>.jl` to access a specific example. `<file>.jl` could be any file inside the `examples/` directory. In general, any file with a `main` function that takes one argument-the `Window` object, and returns a valid Escher UI is served in this way.
+
+The following section will give a general overview of how UIs are created with Escher.
+
+
+$(vskip(1em))
+# An overview
+$(vskip(1em))
+
+These are the rules Escher is built around.
 
 $(vskip(1em))
 
-See README for setup instruction.
+## Rule 0: UIs are immutable values
 
-## Getting Started
+$(vskip(1em))
+A UI in Escher is simply an immutable Julia value of the abstract type `Tile`. A Tile is rendered into a browser [DOM tree](http://en.wikipedia.org/wiki/Document_Object_Model) to actually display the UI.
 
-To begin with, under a new directory, create a file called `index.jl` and save the following code in it:
+As an example `plaintext("Hello, World!")` is a Tile that contains the plain text 'Hello, World!'.
 
+Create a file called `hello.jl` in `examples/` directory, and put in the following code in it:
+
+$(vskip(1em))
+```julia
+function main(window)
+    plaintext("Hello, World!")
+end
+```
+$(vskip(1em))
+
+Now if you visit `http://localhost:5555/hello.jl` you should see the text "Hello, World!" on the top left corner of the screen.
+
+Notice the argument `window`. `main` *must* take this argument, and may or may not use it. Briefly, `window.assets` is an input signal which can be used to load HTML dependencies on-the-fly. `window.alive` is a boolean signal that tells you if the window is still open. `window.dimension` is a 2-tuple of lengths representing the current size of the window in pixels.
+
+$(vskip(1em))
+## Rule 1: Functions that modify a UI return a new UI
+
+$(vskip(1em))
+Now let us say you want to give a padding of 10mm around the plain text tile you created in the hello world example, you do it by passing the previous value to the function `pad`.
 
 ```julia
 function main(window)
-    "Hello, World!"
+    txt = plaintext("Hello, World!")
+    pad(10mm, txt)
 end
 ```
 
-Now, from the same directory, run `bin/escherd` script bundled with this package. This should start a web server serving at port 8000.
+Similarly, if you want to change some style in/of a UI, you call a function to do it. For example, to make the Hello, World text red, you could use `fontcolor`:
 
-If you now visit `http://localhost:8000` from your browser, you should see a page with "Hello, World!" written on the top-left corner of it. You just created your first Escher UI! Now if you edit the file to say "Hello, Julians" instead of "Hello, World!" and save it, you should see the page in the browser automatically update to reflect the change! `escherd` provides hot-loading of top-level UI files.
+$(vskip(1em))
+```julia
+function main(window)
+    txt = plaintext("Hello, World!")
+    fontcolor("red", pad(10mm, txt))
+end
+```
+$(vskip(1em))
 
-## WIP Documentation index
+## Rule 2: Most Escher functions have curried methods
+$(vskip(1em))
 
-- [layout-api](layout-api.jl)
-- [typography-api](typography-api.jl)
-- [layout-guide](layout-guide.jl)
-- [typography-guide](typography-guide.jl)
+Omitting the last tile argument to most escher functions returns a 1-argument function that takes a tile and applies the property.
 
+For example, `pad(10mm)` returns an anonymous function of 1 argument which must be a tile, and that returns a new tile with the specified 10mm of padding.
+
+Therefore, `pad(10mm, txt)` is equivalent to `pad(10mm)(txt)` or `txt |> pad(10mm)`. This is helpful when you want to apply, for example, the same padding to a all the tiles in a vector. e.g. `map(pad(10mm), [tile1, tile2])` will return a vector of two tiles with 10mm padding each.
+
+Moreover, using the curried version with the `|>` infix operator makes for code that reads better. For example, the previous Hello World example could also be written like this:
+
+$(vskip(1em))
+```julia
+function main(window)
+    plaintext("Hello, World!") |>
+        fontcolor("red") |>
+        pad(10mm)
+end
+```
+$(vskip(1em))
+
+You can mentally read this as: to the plaintext Hello, World, apply font color red and then apply a padding of `10mm`.
+
+$(vskip(1em))
+## Rule 3: layout functions combine many UIs into one
+$(vskip(1em))
+
+To stack tiles vertically, use `vbox`. To stack horizontally, use `hbox`.
+
+For example
+
+```julia
+hello_color(color) =
+    plaintext("Hello, World!") |>
+        fontcolor(color) |>
+        pad(10mm)
+
+function main(window)
+    x = vbox(
+        hello_color("red"),
+        hello_color("blue"),
+        hello_color("green"),
+    )
+    y = vbox(
+        hello_color("green"),
+        hello_color("red"),
+        hello_color("blue"),
+    )
+
+    hbox(x, y)
+end
+```
+
+$(vskip(1em))
+Should result in an arrangement like this:
+
+$(begin
+    hello_color(color) =
+        plaintext("Hello, World!") |>
+            fontcolor(color) |>
+            pad(1em)
+
+    x = vbox(
+        hello_color("red"),
+        hello_color("blue"),
+        hello_color("green"),
+    )
+    y = vbox(
+        hello_color("green"),
+        hello_color("red"),
+        hello_color("blue"),
+    )
+
+    hbox(x, y)
+end)
+
+`x` and `y` are vertial arrangements of 3 tiles each, these arrangements are themselves put in a `hbox` to place `x` next to `y`.
+
+Other functions that combine multiple UIs include: `menu`, `pages`, `tabs`, and so on, these are defined in `src/library/layout2.jl`.
+
+$(vskip(1em))
+## Rule 4: An interactive UI is a Signal of UIs
+$(vskip(1em))
+
+To get an overview of how Reactive.jl's signals work, see [Reactive documentation](http://julialang.org/Reactive.jl).
+
+There are two facets to this rule:
+
+1. Getting the input from tiles
+2. Creating a signal of UI using these signals
+
+Firstly, some Tiles (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to `Input` signals from Reactive. Widgets such as sliders, buttons, dropdown menus are subtypes of `Behavior`. `subscribe` lets you pipe updates from a behavior into a signal.
+
+For example
+
+```julia
+
+angleᵗ = Input(0) # The angle at any given time
+connected_slider = subscribe(slider(0:360), angleᵗ)
+```
+
+Now `connected_slider` renders as a slider and updates the signal `angleᵗ` when the slider's knob is moved by the user.
+
+Secondly, you can use these input signals to create a signal of Escher UIs. For example,
+
+```julia
+
+using Color # for HSV
+
+function main(window)
+    # First, load HTML dependencies related to the slider
+    push!(window.assets, "widgets")
+
+    angleᵗ = Input(0) # The angle at any given time
+    connected_slider = subscribe(slider(0:360), angleᵗ)
+
+    lift(angleᵗ) do angle
+        vbox(
+            connected_slider,
+            size(5em, 5em, empty) |>
+                fillcolor(HSV(angle, 1.0, 1.0))
+                             # ^^^ Use the current slider angle
+        )
+    end
+end
+```
 """
 
-
-#include("basics/macros.jl")
-#include("basics/tile.jl")
-#include("basics/util.jl")
-#include("basics/length.jl")
-#include("basics/signal.jl")
-#include("basics/lazyload.jl")
-#
-#include("layout.jl")
-#include("basics/typography.jl")
-#include("basics/content.jl")
-#include("basics/embellishment.jl")
-#include("basics/behaviour.jl")
-#include("basics/window.jl")
-#
-#include("library/markdown.jl")
-#include("library/latex.jl")
-#include("library/widgets.jl")
-#include("library/layout2.jl")
-#include("library/slideshow.jl")
-#include("library/codemirror.jl")
-#include("library/animation.jl")
+part2 = md""
 
 include("helpers/page.jl")
 function main(window)
     push!(window.assets, "latex")
-    vbox(
-        pkgname(),
-        vskip(1em),
-        intro,
-        quickguide
-    ) |> centeredpage
+    push!(window.assets, "widgets")
+
+    lift(reactive_eg) do example
+        vbox(
+            pkgname(),
+            vskip(1em),
+            part1,
+            example,
+            part2,
+        ) |> centeredpage
+    end
 end

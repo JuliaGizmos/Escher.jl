@@ -24,7 +24,7 @@ $(vskip(1em))
 # What is reactive programming?
 $(vskip(1em))
 
-*Reactive programming* is a style of talking about event-driven programs in terms of **streams of data**. For example, a keyboard gives out a *stream of key presses*, a timer gives out a *stream of timestamps*, a mouse gives out a *stream of clicks*. More interestingly, an interactive UI is itself a stream of UIs!
+*Reactive programming* is a style of talking about event-driven programs in terms of **streams of data**. For example, a keyboard gives out a *stream of key presses*, a timer gives out a *stream of timestamps*, a mouse gives out a *stream of clicks*. You can create new signals by transforming, and combining other signals. An interactive UI is created by transforming signals from input widgets into a signal of UIs.
 
 **Signals**
 
@@ -135,7 +135,12 @@ $(vskip(1em))
 `consume` is not limited to a single input, if the first argument to `consume` is a function that takes N arguments, you can give N signals as the input to this function. To illustrate this, we will create a [Compose](http://composejl.org/) graphic which contains a shape which can be selected from a group of radio buttons, rotated at a certain angle chosen using a slider.
 
 
-**OK NOW I"M OFF FIXING RADIOBUTTONS BRB**
+# Interpreting input
+
+*Interpreters* in Escher allow you to transform inputs
+
+# 
+
 """
 end
 
