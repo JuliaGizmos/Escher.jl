@@ -206,10 +206,14 @@ watch!(sampler::Sampler, tile) = begin
     broadcast(tile)
 end
 
+watch!(sampler::Sampler) = t -> watch!(sampler, t)
+
 trigger!(sampler::Sampler, tile) = begin
     sampler.triggers[name(tile)] = default_interpreter(tile)
     broadcast(tile)
 end
+
+trigger!(sampler::Sampler) = t -> trigger!(sampler, t)
 
 @api sample => Sampled <: Behavior begin
     arg(sampler::Sampler)
