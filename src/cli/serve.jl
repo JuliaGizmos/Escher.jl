@@ -12,11 +12,14 @@ using Patchwork
 function loadfile(filename)
     if isfile(filename)
         try
-            include(filename)
-            return try
-                main
-            catch
-                w -> Elem(:pre, "$filename doesn't have a main function")
+            ui = include(filename)
+            if typeof(ui) == Function
+                return ui
+            else
+                warn("$filename did not return a function")
+                return (w) -> Elem(:p, string(
+                    filename, " did not return a UI function"
+                ))
             end
         catch err
             bt = backtrace()
@@ -70,7 +73,7 @@ swap!(tilestream, next) =
     push!(tilestream, Input(next))
 
 const signals = Dict()
-function Escher.setup_transport(x)
+function Escher.setup_transport(x::Tuple)
     Escher.makeid(x)
 end
 
@@ -127,7 +130,16 @@ uisocket(dir) = (req) -> begin
 
     main = loadfile(file)
 
-    current = main(window)
+    current = Escher.empty
+    try
+        current = main(window)
+    catch err
+        bt = backtrace()
+        current = Elem(:pre, sprint() do io
+            showerror(io, err)
+            Base.show_backtrace(io, bt)
+        end)
+    end
 
     swap!(tilestream, current)
 
