@@ -6,7 +6,7 @@ make_term(term, typ, parent) =
 
 @doc """
 `@terms` allows you to create singleton types,
-create instances and put them in constants.
+create instances as constants.
 
 E.g.
 
@@ -174,11 +174,6 @@ prependarg(state, method) = begin
     ApiMethod(args, lambda_args, constructor_args)
 end
 
-teeprint(x, fn=println) = begin
-    fn(x)
-    x
-end
-
 @doc """
 Given a list of field definitions (see @api) and a dictionary of type parameters
 (e.g. T <: Number would have an entry :T => :Number in the dict),
@@ -286,6 +281,8 @@ argdocs(args, kwargs, params) =
     vcat(map(arg -> argdoc(arg, params), args),
          map(kwarg -> argdoc(kwarg, params, true), kwargs))
 
+const escher_meta = Dict()
+
 @doc """
 `@api` is used to create new tile types and associated constructors
 
@@ -314,8 +311,8 @@ macro api(names, body)
     argdefs = filter(f -> f.args[1] != :doc, nolines)
     docs = filter(f -> f.args[1] == :doc, nolines)
 
-    typedef = Expr(:type, false, esc(typexpr(typ)),
-        Expr(:block, typebody(argdefs)...))
+    typedef = Expr(:type, false, typexpr(typ),
+        Expr(:block, typebody(argdefs)...)) |> esc
 
     dict = paramdict(typexpr(typ))
 
@@ -326,19 +323,19 @@ macro api(names, body)
     kwnames = map(x -> striptype(x.args[1]), kws)
     ms = map(m -> methodexpr(fn, typename(typ), kws, kwnames, m), methoddefs)
 
-    doc = meta(
-        get(docs, 1, :(doc(""))).args[2],
-        name=fn,
-        typ=typ,
-        args=argdocs(args, kwargs, dict)
+    doc = @compat Dict(
+        :doc=>get(docs, 1, :(doc(""))).args[2],
+        :name=>fn,
+        :type=>typ,
+        :args=>argdocs(args, kwargs, dict)
     )
 
-    Expr(:block, typedef, :(@doc $doc -> $(ms[1])), ms[2:end]...)
+    # save metadata
+    escher_meta[fn] = doc
+    Expr(:block, typedef, ms...)
 end
 
-macro apidoc(names, expr)
-
-    body, obj = expr.args
+macro apidoc(names, body)
 
     fn, typ = names.args
     fields = body.args
@@ -347,8 +344,8 @@ macro apidoc(names, expr)
     argdefs = filter(f -> f.args[1] != :doc, nolines)
     docs = filter(f -> f.args[1] == :doc, nolines)
 
-    typedef = Expr(:type, false, esc(typexpr(typ)),
-        Expr(:block, typebody(argdefs)...))
+    typedef = Expr(:type, false, typexpr(typ),
+        Expr(:block, typebody(argdefs)...)) |> esc
 
     dict = paramdict(typexpr(typ))
 
@@ -357,14 +354,14 @@ macro apidoc(names, expr)
     methoddefs = makeapimethods(args, dict)
     kws = map(kwize, kwargs)
     kwnames = map(x -> striptype(x.args[1]), kws)
-    ms = map(m -> methodexpr(fn, typename(typ), kws, kwnames, m), methoddefs)
 
-    doc = meta(
-        get(docs, 1, :(doc(""))).args[2],
-        name=fn,
-        typ=typ,
-        args=argdocs(args, kwargs, dict)
+    doc = @compat Dict(
+        :doc=>get(docs, 1, :(doc(""))).args[2],
+        :name=>fn,
+        :type=>typ,
+        :args=>argdocs(args, kwargs, dict)
     )
 
-    :(@doc(*, $(Expr(:->, esc(doc), esc(obj)))))
+    # save metadata
+    escher_meta[fn] = doc
 end

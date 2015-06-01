@@ -1,4 +1,3 @@
-using Escher
 using Markdown
 
 import Escher: @api, render

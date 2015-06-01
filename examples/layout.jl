@@ -1,7 +1,5 @@
 
 # An infinite number of mathematicians walk into a bar...
-
-using Escher
 using Color
 
 colors = distinguishable_colors(9)

@@ -1,7 +1,7 @@
 using Color
 
 getdoc(fn) =
-    Escher.__METADATA__.entries[fn]
+    Escher.escher_meta[symbol(string(fn))]
 
 badge(x, bg="#f1f1f1") =
     fontsize(0.8em, x) |>
@@ -58,7 +58,6 @@ function signature(meta)
     sep = [",", hskip(0.5em)]
     sig = [ fontweight(bold, fn), "(", intersperse(sep, args)... ]
     if !isempty(kwargs)
-        println("AAA", kwargs)
         sig = [ sig, "; ", hskip(0.5em), intersperse(sep, kwargs) ]
     end
     sig = [ sig, ")" ]
@@ -74,7 +73,6 @@ rettype(typ) =
 
 function argrow(arg)
     notes = Any[]
-    println(arg)
     if !arg[:coerced]
         push!(notes, badge(hbox("requires ", hskip(0.5em), code(string(arg[:type])))))
     end

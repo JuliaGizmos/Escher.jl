@@ -32,6 +32,8 @@ abstract Behavior <: Tile
 
 name(b::Behavior) = b.name
 
+broadcast(b::Behavior) = b
+
 ## Interpreting a message from a behavior ##
 
 abstract Interpreter

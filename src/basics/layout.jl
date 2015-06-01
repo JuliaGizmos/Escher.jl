@@ -249,7 +249,8 @@ render(f::Flow) =
     doc("Arrange tiles horizontally. `hbox(args...)`
 is equivalent to `flow(horizontal, args...)`")
     arg(tiles::TileList)
-end ->
+end
+
 hbox(args...) = flow(horizontal, args...)
 
 vbox(args...) = flow(vertical, args...)
