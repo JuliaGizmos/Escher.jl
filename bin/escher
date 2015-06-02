@@ -22,7 +22,7 @@ parse_commandline() = begin
         "--dir", "-d"
             help = "Path to serve from, defaults to `.' or when compiling, the output directory."
             arg_type = String
-            default = "build"
+            default = ""
         "--base", "-b"
             help = "If the compiled files are being served from a subdirectory"
             arg_type = String
@@ -40,7 +40,7 @@ main() = begin
     if parsed_args["serve"]
         escher_serve(parsed_args["port"], parsed_args["dir"])
     else parsed_args["make"]
-        dir = parsed_args["dir"]
+        dir = parsed_args["dir"] == "" ? "build" : parsed_args["dir"]
         Any[escher_make(f, dir; base=parsed_args["base"]) for f in parsed_args["files"]]
     end
 end

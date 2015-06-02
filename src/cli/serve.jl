@@ -191,7 +191,7 @@ uisocket(dir) = (req) -> begin
 
 end
 
-function escher_serve(port=5555, dir=".")
+function escher_serve(port=5555, dir="")
     # App
     @app static = (
         Mux.defaults,
