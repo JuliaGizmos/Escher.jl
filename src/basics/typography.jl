@@ -227,7 +227,6 @@ h2(txt) = heading(2, txt)
 h3(txt) = heading(3, txt)
 h4(txt) = heading(4, txt)
 
-paragraph(txt) = class("paragraph", txt, forcewrap=true, wrap=:p)
 blockquote(txt) = class("blockquote", txt, forcewrap=true, wrap=:blockquote)
 caption(txt) = class("caption", txt, wrap=:span)
 emph(txt) = class("emph", txt, forcewrap=true, wrap=:em)
@@ -239,12 +238,5 @@ end
 
 ## String will go inside a span, is this OK?
 render(x::Code) = Elem(:code, render(x.code))
-
-@api codeblock => CodeBlock <: Tile begin
-    arg(code::Any)
-    kwarg(language::String="julia")
-end
-
-render(x::CodeBlock) = Elem(:pre, render(x.code))
 
 # colsize

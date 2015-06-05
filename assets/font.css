@@ -16,10 +16,27 @@ p {
     font-family: 'Crimson Text';
 }
 
-.font-monospace, code, pre {
+.font-monospace, code-mirror, code, pre {
     font-family: 'Source Code Pro', monospace;
     font-weight: 500;
-    padding: 0.25;
+}
+code {
+    padding: 0 0.24em;
+}
+
+/* Spacing in markdown */
+
+.md-heading {
+    margin-bottom: 0.33em;
+    margin-top: 0.66em;
+}
+
+.md-codeblock {
+    padding-left: 4em;
+}
+
+.md-paragraph {
+    margin: 0.66em 0;
 }
 
 .font-uppercase {
@@ -50,7 +67,7 @@ p {
   color: #757575;
   font-size: 112px;
   font-weight: 200;
-  line-height: 120px;  /* guessed */
+  line-height: 1.1em;  /* guessed */
   text-indent: -0.089em;
   text-rendering: optimizeLegibility;
 }
@@ -59,7 +76,7 @@ p {
   font-size: 56px;
   font-weight: 200;
   letter-spacing: -.026em;
-  line-height: 60px;  /* guessed */
+  line-height: 1.1em;  /* guessed */
   text-indent: -0.082em;
   text-rendering: optimizeLegibility;
 }

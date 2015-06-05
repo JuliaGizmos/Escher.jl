@@ -4,6 +4,7 @@ export codemirror
 @api codemirror => CodeMirror <: Widget begin
     arg(code::String="")
     kwarg(name::Symbol=:_code)
+    kwarg(readonly::Bool=false)
     kwarg(language::String="julia")
     kwarg(theme::String="elegant")
     kwarg(linenumbers::Bool=true)
@@ -18,5 +19,6 @@ render(c::CodeMirror) =
     Elem("code-mirror",
         value=c.code,
         mode=c.language,
+        readOnly=c.readonly,
         theme=c.theme,
         lineNumbers=c.linenumbers)
