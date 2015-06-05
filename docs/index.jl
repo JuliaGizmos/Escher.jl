@@ -1,10 +1,30 @@
 using Markdown
+using Color
+import Compose: compose, context, polygon
+using Lazy
+using Gadfly
+
+import Escher: @d
 
 # Home page.
 
-pkgname(name="Escher") = title(3, name)
+pkgname(name="Escher") =
+    hbox(title(3, name), hskip(1em), Escher.latex("\\beta")) |> fontcolor("#999")
 
-using Color
+*(f::Function, g::Function) = x -> f(g(x))
+
+sidenote(note, icon="info", iconcolor="#aaa") =
+    hbox(Escher.icon(icon) |>
+            size(100px, 100px) |>
+            fontcolor(iconcolor),
+        hskip(4em),
+        note |>
+           fontsize(0.9em) * fontcolor("#666")) |>
+        pad(1em) |>
+        bordercolor("#e1e1e1") |>
+        Escher.borderstyle([top, bottom], solid) |>
+        Escher.borderwidth([top, bottom], 1px)
+
 angleᵗ = Input(0) # The angle at any given time
 connected_slider = subscribe(slider(0:360), angleᵗ)
 
@@ -16,94 +36,208 @@ reactive_eg = lift(angleᵗ) do angle
     )
 end
 
+function sierpinski(n)
+    if n == 0
+        compose(context(), polygon([(1,1), (0,1), (1/2, 0)]))
+    else
+        t = sierpinski(n - 1)
+        compose(context(),
+                (context(1/4,   0, 1/2, 1/2), t),
+                (context(  0, 1/2, 1/2, 1/2), t),
+                (context(1/2, 1/2, 1/2, 1/2), t))
+    end
+end
+
+tex_eg = """f(x) = \\int_{-\\infty}^\\infty
+    \\hat f(\\xi)\,e^{2 \\pi i \\xi x}
+    \\,d\\xi
+"""
+md_example = md"""**Things to do:**
+
+- Create *universe*
+- Make a *pie*
+"""
+
 part1 = md"""
 
 $(vskip(1em))
 $(
 
-fontsize(1.33em,
-     "Escher lets you to build beautiful, interactive Web UIs in pure Julia.") |>
+vbox(
+hline(color=color("#e1e1e1")),
+vskip(2em),
+Escher.fontsize(2em,
+     "Escher lets you build beautiful interactive Web UIs in Julia.") |>
         textalign(centertext) |>
-        fontstyle(italic)
+        fontweight(200) |>
+        lineheight(1.2em) |>
+        maxwidth(15em) |>
+        x -> hbox(flex(), x, flex()),
+vskip(2em),
+hline(color=color("#e1e1e1")),
+)
+)
+$(vskip(3em))
+
+$(title(2, "What's inside") |> Escher.fontsize(1.75em))
+
+$(
+vbox(md"**A web server for 2015.** Escher's built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.",
+
+md"**A rich functional library of UI components.** the built-in library functions support Markdown, Input widgets, TeX-style Layouts, Styling, LaTeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs. The API comprehensively covers features from HTML and CSS, and also provides advanced features. Its user merely needs to know how to write code in Julia."
+) |> pad([left, right], 2em)
 )
 
-$(vskip(1em))
-
-It comes with:
-
-**A web server for 2015.** the built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.
-
-**A rich functional library of UI components.** the built-in library functions support Markdown, Input widgets, TeX-style Layouts, Styling, LaTeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs.
- 
-
-$(vskip(1em))
+$(vskip(2em))
 
 # Installation
 
-$(vskip(1em))
+In a Julia REPL, run:
 
 ```julia
 Pkg.add("Escher")
 ```
 
-$(vskip(1em))
 You might want to link escher executable to `/usr/local/bin` so that it goes in your PATH.
 
-$(vskip(1em))
 ```sh
 ln -s ~/.julia/v0.4/Escher/bin/escher /usr/local/bin/
 ```
 
-$(vskip(1em))
-## Starting the server
-$(vskip(1em))
+# Usage
 
-A great way to get started is by looking at the examples.
+From the directory from which you want to serve files containing Escher UIs, run:
+
+```
+<Escher-package-path/bin>/escher --serve
+```
+
 
 From the `examples/` directory in `~/.julia/v0.3/Escher`, run the following command to bring up the escher server:
 
-```
-../bin/escher --serve
-```
 
 This will start a web server on port 5555. See `escher --help` for other options to this command. You can now point your browser to `http://localhost:5555/` to access the examples viewer interface. Or you can also visit `http://localhost:5555/<file>.jl` to access a specific example. `<file>.jl` could be any file inside the `examples/` directory. In general, any file with a `main` function that takes one argument-the `Window` object, and returns a valid Escher UI is served in this way.
 
 The following section will give a general overview of how UIs are created with Escher.
 
 
-$(vskip(1em))
-# An overview
-$(vskip(1em))
+# An Overview
 
-These are the rules Escher is built around.
+Escher is built around 5 rules. Understanding these rules gives you a foundation to understanding Escher's comprehensive API.
 
-$(vskip(1em))
+## Rule 1: UIs are immutable values
 
-## Rule 0: UIs are immutable values
-
-$(vskip(1em))
 A UI in Escher is simply an immutable Julia value of the abstract type `Tile`. A Tile is rendered into a browser [DOM tree](http://en.wikipedia.org/wiki/Document_Object_Model) to actually display the UI.
 
-As an example `plaintext("Hello, World!")` is a Tile that contains the plain text 'Hello, World!'.
+Escher has all kinds of functions that generate Tiles.
 
-Create a file called `hello.jl` in `examples/` directory, and put in the following code in it:
 
-$(vskip(1em))
+**Example 1.**
+
+`plaintext("Hello, World!")` is a Tile that contains the plain text 'Hello, World!'.
+
+To actually see this in action, create a file called `hello.jl` in an directory where the Escher server is running. Save the following code in it:
+
 ```julia
 function main(window)
     plaintext("Hello, World!")
 end
 ```
-$(vskip(1em))
 
 Now if you visit `http://localhost:5555/hello.jl` you should see the text "Hello, World!" on the top left corner of the screen.
 
-Notice the argument `window`. `main` *must* take this argument, and may or may not use it. Briefly, `window.assets` is an input signal which can be used to load HTML dependencies on-the-fly. `window.alive` is a boolean signal that tells you if the window is still open. `window.dimension` is a 2-tuple of lengths representing the current size of the window in pixels.
-
 $(vskip(1em))
-## Rule 1: Functions that modify a UI return a new UI
-
+$(sidenote(md"The function `main` *must* take a window argument, and may or may not use it. The `window` object contains some information about the current browser window. Specifically, `window.assets` is an input signal which can be used to load HTML dependencies on-the-fly. `window.alive` is a boolean signal that tells you if the window is still open. `window.dimension` is a 2-tuple representing the current size of the window in pixels."))
 $(vskip(1em))
+
+**Example 2.**
+
+The `md""` string macro can generate markdown tiles from a markdown string.
+```julia
+using Markdown
+
+function main(window)
+    md\"\"\"
+**Things to do:**
+
+- Create *universe*
+- Make a *pie*
+    \"\"\"
+end
+```
+
+*Output:*
+
+$(md_example |> pad([left], 4em))
+
+**Example 3.**
+
+The `latex` function creates a LaTeX tile.
+```julia
+function main(window)
+    push!(window.assets, "latex")
+
+    latex(\"\"\"f(x) = \int_{-\infty}^\infty
+        \hat f(\xi)\,e^{2 \pi i \xi x}
+        \,d\xi\"\"\")
+end
+```
+*Output:*
+
+$(Escher.latex(tex_eg, block=true))
+
+
+**Example 3.**
+
+[Gadfly](http://gadflyjl.org) plots are essentially immutable values too. Escher type-casts Gadfly plots to tiles.
+
+```julia
+using Gadfly
+
+function main(window)
+    plot(z=(x,y) -> x*exp(-(x-int(x))^2-y^2),
+         x=linspace(-8,8,150), y=linspace(-2,2,150), Geom.contour)
+end
+```
+*Output:*
+
+$(
+plot(z=(x,y) -> x*exp(-(x-int(x))^2-y^2),
+     x=linspace(-8,8,150), y=linspace(-2,2,150), Geom.contour)
+
+)
+
+**Example 4.**
+
+[Compose](http://composejl.org) graphics work the same way.
+
+```julia
+using Compose
+using Color
+
+function sierpinski(n)
+    if n == 0
+        compose(context(), polygon([(1,1), (0,1), (1/2, 0)]))
+    else
+        t = sierpinski(n - 1)
+        compose(context(),
+                (context(1/4,   0, 1/2, 1/2), t),
+                (context(  0, 1/2, 1/2, 1/2), t),
+                (context(1/2, 1/2, 1/2, 1/2), t))
+    end
+end
+
+main(window) = compose(sierpinski(6))
+
+```
+*Output:*
+
+$(vskip(2em))
+$(drawing(3Compose.inch, sqrt(3)/2*3Compose.inch, compose(sierpinski(6))) |> pad([left], 8em))
+
+## Rule 2: Functions that modify a UI return a *new* UI
+
+$(vskip(0.5em))
 Now let us say you want to give a padding of 10mm around the plain text tile you created in the hello world example, you do it by passing the previous value to the function `pad`.
 
 ```julia
@@ -124,7 +258,7 @@ end
 ```
 $(vskip(1em))
 
-## Rule 2: Most Escher functions have curried methods
+## Rule 3: Most Escher functions have curried methods
 $(vskip(1em))
 
 Omitting the last tile argument to most escher functions returns a 1-argument function that takes a tile and applies the property.
@@ -148,7 +282,7 @@ $(vskip(1em))
 You can mentally read this as: to the plaintext Hello, World, apply font color red and then apply a padding of `10mm`.
 
 $(vskip(1em))
-## Rule 3: layout functions combine many UIs into one
+## Rule 4: layout functions combine many UIs into one
 $(vskip(1em))
 
 To stack tiles vertically, use `vbox`. To stack horizontally, use `hbox`.
@@ -205,7 +339,7 @@ end)
 Other functions that combine multiple UIs include: `menu`, `pages`, `tabs`, and so on, these are defined in `src/library/layout2.jl`.
 
 $(vskip(1em))
-## Rule 4: An interactive UI is a Signal of UIs
+## Rule 5: An interactive UI is a Signal of UIs
 $(vskip(1em))
 
 To get an overview of how Reactive.jl's signals work, see [Reactive documentation](http://julialang.org/Reactive.jl).
@@ -258,6 +392,7 @@ include("helpers/page.jl")
 function main(window)
     push!(window.assets, "latex")
     push!(window.assets, "widgets")
+    push!(window.assets, "codemirror")
 
     lift(reactive_eg) do example
         vbox(
@@ -266,6 +401,6 @@ function main(window)
             part1,
             example,
             part2,
-        ) |> centeredpage
+        ) |> docpage
     end
 end
