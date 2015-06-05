@@ -35,7 +35,6 @@ license that can be found in the LICENSE file.
         height: auto;
       }
       .CodeMirror {
-        border: 1px solid #eee;
         top: 0;
         left: 0;
         height: inherit;
@@ -59,10 +58,11 @@ license that can be found in the LICENSE file.
           mode: this.mode,
           theme: this.theme,
           tabSize: this.tabSize,
+          readOnly: this.readOnly,
           lineNumbers: this.lineNumbers,
           viewportMargin: Infinity,
           foldGutter: true,
-          gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+          gutters: ["CodeMirror-linenumbers"]
         });
         var self = this
         this.mirror.on("change", function () {
