@@ -60,7 +60,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         <div id="root">
         </div>
         <script>
-            new Patchwork.Node("root", $(Patchwork.jsonfmt(render(ui)) |> json))
+            new Patchwork.Node("root", $(Patchwork.jsonfmt(render(getvalue(ui))) |> json))
         </script>
         </body>
         </html>
