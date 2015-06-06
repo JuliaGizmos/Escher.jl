@@ -137,7 +137,7 @@ Polymer({
         this.elem = this.findElem()
 
         this.elem.addEventListener("core-select", function (ev) {
-            self.value = (self.elem.selected || (self.elem.multi ? [] : 0)) + 1 // FIXME
+            self.value = (self.elem.selected || (self.elem.multi ? [] : 0))
             self.update()
         })
         this.super()

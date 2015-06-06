@@ -52,6 +52,8 @@ render(tabs::Tabs) =
         map(t -> Elem("paper-tab", render(t)), tabs.tiles.tiles),
         selected=tabs.selected-1)
 
+broadcast(t::Tabs) = selectable(t, name=t.name)
+
 # Menus
 
 @api menu => Menu <: Selection begin

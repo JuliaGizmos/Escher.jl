@@ -110,7 +110,9 @@ render(t::Selectable) =
     render(t.tile) <<
         Elem("selectable-behavior", name=t.name, elem=t.elem)
 
-default_interpreter(t::Selectable) = ToType{Int}()
+dec(x) = x-1
+default_interpreter(t::Selectable) =
+    Chained(InterpreterFn(dec), ToType{Int}())
 
 abstract MouseState
 
@@ -148,9 +150,9 @@ end
 # expose contained signal to outside
 name(c::ChanSend) = c.watch
 send(chan::Symbol, watch::Symbol, b) =
-    ChanSend(chan, watch, b)
+    ChanSend(chan, watch, broadcast(b))
 send(chan::Symbol, b::Behavior) =
-    ChanSend(chan, name(b), b)
+    ChanSend(chan, name(b), broadcast(b))
 
 render(chan::ChanSend) =
     render(chan.tile) <<
