@@ -25,17 +25,6 @@ sidenote(note, icon="info", iconcolor="#aaa") =
         Escher.borderstyle([top, bottom], solid) |>
         Escher.borderwidth([top, bottom], 1px)
 
-angleᵗ = Input(0) # The angle at any given time
-connected_slider = subscribe(slider(0:360), angleᵗ)
-
-reactive_eg = lift(angleᵗ) do angle
-    vbox(
-        connected_slider,
-        size(5em, 5em, empty) |>
-            fillcolor(HSV(angle, 1.0, 1.0))
-    )
-end
-
 function sierpinski(n)
     if n == 0
         compose(context(), polygon([(1,1), (0,1), (1/2, 0)]))
@@ -46,6 +35,16 @@ function sierpinski(n)
                 (context(  0, 1/2, 1/2, 1/2), t),
                 (context(1/2, 1/2, 1/2, 1/2), t))
     end
+end
+
+nᵗ = Input(5) # The angle at any given time
+connected_slider = subscribe(slider(0:7, value=5), nᵗ)
+
+reactive_eg = lift(nᵗ) do n
+    vbox(
+        connected_slider,
+        sierpinski(n)
+    )
 end
 
 tex_eg = """f(x) = \\int_{-\\infty}^\\infty
@@ -235,76 +234,118 @@ main(window) = compose(sierpinski(6))
 $(vskip(2em))
 $(drawing(3Compose.inch, sqrt(3)/2*3Compose.inch, compose(sierpinski(6))) |> pad([left], 8em))
 
-## Rule 2: Functions that modify a UI return a *new* UI
+## Rule 2: functions that modify a tile return a *new* tile
 
-$(vskip(0.5em))
-Now let us say you want to give a padding of 10mm around the plain text tile you created in the hello world example, you do it by passing the previous value to the function `pad`.
+Library functions that take tiles as input do not modify the input, they return new tiles that contain the modifications intended. This is a corollary of Rule 1, since tiles cannot be modified.
+
+**Example 1.**
+
+This example puts a padding of 5mm around a TeX formula, fills the tile with gray color, and changes the font color. We start off by modifying a latex tile and get a series of modified tiles which build up to the final result. Each tile is immutable and can be used later. The `vbox` function stacks many tiles vertically.
 
 ```julia
 function main(window)
-    txt = plaintext("Hello, World!")
-    pad(10mm, txt)
+    push!(window.assets, "latex")
+
+    txt = latex("T = 2\\pi\\sqrt{L\\over g}")
+    txt1 = fontcolor("#499", txt)
+    txt2 = pad(5mm, txt1)
+    txt3 = fillcolor("#eeb", txt2)
+
+    vbox(txt, txt1, txt2, txt3)
 end
 ```
+*Output:*
 
-Similarly, if you want to change some style in/of a UI, you call a function to do it. For example, to make the Hello, World text red, you could use `fontcolor`:
+$(begin
+    txt = Escher.latex("T = 2\\pi\\sqrt{L\\over g}")
+    txt1 = fontcolor("#499", txt)
+    txt2 = pad(5Escher.mm, txt1)
+    txt3 = fillcolor("#eeb", txt2)
+    vbox(txt, txt1, txt2, txt3)
+end)
 
-$(vskip(1em))
+You can of course chain these function calls if you just want the end result.
+
 ```julia
 function main(window)
-    txt = plaintext("Hello, World!")
-    fontcolor("red", pad(10mm, txt))
+    txt = latex("T = 2\\pi\\sqrt{L\\over g}")
+    fillcolor("#eeb", fontcolor("#499", pad(5mm, txt)))
 end
 ```
-$(vskip(1em))
 
-## Rule 3: Most Escher functions have curried methods
-$(vskip(1em))
+$(fillcolor("#eeb", fontcolor("#499", Escher.pad(5Escher.mm, Escher.latex("T = 2\\pi\\sqrt{L\\over g}")))))
 
-Omitting the last tile argument to most escher functions returns a 1-argument function that takes a tile and applies the property.
+## Rule 3: Escher functions have curried methods
+
+Omitting the last tile argument to escher functions returns a 1-argument function that takes a tile.
 
 For example, `pad(10mm)` returns an anonymous function of 1 argument which must be a tile, and that returns a new tile with the specified 10mm of padding.
 
 Therefore, `pad(10mm, txt)` is equivalent to `pad(10mm)(txt)` or `txt |> pad(10mm)`. This is helpful when you want to apply, for example, the same padding to a all the tiles in a vector. e.g. `map(pad(10mm), [tile1, tile2])` will return a vector of two tiles with 10mm padding each.
 
-Moreover, using the curried version with the `|>` infix operator makes for code that reads better. For example, the previous Hello World example could also be written like this:
+Moreover, using the curried version with the `|>` infix operator makes for code that reads better.
 
-$(vskip(1em))
+**Example 1.**
+
+The following is equivalent to the last example.
+
 ```julia
 function main(window)
-    plaintext("Hello, World!") |>
-        fontcolor("red") |>
-        pad(10mm)
+    latex("T = 2\\pi\\sqrt{L\\over g}") |>
+        fontcolor("#499") |>
+        pad(5mm) |>
+        fillcolor("#eeb")
 end
 ```
-$(vskip(1em))
 
 You can mentally read this as: to the plaintext Hello, World, apply font color red and then apply a padding of `10mm`.
 
+**Example 2.**
+
+Since the curried methods return 1-argument lambdas, they can be readily used in a call to `map` or any function that expects a 1-argument function as an argument. Here we are going to use `map` and a curried method of `pad` to pad a number of tiles.
+
+```julia
+function main(window)
+    padded = map(pad([left, right], 1em), ["A", "B", "C", "D"])
+    colors = ["#837", "#859", "#892", "#875"]
+    tiles = map(fillcolor, colors, padded)
+
+    hbox(intersperse(hskip(1em), tiles))
+end
+```
+
+*Output:*
+
+$(begin
+    tiles = map(fillcolor, ["#837", "#859", "#892", "#875"],
+        map(pad([left, right], 1em), ["A", "B", "C", "D"]))
+    hbox(intersperse(hskip(1em), tiles))
+end)
+
 $(vskip(1em))
-## Rule 4: layout functions combine many UIs into one
-$(vskip(1em))
+
+*Explanation:*
+
+`map(pad([left, right], 1em), ["A", "B", "C", "D"])` returns a vector of 4 tiles that each have a padding of `1em` to their left and right. Note that `pad([left, right], 1em)` returns a 1-argument function, making this possible.
+`map(fillcolor, colors, padded)` takes corresponding elements from the `colors` vector and `padded` vector and combines them using `fillcolor`, resulting in 4 colored tiles.  `intersperse(hskip(1em), tiles))` takes the 4-element vector `tiles` and returns a 7-element vector where `hskip(1em)` is *interspered* between each pair of adjacent tiles in `tiles`. `hskip(1em)` is simply a `1em` empty space along the horizontal axis. Finally, `hbox` puts the result of `intersperse` in a horizontal layout.
+
+## Rule 4: layout functions combine many Tiles into one
+
+**Example 1.**
 
 To stack tiles vertically, use `vbox`. To stack horizontally, use `hbox`.
 
-For example
-
 ```julia
-hello_color(color) =
-    plaintext("Hello, World!") |>
-        fontcolor(color) |>
-        pad(10mm)
+# Four tiles from the previous example.
+a,b,c,d = map(fillcolor, ["#837", "#859", "#892", "#875"],
+    map(pad([left, right], 1em), ["A", "B", "C", "D"]))
 
 function main(window)
     x = vbox(
-        hello_color("red"),
-        hello_color("blue"),
-        hello_color("green"),
+        a, b, c, d
     )
     y = vbox(
-        hello_color("green"),
-        hello_color("red"),
-        hello_color("blue"),
+        d, c, b, a
     )
 
     hbox(x, y)
@@ -315,71 +356,133 @@ $(vskip(1em))
 Should result in an arrangement like this:
 
 $(begin
-    hello_color(color) =
-        plaintext("Hello, World!") |>
-            fontcolor(color) |>
-            pad(1em)
+    a,b,c,d = map(fillcolor, ["#837", "#859", "#892", "#875"],
+        map(pad([left, right], 1em), ["A", "B", "C", "D"]))
 
     x = vbox(
-        hello_color("red"),
-        hello_color("blue"),
-        hello_color("green"),
+        a, b, c, d
     )
     y = vbox(
-        hello_color("green"),
-        hello_color("red"),
-        hello_color("blue"),
+        d, c, b, a
     )
 
     hbox(x, y)
 end)
 
-`x` and `y` are vertial arrangements of 3 tiles each, these arrangements are themselves put in a `hbox` to place `x` next to `y`.
+`x` and `y` are vertial arrangements of 4 tiles each, these arrangements are themselves put in a `hbox` to place `x` next to `y`.
 
-Other functions that combine multiple UIs include: `menu`, `pages`, `tabs`, and so on, these are defined in `src/library/layout2.jl`.
 
+**Example 2.**
+
+`The `tabs` function combines tiles into a set of tabs.
+```julia
+tabs([
+    hbox(icon("face"), hskip(1em), "Tab 1"),
+    hbox(icon("explore"), hskip(1em), "Tab 2"),
+    hbox(icon("extension"), hskip(1em), "Tab 3"),
+])
+```
+*Output:*
+$(
+tabs([
+    hbox(icon("face"), hskip(1em), "Tab 1"),
+    hbox(icon("explore"), hskip(1em), "Tab 2"),
+    hbox(icon("extension"), hskip(1em), "Tab 3"),
+])
+)
 $(vskip(1em))
+
+**Example 3.**
+
+The `pages` functions combines tiles into a set of *pages* - only a single page is visible at a time. Pages can be combined with tabs to allow switching between pages.
+
+```julia
+tabbar = tabs([
+    hbox(icon("face"), hskip(1em), "Tab 1"),
+    hbox(icon("explore"), hskip(1em), "Tab 2"),
+    hbox(icon("extension"), hskip(1em), "Tab 3"),
+])
+
+tabcontent = pages([
+    sierpinski(5),
+    plot([sin, cos], 0, 25),
+    title(3, "web component all the things"),
+])
+
+t, p = wire(tabbar, tabcontent, :tab_channel, :selected)
+       # ^^^ returns a pair of "connected" tab set and pages
+vbox(t, p)
+
+
+```
+
+$(begin
+
+tabbar = tabs([
+    hbox(icon("face"), hskip(1em), "Tab 1"),
+    hbox(icon("explore"), hskip(1em), "Tab 2"),
+    hbox(icon("extension"), hskip(1em), "Tab 3"),
+])
+
+tabcontent = pages([
+    drawing(3Compose.inch, 3*sqrt(3)/2*Compose.inch, sierpinski(5)),
+    drawing(5Compose.inch, 3Compose.inch, plot([sin, cos], 0, 25)),
+    title(3, "web component all the things"),
+])
+t, p = wire(tabbar, tabcontent, :tab_channel, :selected)
+vbox(
+    t, p |> pad(1em)
+) |> size(40em, 22em)
+end)
+
+Other higher-order layout functions to try are: `menu`, `submenu`, `slideshow`.
+
 ## Rule 5: An interactive UI is a Signal of UIs
-$(vskip(1em))
 
-To get an overview of how Reactive.jl's signals work, see [Reactive documentation](http://julialang.org/Reactive.jl).
+[Reactive.jl](http://julialang.org/Reactive.jl) package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time.  [Reactive.jl's documentation](http://julialang.org/Reactive.jl) provides an overview of the signal framework. At this point it is highly recommended that you read it.
 
 There are two facets to this rule:
 
-1. Getting the input from tiles
-2. Creating a signal of UI using these signals
+* Getting the input from tiles
+* Creating a signal of UI using these signals
 
-Firstly, some Tiles (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to `Input` signals from Reactive. Widgets such as sliders, buttons, dropdown menus are subtypes of `Behavior`. `subscribe` lets you pipe updates from a behavior into a signal.
+Firstly, some Tiles (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to Reactive's `Input` signals. Widgets such as sliders, buttons, dropdown menus are subtypes of `Behavior`. The function `subscribe` lets you pipe updates from a behavior into a signal.
 
-For example
+**Example 1.**
+
+Let's create a slider and subscribe its current value to a Reactive signal.
 
 ```julia
 
-angleᵗ = Input(0) # The angle at any given time
-connected_slider = subscribe(slider(0:360), angleᵗ)
+iterations = Input(0) # The angle at any given time
+connected_slider = subscribe(slider(0:7), iterations)
 ```
 
-Now `connected_slider` renders as a slider and updates the signal `angleᵗ` when the slider's knob is moved by the user.
+*Output:*
 
-Secondly, you can use these input signals to create a signal of Escher UIs. For example,
+$(slider(0:7))
+
+`connected_slider` renders as a slider and updates the signal `iterations` when the slider's knob is moved by the user.
+
+Secondly, you can use these input signals to create a signal of Escher UIs.
+
+**Example 2.**
 
 ```julia
 
-using Color # for HSV
+using Compose
 
 function main(window)
-    # First, load HTML dependencies related to the slider
+    # Load HTML dependencies related to the slider
     push!(window.assets, "widgets")
 
-    angleᵗ = Input(0) # The angle at any given time
-    connected_slider = subscribe(slider(0:360), angleᵗ)
+    angleᵗ = Input(5) # The angle at any given time
+    connected_slider = subscribe(slider(0:7, value=5), angleᵗ)
 
-    lift(angleᵗ) do angle
+    lift(iterations) do n
         vbox(
             connected_slider,
-            size(5em, 5em, empty) |>
-                fillcolor(HSV(angle, 1.0, 1.0))
-                             # ^^^ Use the current slider angle
+            sierpinski(n)
         )
     end
 end
@@ -390,9 +493,10 @@ part2 = md""
 
 include("helpers/page.jl")
 function main(window)
-    push!(window.assets, "latex")
     push!(window.assets, "widgets")
+    push!(window.assets, "latex")
     push!(window.assets, "codemirror")
+    push!(window.assets, "layout2")
 
     lift(reactive_eg) do example
         vbox(
@@ -400,7 +504,6 @@ function main(window)
             vskip(1em),
             part1,
             example,
-            part2,
         ) |> docpage
     end
 end
