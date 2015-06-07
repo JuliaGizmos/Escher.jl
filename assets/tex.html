@@ -1,1 +1,34 @@
-<link rel="import" href="bower_components/ka-tex/ka-tex.html">
+
+<script src="bower_components/katex/build/katex.js"></script>
+
+<polymer-element
+    name="ka-tex"
+    attributes="source block" >
+
+<template>
+<link rel="stylesheet" href="bower_components/katex/build/katex.min.css">
+
+<div id="rendered"></div>
+</template>
+
+<script>
+
+Polymer({
+    source: "",
+    block: false,
+    render: function () {
+        katex.render(this.source, this.$.rendered, {displayMode: this.block})
+    },
+    domReady: function () {
+        this.render()
+    },
+    sourceChanged: function () {
+        this.render()
+    },
+    blockChanged: function () {
+            this.render()
+    }
+})
+</script>
+
+</polymer-element>
