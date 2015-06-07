@@ -36,5 +36,5 @@ inlinetile(md::Markdown.Link) = link(md.url, map(inlinetile, md.text))
 inlinetile(md::Markdown.Image) = img(md.url, alt=md.alt)
 blocktile(md::Markdown.Image) = class("md-img", img(md.url, alt=md.alt))
 
-inlinetile(md::Markdown.LaTeX) = latex(md.formula, block=false)
-blocktile(md::Markdown.LaTeX) = class("md-latex", latex(md.formula, block=true))
+inlinetile(md::Markdown.LaTeX) = tex(md.formula, block=false)
+blocktile(md::Markdown.LaTeX) = class("md-tex", latex(md.formula, block=true))
