@@ -245,13 +245,14 @@ render(f::Flow) =
     addclasses(render(f.tiles, :div), classes(f))
 
 
+hbox(args...) = flow(horizontal, args...)
+
 @apidoc hbox => Flow <: Tile begin
     doc("Arrange tiles horizontally. `hbox(args...)`
 is equivalent to `flow(horizontal, args...)`")
     arg(tiles::TileList)
 end
 
-hbox(args...) = flow(horizontal, args...)
 
 vbox(args...) = flow(vertical, args...)
 

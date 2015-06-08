@@ -1,4 +1,3 @@
-using Docile
 
 make_term(term, typ, parent) =
     [:(immutable $typ <: $parent end),
@@ -331,8 +330,8 @@ macro api(names, body)
     )
 
     # save metadata
-    escher_meta[fn] = doc
-    Expr(:block, typedef, ms...)
+    setdoc = :(escher_meta[$fn] = $doc)
+    Expr(:block, typedef, ms..., setdoc)
 end
 
 macro apidoc(names, body)
@@ -363,5 +362,5 @@ macro apidoc(names, body)
     )
 
     # save metadata
-    escher_meta[fn] = doc
+    :(escher_meta[$fn] = $doc)
 end

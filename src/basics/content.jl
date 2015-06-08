@@ -15,7 +15,7 @@ render(l::List) =
 end
 
 render(i::Image) =
-    Elem(:img, src=i.url, alt=i.alt, style=["width"=>"auto", "height"=>"auto", "display" => "block"])
+    Elem(:img, src=i.url, alt=i.alt, style=@d("width"=>"auto", "height"=>"auto", "display" => "block"))
 
 @api link => Hyperlink <: Tile begin
     arg(url::String)
