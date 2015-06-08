@@ -146,5 +146,5 @@ end
 
 function main(window)
     push!(window.assets, "widgets")
-    lift(centeredpage, intro)
+    lift(docpage, intro)
 end

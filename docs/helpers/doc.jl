@@ -1,7 +1,7 @@
 using Color
 
 getdoc(fn) =
-    Escher.escher_meta[symbol(string(fn))]
+    Escher.escher_meta[fn]
 
 badge(x, bg="#f1f1f1") =
     fontsize(0.8em, x) |>
@@ -99,17 +99,16 @@ band(t, bg="#f1f1f1", fg="#000") =
 
 function showdoc(fn)
     d = getdoc(fn)
-    meta = d.data
-    docmd = d.docs.data
+    docmd = d[:doc]
 
     vbox(
-        vbox(signature(meta),
-             hbox(hskip(1em), "→", hskip(0.5em), rettype(meta[:typ])) |> fontcolor("#777")) |>
+        vbox(signature(d),
+             hbox(hskip(1em), "→", hskip(0.5em), rettype(d[:type])) |> fontcolor("#777")) |>
                 fonttype(monospace),
         vbox(
              pad([left], 1em, docmd),
              band("Arguments"),
-             argstable(meta[:args]) |> pad([left, right], 1em) |> pad([top, bottom], 0.5em)
+             argstable(d[:args]) |> pad([left, right], 1em) |> pad([top, bottom], 0.5em)
         ) |> pad([left], 1em)
     )
 end

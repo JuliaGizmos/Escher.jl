@@ -22,6 +22,6 @@ $(
 """
 
 function main(window)
-    centeredpage(intro)
+    docpage(intro)
 end
 
