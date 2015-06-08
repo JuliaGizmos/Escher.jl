@@ -1,31 +1,31 @@
 # Escher
 
-Composable web UIs in Julia
+A toolkit for great-looking interactive Web UIs in Julia.
 
-###Development
+Read [the overview](https://shashi.github.io/Escher.jl/).
 
-This package is not ready for mainstream use. However, if you want to help develop this package, use the following instructions to get started: 
+## Installation
 
-Currently Escher works with Julia v0.3.
-
-_In a Julia REPL_
+In a Julia REPL, run:
 
 ```julia
-Pkg.clone("https://github.com/shashi/Escher.jl.git")
+Pkg.add("Escher")
 ```
 
-_On the command line, within the `assets/` subdirectory_
+You might want to link escher executable to `/usr/local/bin` or somewhere in your `PATH`:
 
 ```sh
-npm install -g bower
-bower install
+ln -s ~/.julia/v0.4/Escher/bin/escher /usr/local/bin/
 ```
 
-_On the command line, from within the `Escher.jl/examples` directory_
+## Usage
 
-```sh
-../bin/escher --serve
+From a directory in which you want to serve Escher UI files, run:
+
+```
+<Escher-package-path/bin>/escher --serve
 ```
 
-and navigate to `http://localhost:5555/layout.jl` (or `http://localhost:5555/<any-other-example-file.jl>`)
+This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After runnnig the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
 
+See `escher --help` for other options to the exectuable.
