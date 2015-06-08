@@ -37,7 +37,7 @@ s0 = Pendulum(τ/4-0.4, 4.000)
 function main(window)
     push!(window.assets, "widgets")
 
-    fps10 = fps(25) # lies
+    fps10 = fpswhen(25, window.alive) # lies
     
     sᵗ = foldl( (s, dt) -> step(s, dt, acc), s0, fps10) 
     lift(sᵗ) do s
