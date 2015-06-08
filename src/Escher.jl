@@ -32,7 +32,7 @@ include("basics/behavior.jl")
 include("basics/window.jl")
 
 include("library/markdown.jl")
-include("library/latex.jl")
+include("library/tex.jl")
 include("library/widgets.jl")
 include("library/layout2.jl")
 include("library/slideshow.jl")

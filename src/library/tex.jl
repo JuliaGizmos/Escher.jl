@@ -1,9 +1,9 @@
-export latex
+export tex
 
-@api latex => LaTeX <: Tile begin
+@api tex => TeX <: Tile begin
     arg(source::String)
     kwarg(block::Bool=false)
 end
 
-render(l::LaTeX) =
+render(l::TeX) =
     Elem("ka-tex", source=l.source, block=l.block)

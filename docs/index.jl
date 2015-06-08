@@ -9,7 +9,7 @@ import Escher: @d
 # Home page.
 
 pkgname(name="Escher") =
-    hbox(title(3, name), hskip(1em), Escher.latex("\\beta")) |> fontcolor("#999")
+    hbox(title(3, name), hskip(1em), Escher.tex("\\beta")) |> fontcolor("#999")
 
 *(f::Function, g::Function) = x -> f(g(x))
 
@@ -83,7 +83,7 @@ $(title(2, "What's inside") |> Escher.fontsize(1.75em))
 $(
 vbox(md"**A web server for 2015.** Escher's built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.",
 
-md"**A rich functional library of UI components.** the built-in library functions support Markdown, Input widgets, TeX-style Layouts, Styling, LaTeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs. The API comprehensively covers features from HTML and CSS, and also provides advanced features. Its user merely needs to know how to write code in Julia."
+md"**A rich functional library of UI components.** the built-in library functions support Markdown, Input widgets, TeX-style Layouts, Styling, TeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs. The API comprehensively covers features from HTML and CSS, and also provides advanced features. Its user merely needs to know how to write code in Julia."
 ) |> pad([left, right], 2em)
 )
 
@@ -171,19 +171,19 @@ $(md_example |> pad([left], 4em))
 
 **Example 3.**
 
-The `latex` function creates a LaTeX tile.
+The `tex` function creates a TeX tile.
 ```julia
 function main(window)
-    push!(window.assets, "latex")
+    push!(window.assets, "tex")
 
-    latex(\"\"\"f(x) = \int_{-\infty}^\infty
+    tex(\"\"\"f(x) = \int_{-\infty}^\infty
         \hat f(\xi)\,e^{2 \pi i \xi x}
         \,d\xi\"\"\")
 end
 ```
 *Output:*
 
-$(Escher.latex(tex_eg, block=true))
+$(Escher.tex(tex_eg, block=true))
 
 
 **Example 3.**
@@ -240,13 +240,13 @@ Library functions that take tiles as input do not modify the input, they return 
 
 **Example 1.**
 
-This example puts a padding of 5mm around a TeX formula, fills the tile with gray color, and changes the font color. We start off by modifying a latex tile and get a series of modified tiles which build up to the final result. Each tile is immutable and can be used later. The `vbox` function stacks many tiles vertically.
+This example puts a padding of 5mm around a TeX formula, fills the tile with gray color, and changes the font color. We start off by modifying a tex tile and get a series of modified tiles which build up to the final result. Each tile is immutable and can be used later. The `vbox` function stacks many tiles vertically.
 
 ```julia
 function main(window)
-    push!(window.assets, "latex")
+    push!(window.assets, "tex")
 
-    txt = latex("T = 2\\pi\\sqrt{L\\over g}")
+    txt = tex("T = 2\\pi\\sqrt{L\\over g}")
     txt1 = fontcolor("#499", txt)
     txt2 = pad(5mm, txt1)
     txt3 = fillcolor("#eeb", txt2)
@@ -257,7 +257,7 @@ end
 *Output:*
 
 $(begin
-    txt = Escher.latex("T = 2\\pi\\sqrt{L\\over g}")
+    txt = Escher.tex("T = 2\\pi\\sqrt{L\\over g}")
     txt1 = fontcolor("#499", txt)
     txt2 = pad(5Escher.mm, txt1)
     txt3 = fillcolor("#eeb", txt2)
@@ -268,12 +268,12 @@ You can of course chain these function calls if you just want the end result.
 
 ```julia
 function main(window)
-    txt = latex("T = 2\\pi\\sqrt{L\\over g}")
+    txt = tex("T = 2\\pi\\sqrt{L\\over g}")
     fillcolor("#eeb", fontcolor("#499", pad(5mm, txt)))
 end
 ```
 
-$(fillcolor("#eeb", fontcolor("#499", Escher.pad(5Escher.mm, Escher.latex("T = 2\\pi\\sqrt{L\\over g}")))))
+$(fillcolor("#eeb", fontcolor("#499", Escher.pad(5Escher.mm, Escher.tex("T = 2\\pi\\sqrt{L\\over g}")))))
 
 ## Rule 3: Escher functions have curried methods
 
@@ -291,7 +291,7 @@ The following is equivalent to the last example.
 
 ```julia
 function main(window)
-    latex("T = 2\\pi\\sqrt{L\\over g}") |>
+    tex("T = 2\\pi\\sqrt{L\\over g}") |>
         fontcolor("#499") |>
         pad(5mm) |>
         fillcolor("#eeb")
@@ -494,7 +494,7 @@ part2 = md""
 include("helpers/page.jl")
 function main(window)
     push!(window.assets, "widgets")
-    push!(window.assets, "latex")
+    push!(window.assets, "tex")
     push!(window.assets, "codemirror")
     push!(window.assets, "layout2")
 
