@@ -5,7 +5,7 @@ include("helpers/page.jl")
 
 typeexample(code, output=eval(parse(code))) =
   vbox(
-     codeblock(code) |> fontcolor("#777"),
+     codemirror(code, readonly=true, linenumbers=false) |> fontcolor("#777"),
      output |> pad([left], 2em))
 
 titles = vbox(
@@ -17,6 +17,8 @@ headings = vbox(
        map(n -> typeexample("heading($n, \"Heading $n\")"), 1:4)))
 
 function main(window)
+    push!(window.assets, "codemirror")
+
     md"""
 $(title(3, "Typography"))
 $(vskip(1em))
@@ -43,5 +45,5 @@ $(
 
 $(vskip(4em))
 
-    """ |> centeredpage
+    """ |> docpage
 end

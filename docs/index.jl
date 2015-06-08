@@ -597,7 +597,16 @@ Below is a screen grab of a game that was just lost.
 ![](assets/img/minesweeper.png)
 
 
-**A note about documentation.** I am currently dealing with RSI that is worsening everyday, any help in the [effort to document Escher](https://github.com/shashi/Escher.jl/issues/26) will be hugely appreciated. Do open issues on the Github page if you find any! I hope you enjoy playing with Escher.
+# Documentation
+
+The documentation is a work in progress. Here are the other bits available for now:
+
+* [Layout Guide](layout-guide.html)
+* [Typography API](typography.html)
+* [Reactive programming Guide](reactive.html)
+
+Any help with documenting Escher will be appreciated. Take a look at [this issue](https://github.com/shashi/Escher.jl/issues/26) to see where you can contribute.
+
 """
 
 include("helpers/page.jl")
