@@ -98,7 +98,7 @@ In a Julia REPL, run:
 Pkg.add("Escher")
 ```
 
-You might want to link escher executable to `/usr/local/bin` so that it goes in your PATH.
+You might want to link escher executable to `/usr/local/bin` or somewhere in your `PATH`:
 
 ```sh
 ln -s ~/.julia/v0.4/Escher/bin/escher /usr/local/bin/
@@ -106,24 +106,20 @@ ln -s ~/.julia/v0.4/Escher/bin/escher /usr/local/bin/
 
 # Usage
 
-From the directory from which you want to serve files containing Escher UIs, run:
+From a directory in which you want to serve Escher UI files, run:
 
 ```
 <Escher-package-path/bin>/escher --serve
 ```
 
+This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After runnnig the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
 
-From the `examples/` directory in `~/.julia/v0.3/Escher`, run the following command to bring up the escher server:
-
-
-This will start a web server on port 5555. See `escher --help` for other options to this command. You can now point your browser to `http://localhost:5555/` to access the examples viewer interface. Or you can also visit `http://localhost:5555/<file>.jl` to access a specific example. `<file>.jl` could be any file inside the `examples/` directory. In general, any file with a `main` function that takes one argument-the `Window` object, and returns a valid Escher UI is served in this way.
-
-The following section will give a general overview of how UIs are created with Escher.
+See `escher --help` for other options to the exectuable.
 
 
 # An Overview
 
-Escher is built around 5 rules. Understanding these rules gives you a foundation to understanding Escher's comprehensive API.
+Escher is built around 5 core rules. Understanding these rules gives you a foundation to understanding Escher's comprehensive API.
 
 ## Rule 1: UIs are immutable values
 
@@ -497,7 +493,7 @@ part2 = md"""
 
 **Example 3.**
 
-This is Minesweeper in about 80 SLOC! Check out the GIF of me playing it.
+This is Minesweeper in about 80 SLOC!
 
 ```julia
 using Color
@@ -594,9 +590,14 @@ end
 
 *Output:*
 
+Below is a screen grab of a game that was just lost.
+
 (Run `examples/minesweeper.jl` via escher server to play the game)
 
 ![](assets/img/minesweeper.png)
+
+
+**A note about documentation.** I am currently dealing with RSI that is worsening everyday, any help in the [effort to document Escher](https://github.com/shashi/Escher.jl/issues/26) will be hugely appreciated. Do open issues on the Github page if you find any! I hope you enjoy playing with Escher.
 """
 
 include("helpers/page.jl")
