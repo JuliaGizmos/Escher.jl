@@ -78,6 +78,7 @@ function showboard{lost}(board::Board{lost})
 end
 
 function main(window)
+    push!(window.assets, "widgets")
 
     lift(boardᵗ) do board
         vbox(
