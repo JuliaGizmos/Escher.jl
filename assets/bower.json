@@ -34,8 +34,7 @@
     "paper-elements": "Polymer/paper-elements#^0.5.5",
     "paper-tabs": "Polymer/paper-tabs#^0.5.5",
     "interact": "~1.2.4",
-    "code-mirror": "shashi/code-mirror#master",
-    "ka-tex": "shashi/ka-tex#master"
+    "code-mirror": "shashi/code-mirror#master"
   }
 }
 
