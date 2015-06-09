@@ -13,6 +13,7 @@ function sierpinski(n)
 end
 
 function main(window)
+    push!(window.assets, "widgets")
 
     iterᵗ = Input(1)
 
@@ -22,6 +23,6 @@ function main(window)
             hbox("Iterations: ", slider(1:6) >>> iterᵗ),
             vskip(1em),
             sierpinski(iter),
-        )
+        ) |> pad(2em)
     end
 end

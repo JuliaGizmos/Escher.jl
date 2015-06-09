@@ -7,12 +7,12 @@ function main(window)
     push!(window.assets, "tex")
     push!(window.assets, "widgets")
 
-    lift(texᵗ, modeᵗ) do tex, mode
+    lift(texᵗ, modeᵗ) do t, mode
         vbox(h1("LaTeX"),
              hbox("LaTeX support is via ", hskip(1em), tex("\\KaTeX")),
-             textinput(tex) >>> texᵗ,
+             textinput() >>> texᵗ,
              hbox("Show as a block", hskip(1em), checkbox(mode) >>> modeᵗ),
              vskip(1em),
-             tex(tex, block=mode)) |> pad(1em) |> maxwidth(30em)
+             tex(t, block=mode)) |> pad(1em) |> maxwidth(30em)
     end
 end

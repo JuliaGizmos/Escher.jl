@@ -6,6 +6,7 @@ plot_beta(α, β) =
     plot(x -> pdf(Beta(α, β), x), 0, 1)
 
 main(window) = begin
+    push!(window.assets, "widgets")
 
     αᵗ = Input(1.0)
     βᵗ = Input(1.0)
@@ -21,6 +22,6 @@ main(window) = begin
                 width(4em), slider(1:100) >>> βᵗ) |>
                 packacross(center),
             plot_beta(α,β) |> drawing(4inch, 3inch),
-        )
+        ) |> pad(2em)
     end
 end
