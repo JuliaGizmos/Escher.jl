@@ -330,7 +330,7 @@ macro api(names, body)
     )
 
     # save metadata
-    setdoc = :(escher_meta[$fn] = $doc)
+    setdoc = :(escher_meta[$(esc(fn))] = $doc)
     Expr(:block, typedef, ms..., setdoc)
 end
 
@@ -362,5 +362,5 @@ macro apidoc(names, body)
     )
 
     # save metadata
-    :(escher_meta[$fn] = $doc)
+    :(escher_meta[$(esc(fn))] = $doc)
 end
