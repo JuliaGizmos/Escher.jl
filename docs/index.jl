@@ -121,7 +121,7 @@ Alternatively, you can start the server from a Julia REPL:
 ```julia
 julia> using Escher
 julia> cd(Pkg.dir("Escher", "examples")) # or any other directory
-julia> escher_serve()
+julia> Escher.escher_serve()
 ```
 
 This might be what you need if you installed Escher using a dmg file on OSX.
