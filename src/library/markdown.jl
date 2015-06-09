@@ -1,4 +1,5 @@
 if VERSION < v"0.4.0-dev"
+    require(Pkg.dir("Markdown", "src", "Markdown.jl"))
     import Markdown
 else
     const Markdown = Base.Markdown
