@@ -1,6 +1,7 @@
 using Markdown # on v0.3
 
 function main(window)
+    push!(window.assets, "codemirror")
     markdown = md"""
 # Heading 1
 
@@ -12,17 +13,20 @@ One morning, when **Gregor Samsa** woke from troubled dreams, he found himself t
 
 ## Heading 2
 
-Code block:
-```julia
+Here is some code:
 
-function foo()
-    1+1
+```julia
+function fib(x)
+    if x in [0, 1]
+        x
+    else
+        fib(x-1) + fib(x-2)
+    end
 end
 ```
 
 ### Heading 3
 
-Here is a quote:
 
 > when you don't create things, you become defined by your tastes rather than ability. your tastes only narrow & exclude people. so create.
 -- whytheluckystiff
