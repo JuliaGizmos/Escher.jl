@@ -112,7 +112,7 @@ From a directory in which you want to serve Escher UI files, run:
 <Escher-package-path/bin>/escher --serve
 ```
 
-This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After runnnig the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
+This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After running the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
 
 See `escher --help` for other options to the exectuable.
 
@@ -120,8 +120,9 @@ Alternatively, you can start the server from a Julia REPL:
 
 ```julia
 julia> using Escher
+julia> include(Pkg.dir("Escher", "src", "cli", "serve.jl"))
 julia> cd(Pkg.dir("Escher", "examples")) # or any other directory
-julia> Escher.escher_serve()
+julia> escher_serve()
 ```
 
 This might be what you need if you installed Escher using a dmg file on OSX.
