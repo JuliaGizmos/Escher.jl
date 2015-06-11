@@ -185,7 +185,7 @@ sampler() = Sampler(Dict(), Dict())
 interpret(s::Sampler, msg) = begin
     try
         d = Dict()
-        d[:_trigger] = msg["_trigger"]
+        d[:_trigger] = symbol(msg["_trigger"])
 
         for (name, interp) in s.triggers
            d[name] = interpret(interp, msg[string(name)])
