@@ -5,16 +5,16 @@ export list, image, link, abbr
     kwarg(ordered::Bool=false)
 end
 
-render(l::List) =
+render(l::List, state) =
     Elem(l.ordered ? :ol : :ul,
-         map(x -> Elem(:li, render(x)), l.tiles))
+         map(x -> Elem(:li, render(x, state)), l.tiles))
 
 @api image => Image <: Tile begin
     arg(url::String)
     kwarg(alt::String="")
 end
 
-render(i::Image) =
+render(i::Image, state) =
     Elem(:img, src=i.url, alt=i.alt, style=@d("width"=>"auto", "height"=>"auto", "display" => "block"))
 
 @api link => Hyperlink <: Tile begin
@@ -22,13 +22,13 @@ render(i::Image) =
     curry(tiles::TileList)
 end
 
-render(a::Hyperlink) =
-    Elem(:a, render(a.tiles), href=a.url)
+render(a::Hyperlink, state) =
+    Elem(:a, render(a.tiles, state), href=a.url)
 
 @api abbr => Abbr <: Tile begin
     arg(title::String)
     curry(tiles::TileList)
 end
 
-render(a::Abbr) =
-    Elem(:abbr, render(a.tiles), title=a.title)
+render(a::Abbr, state) =
+    Elem(:abbr, render(a.tiles, state), title=a.title)

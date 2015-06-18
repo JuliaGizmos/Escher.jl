@@ -72,10 +72,10 @@ classes(::XXLarge) = "font-xx-large"
 end
 WithFontSize{T}(size::T, tiles) = WithFontSize{T}(size, tiles)
 
-render{T <: Length}(t::WithFontSize{T}) =
-    wrapmany(t.tiles, :span) & style(@d(:fontSize => t.size))
-render{T <: FontSize}(t::WithFontSize{T}) =
-    addclasses(wrapmany(t.tiles, :span), classes(t.size))
+render{T <: Length}(t::WithFontSize{T}, state) =
+    wrapmany(t.tiles, :span, state) & style(@d(:fontSize => t.size))
+render{T <: FontSize}(t::WithFontSize{T}, state) =
+    addclasses(wrapmany(t.tiles, :span, state), classes(t.size))
 
 abstract FontWeight
 # These terms add to the explosion as well.
@@ -95,15 +95,15 @@ const allowed_font_weights = 100:100:900
 end
 WithFontWeight{T}(weight::T, tile) = WithFontWeight{T}(weight, tile)
 
-render(t::WithFontWeight) = begin
+render(t::WithFontWeight, state) = begin
     if !(t.weight in allowed_font_weights)
         error(string(t.weight, " is not an allowed font weight"))
     end
-    wrapmany(t.tiles, :span) & style(@d(:fontWeight => t.weight))
+    wrapmany(t.tiles, :span, state) & style(@d(:fontWeight => t.weight))
 end
 
-render{T <: FontWeight}(t::WithFontWeight{T}) =
-    addclasses(wrapmany(t.tiles, :span), classes(t.weight))
+render{T <: FontWeight}(t::WithFontWeight{T}, state) =
+    addclasses(wrapmany(t.tiles, :span, state), classes(t.weight))
 
 @api fontcolor => FontColor <: Tile begin
     arg(color::ColorValue)
@@ -113,15 +113,15 @@ end
 fontcolor(c::String) = fontcolor(color(c))
 fontcolor(c::String, tiles) = fontcolor(color(c), tiles)
 
-render(t::FontColor) =
-    wrapmany(t.tiles, :span) & style(@d(:color => render_color(t.color)))
+render(t::FontColor, state) =
+    wrapmany(t.tiles, :span, state) & style(@d(:color => render_color(t.color)))
 
 @api fontfamily => FontFamily <: Tile begin
     arg(family::String)
     curry(tile::TileList)
 end
-render(t::FontFamily) =
-    wrapmany(t.tile, :span) & style(@d(:fontFamily => t.family))
+render(t::FontFamily, state) =
+    wrapmany(t.tile, :span, state) & style(@d(:fontFamily => t.family))
 
 abstract FontType
 # TODO: Add serif and slab fonts
@@ -140,8 +140,8 @@ classes(::SansSerif) = "font-sansserif"
 classes(::SlabSerif) = "font-serif font-slab"
 classes(::Monospace) = "font-monospace"
 
-render(t::WithFontType) =
-    addclasses(wrapmany(t.tiles, :span), classes(t.typ))
+render(t::WithFontType, state) =
+    addclasses(wrapmany(t.tiles, :span, state), classes(t.typ))
 
 abstract FontStyle
 
@@ -158,8 +158,8 @@ classes(::Italic) = "font-italic"
     arg(style::FontStyle)
     curry(tiles::TileList)
 end
-render(t::WithFontStyle) =
-    addclasses(wrapmany(t.tiles, :span), classes(t.style))
+render(t::WithFontStyle, state) =
+    addclasses(wrapmany(t.tiles, :span, state), classes(t.style))
 
 abstract FontCase
 
@@ -177,8 +177,8 @@ classes(::Lowercase) = "font-lowercase"
     curry(tiles::TileList)
 end
 
-render(t::WithFontCase) =
-    addclasses(wrapmany(t.tiles, :span), classes(t.case))
+render(t::WithFontCase, state) =
+    addclasses(wrapmany(t.tiles, :span, state), classes(t.case))
 
 abstract TextAlignment
 
@@ -194,28 +194,28 @@ end
     curry(tile::Tile)
 end
 
-render(t::AlignText{RaggedRight}) =
-    render(t.tile) & style(@d(:textAlign => :left))
-render(t::AlignText{RaggedLeft}) =
-    render(t.tile) & style(@d(:textAlign => :right))
-render(t::AlignText{JustifyText}) =
-    render(t.tile) & style(@d(:textAlign => :justify))
-render(t::AlignText{CenterText}) =
-    render(t.tile) & style(@d(:textAlign => :center))
+render(t::AlignText{RaggedRight}, state) =
+    render(t.tile, state) & style(@d(:textAlign => :left))
+render(t::AlignText{RaggedLeft}, state) =
+    render(t.tile, state) & style(@d(:textAlign => :right))
+render(t::AlignText{JustifyText}, state) =
+    render(t.tile, state) & style(@d(:textAlign => :justify))
+render(t::AlignText{CenterText}, state) =
+    render(t.tile, state) & style(@d(:textAlign => :center))
 
 @api lineheight => LineHeight <: Tile begin
     arg(height::Length)
     curry(tiles::TileList)
 end
-render(t::LineHeight) =
-    wrapmany(t.tiles, :span) & style(@d(:lineHeight => t.height))
+render(t::LineHeight, state) =
+    wrapmany(t.tiles, :span, state) & style(@d(:lineHeight => t.height))
 
 @api letterspacing => LetterSpacing <: Tile begin
     arg(space::Length)
     curry(tiles::TileList)
 end
-render(t::LetterSpacing) =
-    wrapmany(t.tiles, :span) & style(@d(:letterSpacing => t.space))
+render(t::LetterSpacing, state) =
+    wrapmany(t.tiles, :span, state) & style(@d(:letterSpacing => t.space))
 
 # Themable fonts
 
@@ -237,6 +237,6 @@ emph(txt) = class("emph", txt, forcewrap=true, wrap=:em)
 end
 
 ## String will go inside a span, is this OK?
-render(x::Code) = Elem(:code, render(x.code))
+render(x::Code, state) = Elem(:code, render(x.code, state))
 
 # colsize

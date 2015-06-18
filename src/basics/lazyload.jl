@@ -8,34 +8,6 @@ write_escher_prelude(io::IO) = begin
     write_patchwork_prelude(io)
 end
 
-@require Morsel begin
-    # Allow route handlers to return Patchwork nodes
-
-    import Meddle: MeddleRequest, Response
-
-    Morsel.prepare_response{ns, tag}(
-        data::Elem{ns, tag}, req::MeddleRequest, res::Response,
-    ) = begin
-        io = IOBuffer()
-        Patchwork.write_patchwork_prelude(io)
-
-        writemime(io, MIME"text/html"(), data)
-        prepare_response(takebuf_string(io), req, res)
-    end
-
-    Morsel.prepare_response(
-        data::Tile, req::MeddleRequest, res::Response,
-    ) = begin
-
-        io = IOBuffer()
-
-        Escher.write_escher_prelude(io)
-
-        writemime(io, MIME"text/html"(), render(data))
-        prepare_response(takebuf_string(io), req, res)
-    end
-end
-
 @require IJulia begin
     # Load custom element definitions
 
@@ -85,7 +57,7 @@ export drawing
     convert(::Type{Tile}, p::Compose.Context) =
         drawing(p)
 
-    render(d::ComposeGraphic) = begin
+    render(d::ComposeGraphic, state) = begin
         backend = Compose.Patchable(
             d.width, d.height
         )

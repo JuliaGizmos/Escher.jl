@@ -20,23 +20,8 @@ function teelog(x) {
     }
 
     var commands = {
-        mount: function (cmd) {
-            var el = document.getElementById(cmd.id)
-            this.node = new Patchwork.Node(cmd.id, cmd.data, el)
-            var self = this
-            el.addEventListener("signal-transport", function (ev) {
-                    commands["message"].call(self, (teelog({
-                        command: "signal-update",
-                        data: {
-                            signalId: ev.detail.signalId,
-                            value: ev.detail.value
-                        }
-                    })))
-                    ev.stopPropagation()
-            })
-        },
         patch: function (cmd) {
-            this.node.applyPatch(cmd.data)
+            window.escher_subtrees[cmd.id].applyPatch(cmd.data)
         },
         import: function (cmd) {
             var ln = document.createElement("link")
@@ -54,8 +39,7 @@ function teelog(x) {
     }
 
 
-    function Escherd(suffix, el) {
-        this.node = null
+    function Escherd(suffix) {
         this.websocket = null
         var w = window.innerWidth,
             h = window.innerHeight,
@@ -96,8 +80,45 @@ function teelog(x) {
         }
 
         window.addEventListener("beforeunload", closeHandler)
+
+        document.addEventListener("signal-transport", function (ev) {
+                commands["message"].call(self, (teelog({
+                    command: "signal-update",
+                    data: {
+                        signalId: ev.detail.signalId,
+                        value: ev.detail.value
+                    }
+                })))
+                ev.stopPropagation()
+        })
     }
 
+    window.escher_subtrees = {}
     window.Escherd = Escherd
 })();
 </script>
+
+<polymer-element
+    name="signal-container">
+
+<template>
+    <content></content>
+</template>
+
+<script>
+
+    Polymer("signal-container", {
+        id: null,
+        node: null,
+        domReady: function () {
+            // Starts with Escher.empty.
+            this.node = new Patchwork.Node(this.id, {t: "div"}, this)
+            window.escher_subtrees[this.id] = this // Register
+        },
+        applyPatch: function (patches) {
+            this.node.applyPatch(patches)
+        }
+    })
+</script>
+
+</polymer-element>

@@ -137,7 +137,7 @@ interpret(dec::InterpreterThunk, x) = dec.f(dec.args..., x)
 
 name(d::WithInterpreter) = name(d.tile)
 
-render(d::WithInterpreter) = render(d.tile)
+render(d::WithInterpreter, state) = render(d.tile, state)
 
 #
 # Subscribe to a signal and register an interpreter
@@ -162,8 +162,8 @@ subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input}); absorb=true) =
 subscribe(t::WithInterpreter, s::Input; absorb=true) =
     subscribe(t.tile, name(t), (t.interpreter, s), absorb=absorb)
 
-render(sig::Subscription) =
-    render(sig.tile) <<
+render(sig::Subscription, state) =
+    render(sig.tile, state) <<
         Elem("signal-transport",
             # Note: setup_transport here adds (interpreter, input) pair
             # to a dict, returns the key - this fn is idempotent
@@ -220,8 +220,8 @@ trigger!(sampler::Sampler) = t -> trigger!(sampler, t)
     curry(tile::Tile)
     kwarg(name::Symbol=:_sampled)
 end
-render(s::Sampled) =
-    render(s.tile) <<
+render(s::Sampled, state) =
+    render(s.tile, state) <<
         Elem("signal-sampler",
             name=s.name,
             signals=collect(keys(s.sampler.watched)),
@@ -261,6 +261,18 @@ Stop a UI signal from propagating further.
 stoppropagation(tile::Tile, name::Symbol) =
     StopPropagation(tile, name)
 
-render(tile::StopPropagation) =
-    render(tile.tile) <<
+render(tile::StopPropagation, state) =
+    render(tile.tile, state) <<
         Elem("stop-propagation", name=tile.name)
+
+immutable SignalWrap <: Tile
+    signal::Signal
+end
+
+convert(::Type{Tile}, x::Signal) = SignalWrap(x)
+
+render(tile::SignalWrap, state) = begin
+    id = makeid(tile.signal)
+    state["embedded_signals"][id] = tile.signal
+    Elem("signal-container", id=id)
+end

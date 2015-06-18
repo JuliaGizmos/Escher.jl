@@ -9,14 +9,14 @@ Tiles are immutable: once created there is no way to mutate them.
 """ ->
 abstract Tile
 
-render{T <: Tile}(x::T) =
+render{T <: Tile}(x::T, state) =
     error("$T cannot be rendered.")
 
 immutable Leaf <: Tile
     element::Elem
 end
-render(x::Elem) = x
-render(x::Leaf) = x.element
+render(x::Elem, state) = x
+render(x::Leaf, state) = x.element
 
 convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
@@ -34,23 +34,22 @@ render_fallback(m::MIME"text/svg", x) = Elem(:div, innerHTML=stringmime(m, x))
 render_fallback(m::MIME"image/png", x) =
     Elem(:img, src="data:image/png;base64," * stringmime(m, x))
 
-render(x::FloatingPoint) = @sprintf "%0.3f" x
-render(x::Symbol) = string(x)
-render(x::String) = Elem(:span, x)
-render(xs::AbstractArray, tag="div") = Elem(tag, map(render, xs))
+render(x::FloatingPoint, state) = @sprintf "%0.3f" x
+render(x::Symbol, state) = string(x)
+render(x::String, state) = Elem(:span, x)
 
 immutable AnyWrap <: Tile
     value
 end
 
-render{T}(x::T) =
+render{T}(x::T, state) =
     # Try to convert first
     method_exists(convert, (Type{Tile}, T)) ?
-        render(convert(Tile, x)) :
-        render(AnyWrap(x))
+        render(convert(Tile, x), state) :
+        render(AnyWrap(x), state)
 
 # Catch-all render
-render(x::AnyWrap) = render_fallback(bestmime(x.value), x.xvalue)
+render(x::AnyWrap, state) = render_fallback(bestmime(x.value), x.xvalue)
 
 @doc """
 `Empty` is handy tile that is well... Empty.
@@ -64,16 +63,13 @@ An Empty element.
 """ ->
 const empty = Empty()
 
-render(t::Empty) = Elem(:div)
+render(t::Empty, state) = Elem(:div)
 
-writemime(io::IO, m::MIME"text/html", x::Tile) =
-    writemime(io, m, Elem(:div, Escher.render(x), className="escherRoot"))
-
-writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
-    writemime(io, m, lift(Escher.render, Patchwork.Elem, x))
-
-render{T <: Tile}(s::Signal{T}) =
-    render(value(s))
+#  writemime(io::IO, m::MIME"text/html", x::Tile) =
+#      writemime(io, m, Elem(:div, Escher.render(x, Dict()), className="escherRoot"))
+#
+#  writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
+#      writemime(io, m, lift(Escher.render, Patchwork.Elem, x))
 
 # Note a TileList is NOT a Tile
 immutable TileList
@@ -87,8 +83,8 @@ convert(::Type{TileList}, xs::Tuple) =
 convert(::Type{TileList}, x) =
     TileList([x])
 
-render(t::TileList) =
-    map(render, t.tiles)
+render(t::TileList, state) =
+    map(x -> render(x, state), t.tiles)
 
-render(t::TileList, wrap) =
-    Elem(wrap, map(render, t.tiles))
+render(t::TileList, wrap, state) =
+    Elem(wrap, map(x -> render(x, state), t.tiles))

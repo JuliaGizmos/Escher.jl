@@ -22,8 +22,8 @@ const allsides = Side[]
     arg(color::ColorValue)
     curry(tile::Tile)
 end
-render(t::BorderColor) =
-    render(t.tile) & (
+render(t::BorderColor, state) =
+    render(t.tile, state) & (
         mapparts(
             allsides, t.sides, "border", "Color", render_color(t.color)
         ) |> style
@@ -34,8 +34,8 @@ render(t::BorderColor) =
     arg(width::Length)
     curry(tile::Tile)
 end
-render(t::BorderWidth) =
-    render(t.tile) &
+render(t::BorderWidth, state) =
+    render(t.tile, state) &
         style(mapparts(allsides, t.sides, "border", "Width", t.width))
 
 abstract StrokeStyle
@@ -57,8 +57,8 @@ name(::Dashed) = "dashed"
     arg(style::StrokeStyle)
     curry(tile::Tile)
 end
-render(t::BorderStyle) =
-    render(t.tile) &
+render(t::BorderStyle, state) =
+    render(t.tile, state) &
         style(mapparts(allsides, t.sides, "border", "Style", name(t.style)))
 
 border(
@@ -100,8 +100,8 @@ const allcorners = Corner[]
     curry(tile::Tile)
 end
 
-render(t::RoundedRect) =
-    render(t.tile) &
+render(t::RoundedRect, state) =
+    render(t.tile, state) &
         style(mapparts(allcorners, t.corners, "border", "Radius", t.radius))
 
 
@@ -123,6 +123,6 @@ end
     curry(tile::Tile)
 end
 
-render(t::FillColor) =
-    render(t.tile) & style(@d(:backgroundColor => render_color(t.color)))
+render(t::FillColor, state) =
+    render(t.tile, state) & style(@d(:backgroundColor => render_color(t.color)))
 

@@ -15,7 +15,7 @@ export tabs,
     typedarg(icon::String="")
     kwarg(url::Bool=false)
 end
-render(i::Icon) =
+render(i::Icon, state) =
     Elem("core-icon") & @d((i.url ? :src : :icon) => i.icon)
 
 @api iconbutton => IconButton <: Widget begin
@@ -23,7 +23,7 @@ render(i::Icon) =
     kwarg(name::Symbol=:_iconbutton)
     kwarg(url::Bool=false)
 end
-render(i::IconButton) =
+render(i::IconButton, state) =
     Elem("paper-icon-button") & @d((i.url ? :src : :icon) => i.icon)
 
 broadcast(w::IconButton) =
@@ -38,8 +38,8 @@ abstract Selection <: Widget
     kwarg(selected::Integer=1)
 end
 
-render(ps::Pages) =
-    Elem("core-pages", render(ps.tiles, :div), selected=ps.selected-1)
+render(ps::Pages, state) =
+    Elem("core-pages", render(ps.tiles, :div, state), selected=ps.selected-1)
 
 @api tabs => Tabs <: Selection begin
     arg(tiles::TileList)
@@ -47,9 +47,9 @@ render(ps::Pages) =
     kwarg(selected::Integer=1)
 end
 
-render(tabs::Tabs) =
+render(tabs::Tabs, state) =
     Elem("paper-tabs",
-        map(t -> Elem("paper-tab", render(t)), tabs.tiles.tiles),
+        map(t -> Elem("paper-tab", render(t, state)), tabs.tiles.tiles),
         selected=tabs.selected-1)
 
 broadcast(t::Tabs) = selectable(t, name=t.name)
@@ -62,8 +62,8 @@ broadcast(t::Tabs) = selectable(t, name=t.name)
     kwarg(selected::Integer=1)
 end
 
-render(m::Menu) =
-    Elem("core-menu", render(m.tiles),
+render(m::Menu, state) =
+    Elem("core-menu", render(m.tiles, state),
         selected=m.selected-1)
 
 broadcast(m::Menu) = selectable(m, name=m.name)
@@ -75,8 +75,8 @@ broadcast(m::Menu) = selectable(m, name=m.name)
     kwarg(selected::Integer=1)
 end
 
-render(m2::SubMenu) =
-    render(render(m2.tiles), "core-submenu")
+render(m2::SubMenu, state) =
+    render(render(m2.tiles), "core-submenu", state)
 
 # Toolbar
 
@@ -84,8 +84,8 @@ render(m2::SubMenu) =
     arg(tiles::AbstractArray)
 end
 
-render(t::Toolbar) =
-    render(t.tiles, "core-toolbar")
+render(t::Toolbar, state) =
+    render(t.tiles, "core-toolbar", state)
 
 # Paper-item and dropdown
 
@@ -96,8 +96,8 @@ end
 
 broadcast(i::Item) = clickable(i)
 
-render(i::Item) =
-    Elem("paper-item", render(i.tile), attributes=@d(:icon=>i.icon))
+render(i::Item, state) =
+    Elem("paper-item", render(i.tile, state), attributes=@d(:icon=>i.icon))
 
 @api dropdown => Dropdown <: Widget begin
     arg(tile::Tile)
@@ -105,9 +105,9 @@ render(i::Item) =
     kwarg(halign::Side{Horizontal}=right)
     kwarg(valign::Side{Vertical}=top)
 end
-render(d::Dropdown) =
+render(d::Dropdown, state) =
     Elem("paper-dropdown",
-        render(d.tile),
+        render(d.tile, state),
         halign=lowercase(name(d.halign)),
         valign=lowercase(name(d.valign)))
 
@@ -121,17 +121,17 @@ render(d::Dropdown) =
     kwarg(disabled::Bool=false)
 end
 
-wrapitem(x::Item) = render(x)
-wrapitem(x::String) = Elem("paper-item", x)
-wrapitem(x) = Elem("paper-item", render(x))
+wrapitem(x::Item, state) = render(x, state)
+wrapitem(x::String, state) = Elem("paper-item", x)
+wrapitem(x, state) = Elem("paper-item", render(x, state))
 
-render(dm::DropdownMenu) = begin
+render(dm::DropdownMenu, state) = begin
     # paper-dropdown-menu spec requires these classes
-    m = render(menu(map(t -> wrapitem(t), dm.items.tiles))) & @d(:className => "menu")
+    m = render(menu(map(t -> wrapitem(t, state), dm.items.tiles)), state) & @d(:className => "menu")
     d = Elem("paper-dropdown", m) & @d(:className => "dropdown")
 
     Elem("paper-dropdown-menu",
-        render(d),
+        render(d, state),
         label=dm.label,
     )
 end

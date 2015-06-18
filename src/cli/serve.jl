@@ -46,10 +46,13 @@ function setup_socket(file)
     write(io, """<script src="/assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>""")
     write(io, """<link rel="import" href="$(Escher.resolve_asset("basics"))">""")
 
-    write(io, """</head> <body fullbleed unresolved><div id="root"></div>""")
+    write(io, """</head> <body fullbleed unresolved>""")
     write(io, """<script>window.addEventListener('polymer-ready', function(e) {
-          new Escherd($(JSON.json(file)), "root");
-    })</script>""")
+          new Escherd($(JSON.json(file)));
+    })</script>
+    <signal-container id="root"></signal-container>
+    </body>
+    </html>""")
     takebuf_string(io)
 end
 
@@ -62,7 +65,7 @@ import_cmd(asset) =
     [ "command" => "import",
       "data" => Escher.resolve_asset(asset) ] 
 
-patch_cmd(diff, id="root") =
+patch_cmd(id, diff) =
    [ "command" => "patch",
     "id" => id,
     "data" => Patchwork.jsonfmt(diff)] |> JSON.json
@@ -106,6 +109,40 @@ query_dict(qstr) = begin
     dict
 end
 
+start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
+
+    state = Dict()
+    state["embedded_signals"] = Dict()
+    init = render(value(sig), state)
+
+    write(sock, patch_cmd(id, Patchwork.diff(render(Escher.empty, state), init)))
+
+    foldl(init, keepwhen(window.alive, Escher.empty, sig); typ=Any) do prev, next
+
+        st = Dict()
+        st["embedded_signals"] = Dict()
+        rendered_next = render(next, st)
+
+        try
+            write(sock, patch_cmd(id, Patchwork.diff(prev, rendered_next)))
+        catch ex
+            if isopen(sock)
+                rethrow(ex)
+            end
+        end
+        for (key, sig) in st["embedded_signals"]
+            start_updates(sig, window, sock, key) 
+        end
+
+        rendered_next
+    end
+
+    for (key, sig) in state["embedded_signals"]
+        start_updates(sig, window, sock, key) 
+    end
+end
+
+
 uisocket(dir) = (req) -> begin
     file = joinpath(abspath(dir), (req[:params][:file]))
 
@@ -140,27 +177,7 @@ uisocket(dir) = (req) -> begin
 
     swap!(tilestream, current)
 
-    rendered = render(current)
-    try
-        write(sock, mount_cmd(rendered))
-    catch ex
-        if isopen(sock)
-            rethrow(ex)
-        end
-    end
-
-    foldl(rendered, flatten(tilestream; typ=Any); typ=Any) do prev, next
-        rendered_next = render(next)
-        try
-            write(sock, patch_cmd(
-                Patchwork.diff(prev, rendered_next)))
-        catch ex
-            if isopen(sock)
-                rethrow(ex)
-            end
-        end
-        rendered_next
-    end
+    start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
     @async while isopen(sock)
         data = read(sock)

@@ -1,5 +1,5 @@
 // IJulia setup
-if (window.IPython && window) {
+if (typeof(window.IPython) !== "undefined" && window) {
     window.addEventListener('polymer-ready', function () {
         var commMgr = IPython.notebook.kernel.comm_manager,
             comms = {}

@@ -6,10 +6,10 @@ export slideshow
     kwarg(transitions::String="slide-from-right cross-fade-all")
 end
 
-render_slide(x) =
+render_slide(x, state) =
     packitems(center, packacross(center, vbox([x]))) |>
-        (t -> render(t) & @d(:attributes => @d(:fit => :fit)))
+        (t -> render(t, state) & @d(:attributes => @d(:fit => :fit)))
 
-render(x::SlideShow) =
-    Elem("slide-show", map(render_slide, x.tiles.tiles),
+render(x::SlideShow, state) =
+    Elem("slide-show", map(x -> render_slide(x, state), x.tiles.tiles),
         transitions=x.transitions)

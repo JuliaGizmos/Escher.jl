@@ -62,9 +62,9 @@ export inset,
     arg(width::Length, doc="The width")
     curry(tile::Tile)
 end
-render(t::Width) = begin
+render(t::Width, state) = begin
     prefixed = t.prefix == "" ? "width" : t.prefix * "Width"
-    render(t.tile) & style(@d(prefixed => t.width))
+    render(t.tile, state) & style(@d(prefixed => t.width))
 end
 
 @api height => Height <: Tile begin
@@ -74,8 +74,8 @@ end
     curry(tile::Tile)
 end
 
-render(t::Height) =
-    render(t.tile) &
+render(t::Height, state) =
+    render(t.tile, state) &
         style(@d((t.prefix == "" ? "height" : t.prefix * "Height") => t.height))
 
 minwidth(w, x...) = width("min", w, x...)
@@ -156,9 +156,9 @@ render_position(c::Corner) = style(render_position(c, 0, 0))
 render_position{C <: Corner}(p::Relative{C}) =
     style(render_position(C(), p.x, p.y))
 
-render(tile::Inset) = begin
-    outer = render(tile.containing)
-    inner = render(tile.contained)
+render(tile::Inset, state) = begin
+    outer = render(tile.containing, state)
+    inner = render(tile.contained, state)
 
     outer &= style(@d(:position => :relative))
     inner &= style(@d(:position => :absolute))
@@ -218,8 +218,8 @@ end
 
 abstract FlexContainer <: Tile
 
-render(f::FlexContainer) =
-    addclasses(render(f.tile), classes(f))
+render(f::FlexContainer, state) =
+    addclasses(render(f.tile, state), classes(f))
 
 
 @api flow => Flow{A <: FixedAxis} <: FlexContainer begin
@@ -241,8 +241,8 @@ classes(f::Flow{Horizontal}) =
 classes(f::Flow{Vertical}) =
     f.reverse ? "flow flow-reverse vertical" : "flow vertical"
 
-render(f::Flow) =
-    addclasses(render(f.tiles, :div), classes(f))
+render(f::Flow, state) =
+    addclasses(render(f.tiles, :div, state), classes(f))
 
 
 hbox(args...) = flow(horizontal, args...)
@@ -286,8 +286,8 @@ classes(f::Wrap) =
     curry(tile::Tile)
 end
 
-render(f::FloatingTile) =
-    render(f.tile) & style(@d(:float => lowercase(name(f.side))))
+render(f::FloatingTile, state) =
+    render(f.tile, state) & style(@d(:float => lowercase(name(f.side))))
 
 @api grow => Grow <: Tile begin
     doc("Expand a tile along the main axis to fit extra space in the parent `hbox` or `vbox`.")
@@ -305,8 +305,8 @@ end
 grow(t::Tile) = grow(1.0, t)
 grow(t::AbstractVector) = map(grow, t)
 
-render(t::Grow) =
-    render(t.tile) & style(@d(:flexGrow => t.factor))
+render(t::Grow, state) =
+    render(t.tile, state) & style(@d(:flexGrow => t.factor))
 
 @api shrink => Shrink <: Tile begin
     doc("Shrink a tile along the main axis to accomodate space in the parent `hbox` or `vbox`.")
@@ -318,16 +318,16 @@ end
 shrink(t::Tile) = shrink(1.0, t)
 shrink(t::AbstractVector) = map(shrink, t)
 
-render(t::Shrink) =
-    render(t.tile) & style(@d(:flexShrink => t.factor))
+render(t::Shrink, state) =
+    render(t.tile, state) & style(@d(:flexShrink => t.factor))
 
 @api flexbasis => FlexBasis <: Tile begin
     arg(basis::Union(Length, Symbol))
     curry(tile::Tile)
 end
 
-render(t::FlexBasis) =
-    render(t.tile) & style(@d(:flexBasis => t.basis))
+render(t::FlexBasis, state) =
+    render(t.tile, state) & style(@d(:flexBasis => t.basis))
 
 # Flex ignores the width and distributes forcefully
 flex(factor::Real, t) =
@@ -398,7 +398,7 @@ immutable Container <: Tile
     tile::Tile
 end
 
-render(cont::Container) = Elem(:div, render(cont.tile))
+render(cont::Container, state) = Elem(:div, render(cont.tile, state))
 
 
 @api padcontent => PadContent <: Tile begin
@@ -407,8 +407,8 @@ render(cont::Container) = Elem(:div, render(cont.tile))
     curry(tile::Tile)
 end
 
-render(t::PadContent) =
-    render(t.tile) &
+render(t::PadContent, state) =
+    render(t.tile, state) &
         style(mapparts(allsides, t.sides, "padding", "", t.length))
 
 pad(len::Length, tile) =

@@ -28,10 +28,10 @@ end
 
 # Render logic
 
-render_cell(x) =
-    Elem(:td, render(x))
+render_cell(x, state) =
+    Elem(:td, render(x, state))
 
-render(t::Table) = begin
+render(t::Table, state) = begin
     if length(t.head) > 0
         @assert length(t.head) == ncol(t.body)
         head = t.head
@@ -40,9 +40,9 @@ render(t::Table) = begin
     end
 
     Elem(:table,
-        [Elem(:thead, Elem(:tr, map(x -> Elem(:th, render(x)), head))),
+        [Elem(:thead, Elem(:tr, map(x -> Elem(:th, render(x, state)), head))),
          Elem(:tbody,
-            [Elem(:tr, [render_cell(v) for (k,v) in row])
+            [Elem(:tr, [render_cell(v, state) for (k,v) in row])
                 for row in eachrow(t.body)]
          )]
     )

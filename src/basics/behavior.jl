@@ -22,8 +22,8 @@ end
 
 default_interpreter(::WithState) = identity
 
-render(t::WithState) =
-    render(t.tile) <<
+render(t::WithState, state) =
+    render(t.tile, state) <<
         Elem(
             "watch-state",
             name=t.name,
@@ -39,8 +39,8 @@ render(t::WithState) =
     kwarg(onpress::String="")
 end
 
-render(k::Keypress) =
-    render(k.tile) & @d(:attributes => @d(:tabindex => 1)) <<
+render(k::Keypress, state) =
+    render(k.tile, state) & @d(:attributes => @d(:tabindex => 1)) <<
         Elem("keypress-behavior", keys=k.keys, name=k.name) &
             (k.onpress != "" ? @d(:onpress => k.onpress) : Dict())
 
@@ -93,8 +93,8 @@ interpret(c::ClickInterpreter, x) =
         DomainError()
     end
 
-render(c::Clickable) =
-    render(c.tile) <<
+render(c::Clickable, state) =
+    render(c.tile, state) <<
         Elem("clickable-behavior";
             name=c.name,
             buttons=string(map(button_number, c.buttons)),
@@ -106,8 +106,8 @@ render(c::Clickable) =
     kwarg(elem::String="::parent")
 end
 
-render(t::Selectable) =
-    render(t.tile) <<
+render(t::Selectable, state) =
+    render(t.tile, state) <<
         Elem("selectable-behavior", name=t.name, elem=t.elem)
 
 dec(x) = x-1
@@ -154,8 +154,8 @@ send(chan::Symbol, watch::Symbol, b) =
 send(chan::Symbol, b::Behavior) =
     ChanSend(chan, name(b), broadcast(b))
 
-render(chan::ChanSend) =
-    render(chan.tile) <<
+render(chan::ChanSend, state) =
+    render(chan.tile, state) <<
         Elem("chan-send", chan=chan.chan, watch=chan.watch)
 
 
@@ -167,8 +167,8 @@ end
 recv(chan::Symbol, t, attr) =
     ChanRecv(chan, attr, t)
 
-render(chan::ChanRecv) =
-    render(chan.tile) <<
+render(chan::ChanRecv, state) =
+    render(chan.tile, state) <<
         Elem("chan-recv", chan=chan.chan, attr=chan.attr)
 
 wire(a, b, chan, attribute) =
