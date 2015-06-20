@@ -47,9 +47,19 @@
 
 <script>
 Polymer({
+    // Refresh any code-mirror tile in the currently selected slide
+    refreshCodeMirror: function () {
+
+        var cs = this.selectedItem.querySelectorAll("code-mirror");
+        for (var i=0, l=cs.length; i < l; i++) {
+            cs[i].mirror.refresh()
+        }
+    },
     domReady: function () {
-        var children = [].slice.call(this.children),
-            self = this
+        var self = this
+        this.addEventListener("core-animated-pages-transition-end", function () {
+            self.refreshCodeMirror()
+        })
         this.super()
     },
     arrowHandler: function (ev) {
@@ -60,6 +70,7 @@ Polymer({
             this.selectPrevious()
             break;
         case "right":
+        case "enter":
         case "down":
             this.selectNext()
             break;
