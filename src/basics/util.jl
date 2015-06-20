@@ -51,7 +51,7 @@ getproperty(el::Elem, prop, default) =
 wrapmany(t::TileList, wrap, state) =
     length(t.tiles) == 1 ?
         render(t.tiles[1], state) :
-        render(t.tiles, wrap, state)
+        Elem(wrap, map(t -> render(t, state), t.tiles))
 
 @api class => Class <: Tile begin
     arg(class::String)

@@ -39,7 +39,9 @@ abstract Selection <: Widget
 end
 
 render(ps::Pages, state) =
-    Elem("core-pages", render(ps.tiles, :div, state), selected=ps.selected-1)
+    Elem("core-pages",
+        map(t -> Elem("section", render(t, state)), ps.tiles.tiles),
+        selected=ps.selected-1)
 
 @api tabs => Tabs <: Selection begin
     arg(tiles::TileList)
