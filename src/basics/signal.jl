@@ -272,7 +272,7 @@ end
 convert(::Type{Tile}, x::Signal) = SignalWrap(x)
 
 render(tile::SignalWrap, state) = begin
-    id = makeid(tile.signal)
+    id = "signal-" * makeid(tile.signal)
     state["embedded_signals"][id] = tile.signal
-    Elem("signal-container", id=id)
+    Elem("signal-container", attributes=@d(:id => id))
 end

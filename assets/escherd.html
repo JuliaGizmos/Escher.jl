@@ -21,7 +21,7 @@ function teelog(x) {
 
     var commands = {
         patch: function (cmd) {
-            window.escher_subtrees[cmd.id].applyPatch(cmd.data)
+            Escherd.applyPatch(cmd.id, cmd.data)
         },
         import: function (cmd) {
             var ln = document.createElement("link")
@@ -33,7 +33,6 @@ function teelog(x) {
             console.log(cmd)
         },
         message: function (msg) {
-            console.log("Sending message", msg)
             this.websocket.send(JSON.stringify(msg))
         }
     }
@@ -93,8 +92,39 @@ function teelog(x) {
         })
     }
 
-    window.escher_subtrees = {}
+    // Store for patches of nodes as yet uncreated
+    Escherd.patches = {}
+    Escherd.applyPatch = function (id, patch) {
+        if (typeof(Escherd.patches[id]) === "undefined") {
+            Escherd.patches[id] = []
+        }
+        if (typeof(escher_subtrees.ready[id]) !== "undefined") {
+            escher_subtrees.ready[id].applyPatch(patch)
+        } else if (typeof(escher_subtrees.destroyed[id]) !== "undefined") {
+            console.log("Patch received for a previously destroyed subtree. This is why we can't have good things.")
+        } else {
+            Escherd.patches[id].push(patch)
+        }
+    }
+
+    Escherd.addSubtree = function (id, node) {
+        delete escher_subtrees.destroyed[id]
+        escher_subtrees.ready[id] = node
+        if (typeof(Escherd.patches[id]) !== "undefined") {
+            for (var i=0, l=Escherd.patches[id].length;
+                    i < l; i++) {
+                node.applyPatch(Escherd.patches[id][i])
+            }
+        }
+    }
+
+    Escherd.removeSubtree = function (id) {
+        delete escher_subtrees.ready[id]
+        escher_subtrees.destroyed[id] = true
+    }
+
     window.Escherd = Escherd
+    window.escher_subtrees = {ready: {}, destroyed: {}}
 })();
 </script>
 
@@ -108,15 +138,18 @@ function teelog(x) {
 <script>
 
     Polymer("signal-container", {
-        id: null,
-        node: null,
+        id: "",
+        vnode: null,
         domReady: function () {
             // Starts with Escher.empty.
-            this.node = new Patchwork.Node(this.id, {t: "div"}, this)
-            window.escher_subtrees[this.id] = this // Register
+            this.vnode = new Patchwork.Node(this.id, {t: "div"}, this)
+            Escherd.addSubtree(this.id, this.vnode)
         },
-        applyPatch: function (patches) {
-            this.node.applyPatch(patches)
+        idChanged: function (a, b) {
+            if (a !== "") {
+                Escherd.removeSubtree(a)
+                Escherd.addSubtree(b, this.vnode)
+            }
         }
     })
 </script>
