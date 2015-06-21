@@ -27,9 +27,41 @@
 </style>
 
 <polymer-element
+    name="slide-fragment">
+<template>
+    <style>
+        :host {
+            opacity: 0;
+        }
+    </style>
+    <content></content>
+</template>
+<script>
+    Polymer({
+        show: function () {
+            this.style.opacity = "1";
+        }
+    })
+</script>
+</polymer-element>
+
+<polymer-element
+    name="slide-tile"
+    layout horizontal center center-justified>
+<template>
+    <section >
+        <content></content>
+    </section>
+</template>
+<script>
+    Polymer({
+    })
+</script>
+</polymer-element>
+
+<polymer-element
     name="slide-show"
     extends="core-animated-pages"
-    transitions="cross-fade-all slide-from-right"
     tabindex="0"
     >
 
@@ -42,7 +74,7 @@
 </style>
     <shadow></shadow>
     <!-- TODO: touch guestures, esc for overview -->
-    <core-a11y-keys target="{{}}" keys="up down left right" on-keys-pressed="{{arrowHandler}}"></core-a11y-keys>
+    <core-a11y-keys target="{{}}" keys="up down left right enter ctrl+left ctrl+right shift+left shift+right" on-keys-pressed="{{arrowHandler}}"></core-a11y-keys>
 </template>
 
 <script>
@@ -57,22 +89,44 @@ Polymer({
     },
     domReady: function () {
         var self = this
-        this.addEventListener("core-animated-pages-transition-end", function () {
-            self.refreshCodeMirror()
-        })
         this.super()
+    },
+    transitionToSlide: function (i) {
+        var s = this.items[i]
+        // do nothing if the item does not exist
+        if (!s) {
+            return
+        }
+        this.transitions = s.inTransitions || ''
+
+        var self = this
+        this.selectIndex(i)
+        setTimeout(function () {
+            self.refreshCodeMirror()
+        }, 0)
+    },
+    showNext: function (wrapped) {
+        var i = wrapped &&
+            this.selectedIndex >= this.items.length - 1 ?
+                0 : this.selectedIndex + 1
+        this.transitionToSlide(i)
+    },
+    showPrev: function (wrapped) {
+        var i = wrapped && !this.selectedIndex ?
+            this.items.length - 1 : this.selectedIndex - 1;
+        this.transitionToSlide(i)
     },
     arrowHandler: function (ev) {
         // TODO: fragments and custom transition
         switch(ev.detail.key) {
         case "left":
         case "up":
-            this.selectPrevious()
+            this.showPrev()
             break;
         case "right":
         case "enter":
         case "down":
-            this.selectNext()
+            this.showNext()
             break;
         }
     }
