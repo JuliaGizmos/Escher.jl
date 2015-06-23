@@ -135,7 +135,7 @@ function teelog(x) {
     name="signal-container">
 
 <template>
-    <content></content>
+    <shadow></shadow>
 </template>
 
 <script>
@@ -145,8 +145,9 @@ function teelog(x) {
         vnode: null,
         domReady: function () {
             // Starts with Escher.empty.
-            this.vnode = new Patchwork.Node(this.id, {t: "div"}, this)
-            Escher.addSubtree(this.id, this.vnode)
+            var id = this.getAttribute("id")
+            this.vnode = new Patchwork.Node(id, {t: "div"}, this)
+            Escher.addSubtree(id, this.vnode)
         },
         idChanged: function (a, b) {
             if (a !== "") {
