@@ -48,7 +48,7 @@ function setup_socket(file)
 
     write(io, """</head> <body fullbleed unresolved>""")
     write(io, """<script>window.addEventListener('polymer-ready', function(e) {
-          new Escherd($(JSON.json(file)));
+          Escher.init($(JSON.json(file)));
     })</script>
     <signal-container id="root"></signal-container>
     </body>

@@ -23,17 +23,6 @@ end
     end
 end
 
-@require Blink begin
-    # This is still defunct though
-    import BlinkDisplay, Graphics
-
-    Blink.windowinit() do w
-        Blink.head(w, custom_elements())
-    end
-
-    Graphics.media(Tile, Graphics.Media.Graphical)
-end
-
 @require Gadfly begin
     import Gadfly: Compose
 

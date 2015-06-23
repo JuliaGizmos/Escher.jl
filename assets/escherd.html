@@ -21,7 +21,7 @@ function teelog(x) {
 
     var commands = {
         patch: function (cmd) {
-            Escherd.applyPatch(cmd.id, cmd.data)
+            Escher.applyPatch(cmd.id, cmd.data)
         },
         import: function (cmd) {
             var ln = document.createElement("link")
@@ -31,100 +31,103 @@ function teelog(x) {
         },
         log: function (cmd) {
             console.log(cmd)
-        },
-        message: function (msg) {
-            this.websocket.send(JSON.stringify(msg))
         }
     }
 
+    var w = window.innerWidth,
+        h = window.innerHeight
 
-    function Escherd(suffix) {
-        this.websocket = null
-        var w = window.innerWidth,
-            h = window.innerHeight,
-            url = socket_url(suffix) + "?w=" + w + "&h=" + h
+        Escher = {}
+        Escher.init = function (suffix) {
+            if (typeof(window.Blink) === "undefined") {
+                var url = socket_url(suffix) + "?w=" + w + "&h=" + h,
+                    ws = new WebSocket(url)
 
-        var ws = new WebSocket(url)
-
-        var self = this
-        ws.onmessage = function (msg) {
-            var cmd = JSON.parse(msg.data),
-                f = commands[cmd.command]
-            if (!f) {
-                console.log("Invalid command", cmd.command, "invoked")
-            } else {
-                f.call(self, cmd)
-            }
-        }
-        ws.onerror = function (e) {
-            console.log("Error in web socket connection", e)
-        }
-        this.websocket = ws
-
-        window.addEventListener("resize", function (ev) {
-            // TODO: Throttle
-            commands.message.call(self,
-                { command: "window-size",
-                  data: [ window.innerWidth, window.innerHeight ]
-                }
-            )
-        })
-
-
-        var closeHandler = function () {
-            commands.message.call(self,
-                {command: "window-kill", data: null})
-            // prevent firing twice
-            window.removeEventListener("beforeunload", closeHandler)
-        }
-
-        window.addEventListener("beforeunload", closeHandler)
-
-        document.addEventListener("signal-transport", function (ev) {
-                commands["message"].call(self, (teelog({
-                    command: "signal-update",
-                    data: {
-                        signalId: ev.detail.signalId,
-                        value: ev.detail.value
+                ws.onmessage = function (msg) {
+                    var cmd = JSON.parse(msg.data),
+                        f = commands[cmd.command]
+                    if (!f) {
+                        console.log("Invalid command", cmd.command, "invoked")
+                    } else {
+                        f.call(Escher, cmd)
                     }
-                })))
-                ev.stopPropagation()
-        })
-    }
+                }
 
-    // Store for patches of nodes as yet uncreated
-    Escherd.patches = {}
-    Escherd.applyPatch = function (id, patch) {
-        if (typeof(Escherd.patches[id]) === "undefined") {
-            Escherd.patches[id] = []
+                ws.onerror = function (e) {
+                    console.log("Error in web socket connection", e)
+                }
+                Escher.send = function (data) {
+                    console.log(data)
+                    ws.send(JSON.stringify(data))
+                }
+
+            } else {
+                Escher.send = function (data) {
+                    Blink.msg("escher", data)
+                }
+            }
+            window.addEventListener("resize", function (ev) {
+                // TODO: Throttle
+                Escher.send(
+                    { command: "window-size",
+                      data: [ window.innerWidth, window.innerHeight ]
+                    }
+                )
+            })
+
+
+            var closeHandler = function () {
+                Escher.send({command: "window-kill", data: null})
+                // prevent firing twice
+                window.removeEventListener("beforeunload", closeHandler)
+            }
+
+            window.addEventListener("beforeunload", closeHandler)
+
+            document.addEventListener("signal-transport", function (ev) {
+                    Escher.send({
+                        command: "signal-update",
+                        data: {
+                            signalId: ev.detail.signalId,
+                            value: ev.detail.value
+                        }
+                    })
+                    ev.stopPropagation()
+            })
         }
-        if (typeof(escher_subtrees.ready[id]) !== "undefined") {
-            escher_subtrees.ready[id].applyPatch(patch)
-        } else if (typeof(escher_subtrees.destroyed[id]) !== "undefined") {
+    // Store for patches of nodes as yet uncreated
+    Escher.patches = {}
+    Escher.applyPatch = function (id, patch) {
+        if (typeof(Escher.patches[id]) === "undefined") {
+            Escher.patches[id] = []
+        }
+        if (typeof(Escher.subtrees.ready[id]) !== "undefined") {
+            Escher.subtrees.ready[id].applyPatch(patch)
+        } else if (typeof(Escher.subtrees.destroyed[id]) !== "undefined") {
             console.log("Patch received for a previously destroyed subtree. This is why we can't have good things.")
         } else {
-            Escherd.patches[id].push(patch)
+            Escher.patches[id].push(patch)
         }
     }
 
-    Escherd.addSubtree = function (id, node) {
-        delete escher_subtrees.destroyed[id]
-        escher_subtrees.ready[id] = node
-        if (typeof(Escherd.patches[id]) !== "undefined") {
-            for (var i=0, l=Escherd.patches[id].length;
+    Escher.addSubtree = function (id, node) {
+        delete Escher.subtrees.destroyed[id]
+        Escher.subtrees.ready[id] = node
+        if (typeof(Escher.patches[id]) !== "undefined") {
+            for (var i=0, l=Escher.patches[id].length;
                     i < l; i++) {
-                node.applyPatch(Escherd.patches[id][i])
+                node.applyPatch(Escher.patches[id][i])
             }
         }
     }
 
-    Escherd.removeSubtree = function (id) {
-        delete escher_subtrees.ready[id]
-        escher_subtrees.destroyed[id] = true
+    Escher.removeSubtree = function (id) {
+        delete Escher.subtrees.ready[id]
+        Escher.subtrees.destroyed[id] = true
     }
 
-    window.Escherd = Escherd
-    window.escher_subtrees = {ready: {}, destroyed: {}}
+    Escher.subtrees = {ready: {}, destroyed: {}}
+    window.Escher = Escher
 })();
 </script>
 
@@ -143,12 +146,12 @@ function teelog(x) {
         domReady: function () {
             // Starts with Escher.empty.
             this.vnode = new Patchwork.Node(this.id, {t: "div"}, this)
-            Escherd.addSubtree(this.id, this.vnode)
+            Escher.addSubtree(this.id, this.vnode)
         },
         idChanged: function (a, b) {
             if (a !== "") {
-                Escherd.removeSubtree(a)
-                Escherd.addSubtree(b, this.vnode)
+                Escher.removeSubtree(a)
+                Escher.addSubtree(b, this.vnode)
             }
         }
     })
