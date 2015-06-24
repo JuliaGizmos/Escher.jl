@@ -1,11 +1,12 @@
 julia 0.3-
+ArgParse
+Color
 Compat
 JSON
-Requires
 Markdown
-Reactive
-Patchwork
-ArgParse
+Media
 Mux
+Reactive
+Requires
+Patchwork
 WebSockets
-Color

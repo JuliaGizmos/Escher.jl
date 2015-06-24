@@ -16,6 +16,12 @@ end
     curry(x::Int)
 end
 
+println(macroexpand(:(@api test2 => TestType2 begin
+    typedarg(a::FloatingPoint)
+    arg(b::Int)
+    curry(x::Int)
+end)))
+
 @fact_throws test2(2, 3, 4) # Because 2 should be float
 @fact test2(2.0, 3, 4) => TestType2(2.0, 3, 4)
 @fact test2(2.0, 3)(4) => TestType2(2.0, 3, 4)

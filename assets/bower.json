@@ -34,7 +34,10 @@
     "paper-elements": "Polymer/paper-elements#^0.5.5",
     "paper-tabs": "Polymer/paper-tabs#^0.5.5",
     "interact": "~1.2.4",
-    "code-mirror": "shashi/code-mirror#master"
+    "code-mirror": "shashi/code-mirror#master",
+    "webcomponentsjs": "~0.7.5"
+  },
+  "resolutions": {
+    "webcomponentsjs": "~0.7.5"
   }
 }
-

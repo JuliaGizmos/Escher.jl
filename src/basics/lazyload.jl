@@ -61,3 +61,7 @@ end
 
     convert(::Type{Tile}, df::AbstractDataFrame) = table(df)
 end
+
+@require Blink begin
+    include("blink.jl")
+end

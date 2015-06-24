@@ -8,7 +8,7 @@ btn = Input(false)
 it = Input([0])
 val = Input([1.0])
 running = Input(false)
-result = lift(st -> run_simulate() , Any, btn; init=nothing)
+result = lift(st -> run_simulate() , btn; typ=Any, init=nothing)
 
 f(u) = exp(-u^2/2)/√(2pi)
 
