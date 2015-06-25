@@ -26,7 +26,9 @@ blocktile(md::Markdown.Code)  =
 blocktile(md::Markdown.BlockQuote) =
     class("md-blockquote", blockquote(map(blocktile, md.content)))
 blocktile(md::Markdown.List) =
-    class("md-list", list(map(item -> map(inlinetile, item), md.items), ordered=md.ordered))
+    class("md-list",
+        list(map(item -> class("md-list-item", map(inlinetile, item)),
+            md.items), ordered=md.ordered))
 blocktile(md::Markdown.Paragraph) =
     class("md-paragraph", map(inlinetile, md.content))
 

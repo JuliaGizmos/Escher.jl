@@ -1,13 +1,13 @@
 export list, image, link, abbr
 
 @api list => List <: Tile begin
-    curry(tiles::AbstractArray)
+    curry(tiles::TileList)
     kwarg(ordered::Bool=false)
 end
 
 render(l::List, state) =
     Elem(l.ordered ? :ol : :ul,
-         map(x -> Elem(:li, render(x, state)), l.tiles))
+         map(x -> Elem(:li, render(x, state)), l.tiles.tiles))
 
 @api image => Image <: Tile begin
     arg(url::String)

@@ -19,6 +19,7 @@ render(x::Elem, state) = x
 render(x::Leaf, state) = x.element
 
 convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
+convert(::Type{Tile}, x::Char) = Leaf(Elem(:span, string(x)))
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
 
 bestmime(val) = begin
