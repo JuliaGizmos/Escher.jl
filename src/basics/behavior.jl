@@ -110,9 +110,9 @@ render(t::Selectable, state) =
     render(t.tile, state) <<
         Elem("selectable-behavior", name=t.name, elem=t.elem)
 
-dec(x) = x-1
+inc(x) = x+1
 default_interpreter(t::Selectable) =
-    Chained(InterpreterFn(dec), ToType{Int}())
+    Chained(InterpreterFn(inc), ToType{Int}())
 
 abstract MouseState
 
