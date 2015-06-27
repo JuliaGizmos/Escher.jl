@@ -83,7 +83,7 @@ render(m2::SubMenu, state) =
 # Toolbar
 
 @api toolbar => Toolbar <: Tile begin
-    arg(tiles::AbstractArray)
+    arg(tiles::TileList)
 end
 
 render(t::Toolbar, state) =

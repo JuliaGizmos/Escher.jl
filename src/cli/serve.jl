@@ -83,7 +83,6 @@ end
 
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
-        println(msg)
         id = msg["data"]["signalId"]
         interp, sig = Escher.fromid(id)
         push!(sig, Escher.interpret(interp, msg["data"]["value"]))
