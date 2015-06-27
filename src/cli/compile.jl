@@ -39,6 +39,9 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         end
     end
 
+    state = Dict()
+    state["embedded_signals"] = Dict()
+
     open(opath, "w") do io
         write(io, """<!doctype html>
         <html>
@@ -60,7 +63,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         <div id="root">
         </div>
         <script>
-            new Patchwork.Node("root", $(Patchwork.jsonfmt(Escher.render(getvalue(ui))) |> json))
+            new Patchwork.Node("root", $(Patchwork.jsonfmt(Escher.render(getvalue(ui), state)) |> json))
         </script>
         </body>
         </html>
