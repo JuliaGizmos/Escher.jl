@@ -16,9 +16,9 @@ $(vskip(1em))
 $(vskip(1em))
 
 $(
-    showdocs([hbox, width, height, flow])
+    showdocs([width, height, size, container, minwidth, minheight, maxwidth, maxheight, pad, flow,
+              hbox, vbox, shrink, grow, flex, packitems, packacross, packlines])
 )
-
 """
 
 function main(window)
