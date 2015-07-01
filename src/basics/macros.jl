@@ -252,6 +252,9 @@ From a field definition, generate metadata for documenting the field
 """ ->
 argdoc(arg, params, iskwarg=false) = begin
     name, typ = typebody(arg).args
+    kws = filter(x-> isa(x, Expr) && x.head === :kw, arg.args[2:end])
+    docstr = get(Any[get(kw.args, 2, "") for kw in
+                filter(x->get(x.args, 1, :x) == :doc, kws)], 1, "")
 
     dict = Dict()
     dict[:name] = name
@@ -269,7 +272,8 @@ argdoc(arg, params, iskwarg=false) = begin
             dict[:coerced] = false
         end
     end
-    dict
+
+    :(merge($dict, (@compat Dict(:doc=>$docstr))))
 end
 
 @doc """
@@ -277,8 +281,8 @@ Given field definitions (both args and kwargs),
 return the documentation object for an API
 """ ->
 argdocs(args, kwargs, params) =
-    vcat(map(arg -> argdoc(arg, params), args),
-         map(kwarg -> argdoc(kwarg, params, true), kwargs))
+    Expr(:vcat, map(arg -> argdoc(arg, params), args)...,
+                map(kwarg -> argdoc(kwarg, params, true), kwargs)...)
 
 const escher_meta = Dict()
 
@@ -322,15 +326,16 @@ macro api(names, body)
     kwnames = map(x -> striptype(x.args[1]), kws)
     ms = map(m -> methodexpr(fn, typename(typ), kws, kwnames, m), methoddefs)
 
-    doc = @compat Dict(
-        :doc=>get(docs, 1, :(doc(""))).args[2],
-        :name=>fn,
-        :type=>typ,
-        :args=>argdocs(args, kwargs, dict)
-    )
+    docstr = get(docs, 1, :(doc(""))).args[2]
+    doc = :(@compat Dict(
+        :doc=> $docstr,
+        :name=>$fn,
+        :type=>$(Expr(:quote, typ)),
+        :args=>$(argdocs(args, kwargs, dict))
+    ))
 
     # save metadata
-    setdoc = :(escher_meta[$(esc(fn))] = $doc)
+    setdoc = :(escher_meta[$(esc(fn))] = $(esc(doc)))
     Expr(:block, typedef, ms..., setdoc)
 end
 
@@ -354,13 +359,14 @@ macro apidoc(names, body)
     kws = map(kwize, kwargs)
     kwnames = map(x -> striptype(x.args[1]), kws)
 
-    doc = @compat Dict(
-        :doc=>get(docs, 1, :(doc(""))).args[2],
-        :name=>fn,
-        :type=>typ,
-        :args=>argdocs(args, kwargs, dict)
-    )
+    docstr = get(docs, 1, :(doc(""))).args[2]
+    doc = :(@compat Dict(
+        :doc=> $docstr,
+        :name=>$fn,
+        :type=>$(Expr(:quote, typ)),
+        :args=>$(argdocs(args, kwargs, dict))
+    ))
 
     # save metadata
-    :(escher_meta[$(esc(fn))] = $doc)
+    :(escher_meta[$(esc(fn))] = $(esc(doc)))
 end
