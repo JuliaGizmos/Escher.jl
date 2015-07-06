@@ -39,18 +39,14 @@ render(x::FloatingPoint, state) = @sprintf "%0.3f" x
 render(x::Symbol, state) = string(x)
 render(x::String, state) = Elem(:span, x)
 
-immutable AnyWrap <: Tile
-    value
-end
-
 render{T}(x::T, state) =
-    # Try to convert first
-    method_exists(convert, (Type{Tile}, T)) ?
-        render(convert(Tile, x), state) :
-        render(AnyWrap(x), state)
-
-# Catch-all render
-render(x::AnyWrap, state) = render_fallback(bestmime(x.value), x.xvalue)
+    try
+        render(convert(Tile, x), state)
+    catch err
+        # If something other than the conversion failed, rethrow...
+        !isa(err, MethodError) && rethrow()
+        render_fallback(bestmime(x), x)
+    end
 
 @doc """
 `Empty` is handy tile that is well... Empty.
