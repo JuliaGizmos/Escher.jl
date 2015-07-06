@@ -8,6 +8,12 @@ write_escher_prelude(io::IO) = begin
     write_patchwork_prelude(io)
 end
 
+# FIXME: figure out a way to make this work for Escher
+#
+# immutable EscherDisplay <: Base.Display end
+#
+# pushdisplay(EscherDisplay())
+
 @require IJulia begin
     # Load custom element definitions
 
@@ -23,35 +29,42 @@ end
     end
 end
 
+export drawing
+
+@require Compose begin
+
+    # A declarative version of draw?
+    @api drawing => ComposeGraphic <: Tile begin
+        arg(img::Any)
+        curry(graphic::Any) # Either a plot or a compose node
+    end
+    drawing(p) =
+        drawing(Compose.Patchable(Compose.default_graphic_width,
+                        Compose.default_graphic_height), p)
+
+    convert(::Type{Tile}, p::Compose.Context) =
+        drawing(p)
+
+    compose_render(img::Compose.Patchable, pic) = begin
+        draw(img, pic)
+    end
+
+    compose_render(img::Compose.Image, pic) = begin
+        Compose.draw(img, pic) # do the drawing side-effect
+        Elem(:img, src="""data:image/png;base64,$(base64(takebuf_array(img.out)))""")
+    end
+
+    render(d::ComposeGraphic, state) = begin
+        Elem(:div, compose_render(d.img, d.graphic), className="graphic-wrap")
+    end
+
+end
+
 @require Gadfly begin
     import Gadfly: Compose
 
     convert(::Type{Tile}, p::Gadfly.Plot) =
         drawing(p)
-end
-
-export drawing
-
-@require Compose begin
-
-    @api drawing => ComposeGraphic <: Tile begin
-        arg(width::Compose.Measure)
-        arg(height::Compose.Measure)
-        curry(graphic::Any) # Either a plot or a compose node
-    end
-    drawing(p) =
-        drawing(Compose.default_graphic_width,
-                Compose.default_graphic_height, p)
-
-    convert(::Type{Tile}, p::Compose.Context) =
-        drawing(p)
-
-    render(d::ComposeGraphic, state) = begin
-        backend = Compose.Patchable(
-            d.width, d.height
-        )
-        Elem(:div, Compose.draw(backend, d.graphic), className="graphic-wrap")
-    end
 end
 
 @require DataFrames begin
