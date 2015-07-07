@@ -8,7 +8,8 @@ export broadcast,
        togglebutton,
        textinput,
        progress,
-       paper
+       paper,
+       datepicker
 
 # A widget can be coerced into a behavior
 # by calling `broadcast` on it.
@@ -246,3 +247,35 @@ end
 
 render(p::PaperShadow, state) =
     Elem("paper-shadow", render(p.tile, state), z=p.z, animated=p.animated)
+
+# Date picker
+
+if VERSION < v"0.4.0-dev"
+    using Dates
+end
+
+
+@api dateselection => DateSelection <: Behavior begin
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_date)
+end
+render(d::DateSelection, state) =
+    render(d.tile, state) << Elem("date-selection", name=d.name)
+
+immutable DateInterpreter <: Interpreter end
+default_interpreter(::DateSelection) = DateInterpreter()
+
+
+@api datepicker => DatePicker <: Widget begin
+    arg(date::Date=today())
+    kwarg(range::Range{Date}=Date("1971-01-01"):Date("2100-12-31"))
+    kwarg(name::Symbol=:_date)
+end
+render(d::DatePicker, state) =
+    Elem("paper-date-picker-two", value=string(d.date), attributes=@d(:min=>string(first(d.range)), :max=>string(last(d.range))))
+broadcast(p::DatePicker) = dateselection(p, name=p.name)
+
+# TODO: Interpret as bounds error if date exceeds range
+interpret(::DateInterpreter, d) = begin
+    date = Date(d["year"], d["month"], d["day"])
+end
