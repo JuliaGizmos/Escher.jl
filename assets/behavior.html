@@ -175,3 +175,32 @@ Polymer({
 </script>
 
 </polymer-element>
+
+<polymer-element
+    name="date-selection"
+    extends="reactive-signal" >
+
+<template></template>
+
+<script>
+Polymer({
+    domReady: function () {
+        var self = this
+
+        this.elem = this.findElem()
+
+        this.elem.addEventListener("date-picked", function (ev) {
+            var d = self.elem.immediateDate
+            self.value = {
+                "year" : d.getFullYear(),
+                "month": d.getMonth() + 1,
+                "day": d.getDate()
+            }
+            self.update()
+        })
+
+        this.super()
+    }
+})
+</script>
+</polymer-element>

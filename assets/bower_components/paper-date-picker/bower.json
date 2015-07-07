@@ -1,0 +1,11 @@
+{
+  "name": "paper-date-picker",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.5",
+    "core-animated-pages": "Polymer/core-animated-pages#^0.5.5",
+    "paper-dialog": "Polymer/paper-dialog#^0.5.5",
+    "paper-button": "Polymer/paper-button#^0.5.5",
+    "paper-ripple": "Polymer/paper-ripple#^0.5.5"
+  },
+  "version": "0.1.4"
+}
