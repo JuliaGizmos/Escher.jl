@@ -108,7 +108,7 @@ end
 
 interpret(dec::Const, _) = dec.value
 
-constant(x, tile::Tile) = addinterpreter(Const(x), tile)
+constant(x, tile) = addinterpreter(Const(x), tile)
 constant(x) = addinterpreter(Const(x))
 constant(xs::AbstractArray, tiles::AbstractArray) = map(constant, xs, tiles)
 constant(x, tiles::AbstractArray) = map(constant(x), tiles)

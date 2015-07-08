@@ -52,14 +52,19 @@ export inset,
        packlines,
        space,
        pad,
-       padcontent
+       padcontent,
+       hidden,
+       visible,
+       scroll,
+       auto,
+       clip
 
 # 0. Width and height
 
 @api width => Width <: Tile begin
     doc("Set the width of a tile")
     typedarg(prefix::String="",
-        doc="""either `""`, `"min"` or `"max"`. See `minwidth` and `maxwidth`.""")
+        doc=md"""either `""`, `"min"` or `"max"`. See `minwidth` and `maxwidth`.""")
     arg(width::Length, doc="The width")
     curry(tile::Tile, doc="the tile to set the height of")
 end
@@ -71,7 +76,7 @@ end
 @api height => Height <: Tile begin
     doc("Set the height of a tile")
     typedarg(prefix::String="",
-        doc="""either `""`, `"min"` or `"max"`. See `minheight` and `maxheight`.""")
+        doc=md"""either `""`, `"min"` or `"max"`. See `minheight` and `maxheight`.""")
     arg(height::Length, doc="the height")
     curry(tile::Tile, doc="the tile to set the height of")
 end
@@ -485,4 +490,30 @@ pad(sides::AbstractVector, len::Length) =
     arg(length::Length, doc="Amount of padding")
     curry(tile::Tile, doc="The tile to pad")
 end
+
+
+# Clipping
+
+abstract Overflow
+
+@terms Overflow begin
+    hidden => Hidden
+    visible => Visible
+    scroll => Scroll
+    auto => AutoClip
+end
+
+@api clip => Clip <: Tile begin
+    typedarg(overflow::Overflow)
+    curry(tile::Tile)
+end
+
+name(::Hidden) = "hidden"
+name(::Visible) = "visible"
+name(::Scroll) = "scroll"
+name(::AutoClip) = "auto"
+
+render(t::Clip, state) =
+    render(Container(t.tile), state) &
+        [:style => [:overflow => name(t.overflow)], :className => "scrollbar"]
 
