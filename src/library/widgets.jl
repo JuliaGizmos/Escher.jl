@@ -18,6 +18,9 @@ abstract Widget <: Behavior
 subscribe(w::Widget, x::Input; absorb=true) =
     subscribe(broadcast(w), x, absorb=absorb)
 
+addinterpreter(i::Interpreter, w::Widget) =
+    addinterpreter(i, broadcast(w))
+
 default_interpreter(w::Widget) =
     default_interpreter(broadcast(w))
 
