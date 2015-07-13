@@ -49,7 +49,7 @@ export drawing
         draw(img, pic)
     end
 
-    compose_render(img::Compose.Image, pic) = begin
+    compose_render(img, pic) = begin
         Compose.draw(img, pic) # do the drawing side-effect
         Elem(:img, src="""data:image/png;base64,$(base64(takebuf_array(img.out)))""")
     end
