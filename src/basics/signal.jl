@@ -241,7 +241,8 @@ makeid(sig) = begin
         # todo ensure connection
         return signal_to_id[sig]
     else
-        id = get!(() -> string(uuid4()), signal_to_id, sig)
+        id = haskey(signal_to_id, sig) ?
+            signal_to_id[sig] : string(rand(Uint128))
         id_to_signal[id] = sig
         return id
     end

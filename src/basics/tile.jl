@@ -84,4 +84,4 @@ render(t::TileList, state) =
     map(x -> render(x, state), t.tiles)
 
 render(t::TileList, wrap, state) =
-    Elem(wrap, map(x -> render(x, state), t.tiles))
+    Elem(wrap, Elem[render(x, state) for x in t.tiles])
