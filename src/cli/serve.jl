@@ -57,18 +57,18 @@ function setup_socket(file)
 end
 
 mount_cmd(node, id="root") =
-    @compat Dict("command" => "mount",
+   [ "command" => "mount",
     "id" => id,
-    "data" => Patchwork.jsonfmt(node)) |> JSON.json
+    "data" => Patchwork.jsonfmt(node)] |> JSON.json
 
 import_cmd(asset) =
-    @compat Dict("command" => "import",
-      "data" => Escher.resolve_asset(asset))
+    [ "command" => "import",
+      "data" => Escher.resolve_asset(asset) ] 
 
 patch_cmd(id, diff) =
-    @compat Dict("command" => "patch",
+   [ "command" => "patch",
     "id" => id,
-    "data" => Patchwork.jsonfmt(diff)) |> JSON.json
+    "data" => Patchwork.jsonfmt(diff)] |> JSON.json
 
 swap!(tilestream, next::Signal) =
     push!(tilestream, next)
@@ -131,14 +131,14 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
             end
         end
         for (key, sig) in st["embedded_signals"]
-            start_updates(sig, window, sock, key)
+            start_updates(sig, window, sock, key) 
         end
 
         rendered_next
     end
 
     for (key, sig) in state["embedded_signals"]
-        start_updates(sig, window, sock, key)
+        start_updates(sig, window, sock, key) 
     end
 end
 

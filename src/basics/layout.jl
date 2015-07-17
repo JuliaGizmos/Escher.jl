@@ -515,5 +515,5 @@ name(::AutoClip) = "auto"
 
 render(t::Clip, state) =
     render(Container(t.tile), state) &
-        @compat Dict(:style => @compat Dict(:overflow => name(t.overflow)), :className => "scrollbar")
+        [:style => [:overflow => name(t.overflow)], :className => "scrollbar"]
 
