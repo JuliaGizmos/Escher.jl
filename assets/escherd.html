@@ -57,7 +57,6 @@ function teelog(x) {
                     console.log("Error in web socket connection", e)
                 }
                 Escher.send = function (data) {
-                    console.log(data)
                     ws.send(JSON.stringify(data))
                 }
 

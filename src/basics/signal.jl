@@ -34,7 +34,7 @@ name(b::Behavior) = b.name
 
 broadcast(b::Behavior) = b
 
-## Interpreting a message from a behavior ##
+## Interpreting a message ##
 
 abstract Interpreter
 

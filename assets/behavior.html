@@ -22,12 +22,17 @@ Polymer({
         this.value = elem[self.attr] || elem.getAttribute(self.attr)
 
         elem.addEventListener(this.trigger, function (ev) {
+            var val;
             if (self.source == "target") {
                 e = ev.target
-                self.value = e[self.attr] || e.getAttribute(self.attr)
+                val = e[self.attr] || e.getAttribute(self.attr)
             } else {
-                self.value = elem[self.attr] || elem.getAttribute(self.attr)
+                val = elem[self.attr] || elem.getAttribute(self.attr)
             }
+            if (typeof(val) === "function") {
+                val = val.call(elem)
+            }
+            self.value = val
             self.update()
         })
         this.super()
@@ -91,7 +96,7 @@ Polymer({
 
 <script>
 Polymer({
-    signals: [], // TODO: replace this with RegEx
+    signals: [],
     triggers: [],
     domReady: function () {
         var self = this
@@ -105,7 +110,7 @@ Polymer({
             if (self.triggers.indexOf(ev.detail.name) >= 0) {
                 var result = {}
                 for(var i=0, l=self.signals.length; i < l; i++) {
-                    var s = self.signals[i]
+                    var s = self.signals[i];
                     result[s] = elem.querySelector("#signal-" + s).value
                 }
                 result[ev.target.name] = ev.target.value
