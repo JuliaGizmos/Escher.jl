@@ -46,7 +46,7 @@ export drawing
         drawing(p)
 
     compose_render(img::Compose.Patchable, pic) = begin
-        draw(img, pic)
+        Compose.draw(img, pic)
     end
 
     compose_render(img, pic) = begin
