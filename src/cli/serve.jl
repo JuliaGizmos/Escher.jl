@@ -76,11 +76,6 @@ swap!(tilestream, next::Signal) =
 swap!(tilestream, next) =
     push!(tilestream, Input(next))
 
-const signals = Dict()
-function Escher.setup_transport(x::Tuple)
-    Escher.makeid(x)
-end
-
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
         id = msg["data"]["signalId"]

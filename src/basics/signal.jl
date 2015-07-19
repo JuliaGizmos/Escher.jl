@@ -167,12 +167,9 @@ render(sig::Subscription, state) =
         Elem("signal-transport",
             # Note: setup_transport here adds (interpreter, input) pair
             # to a dict, returns the key - this fn is idempotent
-            name=sig.name, signalId=setup_transport(sig.receiver))
+            name=sig.name, signalId=makeid(sig.receiver))
 
 (>>>)(b::Behavior, s::Input) = subscribe(b, s)
-
-setup_transport(x) =
-    error("Looks like there is no trasport set up")
 
 ### Sampling
 
