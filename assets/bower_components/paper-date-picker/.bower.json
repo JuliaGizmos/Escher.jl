@@ -1,0 +1,21 @@
+{
+  "name": "paper-date-picker",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.5",
+    "core-animated-pages": "Polymer/core-animated-pages#^0.5.5",
+    "paper-dialog": "Polymer/paper-dialog#^0.5.5",
+    "paper-button": "Polymer/paper-button#^0.5.5",
+    "paper-ripple": "Polymer/paper-ripple#^0.5.5"
+  },
+  "homepage": "https://github.com/shashi/paper-date-picker",
+  "_release": "8bd50666a9",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "8bd50666a94956dace402388ab3be34f2bf4ea76"
+  },
+  "_source": "git://github.com/shashi/paper-date-picker.git",
+  "_target": "master",
+  "_originalSource": "shashi/paper-date-picker",
+  "_direct": true
+}

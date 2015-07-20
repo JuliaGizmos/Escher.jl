@@ -4,32 +4,13 @@ using Distributions
 
 
 N = Input(10000)
-btn = Input(false)
+btn = Input{Escher.MouseButton}(leftbutton)
 it = Input([0])
 val = Input([1.0])
 running = Input(false)
-result = lift(st -> run_simulate() , Any, btn; init=nothing)
+result = lift(st -> run_simulate() , btn; typ=Any, init=nothing)
 
 f(u) = exp(-u^2/2)/√(2pi)
-
-function main(window)
-    push!(window.assets, "tex")
-    push!(window.assets, "widgets")
-
-    lift( it, val, running) do  i, v, r
-        vbox(h1("Interactive Simulations"),
-            hbox(vbox(
-                     md"""We want to estimate the following integral using a
-                     *Monte Carlo* Simulation""",
-                     hbox(tex("\\int_{-5}^{5} \\frac{exp(-u^2/2)}{\\sqrt{2pi}}du" , block=true) ),
-                     ),
-                plot(f, -5, +5, Theme(line_width=2Gadfly.mm, major_label_font_size=40Gadfly.px, minor_label_font_size=25Gadfly.px)) |> size(60em, 60em),
-             ),
-             hbox("Number of runs", slider(10^3:10^3:10^6) >>> N, hskip(5em), hbox(button("Start", raised=true, disabled=r) >>> btn)) |> packacross(center),            
-             hbox("Current value: ", hskip(1em), @sprintf("%2.4f", v[end]) |> emph, hskip(1em)," at iteration :", hskip(1em), string(i[end])),
-             plot(x=i, y=v)) |> pad(2em) 
-    end
-end
 
 
 f(u) = exp(-u^2/2)/√(2pi)
@@ -79,5 +60,22 @@ function initiate()
     push!(running, true)
 end
 
+function main(window)
+    push!(window.assets, "tex")
+    push!(window.assets, "widgets")
 
+    lift( it, val, running) do  i, v, r
+        vbox(h1("Interactive Simulations"),
+            hbox(vbox(
+                     md"""We want to estimate the following integral using a
+                     *Monte Carlo* Simulation""",
+                     hbox(tex("\\int_{-5}^{5} \\frac{exp(-u^2/2)}{\\sqrt{2pi}}du" , block=true) ),
+                     ),
+                plot(f, -5, +5, Theme(line_width=2Gadfly.mm, major_label_font_size=40Gadfly.px, minor_label_font_size=25Gadfly.px)) |> size(60em, 60em),
+             ),
+             hbox("Number of runs", slider(10^3:10^3:10^6) >>> N, hskip(5em), hbox(button("Start", raised=true, disabled=r) >>> btn)) |> packacross(center),            
+             hbox("Current value: ", hskip(1em), @sprintf("%2.4f", v[end]) |> emph, hskip(1em)," at iteration :", hskip(1em), string(i[end])),
+             plot(x=i, y=v)) |> pad(2em) 
+    end
+end
 

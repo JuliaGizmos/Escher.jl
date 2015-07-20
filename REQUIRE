@@ -1,11 +1,12 @@
-julia 0.3-
-Compat
-JSON
-Requires
-Markdown
-Reactive
-Patchwork
+julia 0.3
 ArgParse
-Mux
-WebSockets
 Color
+Compat
+Dates
+JSON
+Markdown
+Mux
+Reactive 0.2.2
+Requires
+Patchwork 0.1.5
+WebSockets

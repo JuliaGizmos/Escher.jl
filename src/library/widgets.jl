@@ -8,7 +8,8 @@ export broadcast,
        togglebutton,
        textinput,
        progress,
-       paper
+       paper,
+       datepicker
 
 # A widget can be coerced into a behavior
 # by calling `broadcast` on it.
@@ -16,6 +17,9 @@ abstract Widget <: Behavior
 
 subscribe(w::Widget, x::Input; absorb=true) =
     subscribe(broadcast(w), x, absorb=absorb)
+
+addinterpreter(i::Interpreter, w::Widget) =
+    addinterpreter(i, broadcast(w))
 
 default_interpreter(w::Widget) =
     default_interpreter(broadcast(w))
@@ -30,8 +34,8 @@ default_interpreter(w::Widget) =
     kwarg(noink::Bool=false)
 end
 
-render(b::Button) =
-    Elem("paper-button", render(b.label);
+render(b::Button, state) =
+    Elem("paper-button", render(b.label, state);
         attributes=@d(
             :raised => boolattr(b.raised, "raised"),
             :noink => boolattr(b.noink, "noink"),
@@ -58,7 +62,7 @@ broadcast(s::Slider) =
     addinterpreter(ToType{eltype(s.range)}(),
         hasstate(s, name=s.name))
 
-render(s::Slider) =
+render(s::Slider, state) =
     Elem("paper-slider",
         min=first(s.range),
         max=last(s.range),
@@ -87,7 +91,7 @@ for (typ, fn, elem) in [(:Checkbox, :checkbox, "paper-checkbox"),
             addinterpreter(ToType{Bool}(),
                 hasstate(c, name=c.name, attr="checked", trigger="change"))
 
-        render(c::$typ) =
+        render(c::$typ, state) =
             Elem($elem,
                 checked=c.value,
                 label=c.label,
@@ -119,7 +123,7 @@ broadcast(t::TextInput, event="input") =
     hasstate(t, name=t.name, attr="value", trigger=event, source="target") |>
         addinterpreter(ToType{String}())
 
-render(t::TextInput) = begin
+render(t::TextInput, state) = begin
     if t.multiline
         if length(t.pattern) > 0
             warn_once(
@@ -174,8 +178,8 @@ end
     curry(item::Tile)
 end
 
-render(t::SelectionItem) =
-    Elem("paper-item", render(t.tile), value=t.value)
+render(t::SelectionItem, state) =
+    Elem("paper-item", render(t.tile, state), value=t.value)
 
 
 
@@ -188,7 +192,7 @@ render(t::SelectionItem) =
     kwarg(disabled::Bool=false)
 end
 
-render(r::RadioButton) =
+render(r::RadioButton, state) =
     Elem("paper-radio-button", label=r.label,
          name=r.name, toggles=r.toggles, disabled=r.disabled)
 
@@ -204,9 +208,9 @@ wrapradio(x) = begin
     radio(name, label)
 end
 
-render(r::RadioGroup) =
+render(r::RadioGroup, state) =
     Elem("paper-radio-group",
-        [render(wrapradio(b)) for b in r.radios],
+        [render(wrapradio(b), state) for b in r.radios],
         value=r.value,
         name=r.name)
 
@@ -223,7 +227,7 @@ end
     arg(active::Bool=true)
 end
 
-render(s::Spinner) = Elem("paper-spinner", active=s.active)
+render(s::Spinner, state) = Elem("paper-spinner", active=s.active)
 
 ## Progress bar
 
@@ -232,7 +236,7 @@ render(s::Spinner) = Elem("paper-spinner", active=s.active)
     kwarg(secondaryprogress::Real=0)
 end
 
-render(p::ProgressBar) =
+render(p::ProgressBar, state) =
     Elem("paper-progress";
         value=p.value,
         secondaryProgress=p.secondaryprogress,
@@ -244,5 +248,37 @@ render(p::ProgressBar) =
     kwarg(animated::Bool=true)
 end
 
-render(p::PaperShadow) =
-    Elem("paper-shadow", render(p.tile), z=p.z, animated=p.animated)
+render(p::PaperShadow, state) =
+    Elem("paper-shadow", render(p.tile, state), z=p.z, animated=p.animated)
+
+# Date picker
+
+if VERSION < v"0.4.0-dev"
+    using Dates
+end
+
+
+@api dateselection => DateSelection <: Behavior begin
+    curry(tile::Tile)
+    kwarg(name::Symbol=:_date)
+end
+render(d::DateSelection, state) =
+    render(d.tile, state) << Elem("date-selection", name=d.name)
+
+immutable DateInterpreter <: Interpreter end
+default_interpreter(::DateSelection) = DateInterpreter()
+
+
+@api datepicker => DatePicker <: Widget begin
+    arg(date::Date=today())
+    kwarg(range::Range{Date}=Date("1971-01-01"):Date("2100-12-31"))
+    kwarg(name::Symbol=:_date)
+end
+render(d::DatePicker, state) =
+    Elem("paper-date-picker-two", value=string(d.date), attributes=@d(:min=>string(first(d.range)), :max=>string(last(d.range))))
+broadcast(p::DatePicker) = dateselection(p, name=p.name)
+
+# TODO: Interpret as bounds error if date exceeds range
+interpret(::DateInterpreter, d) = begin
+    date = Date(d["year"], d["month"], d["day"])
+end

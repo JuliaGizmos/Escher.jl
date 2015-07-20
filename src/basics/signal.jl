@@ -34,7 +34,7 @@ name(b::Behavior) = b.name
 
 broadcast(b::Behavior) = b
 
-## Interpreting a message from a behavior ##
+## Interpreting a message ##
 
 abstract Interpreter
 
@@ -108,7 +108,7 @@ end
 
 interpret(dec::Const, _) = dec.value
 
-constant(x, tile::Tile) = addinterpreter(Const(x), tile)
+constant(x, tile) = addinterpreter(Const(x), tile)
 constant(x) = addinterpreter(Const(x))
 constant(xs::AbstractArray, tiles::AbstractArray) = map(constant, xs, tiles)
 constant(x, tiles::AbstractArray) = map(constant(x), tiles)
@@ -137,7 +137,7 @@ interpret(dec::InterpreterThunk, x) = dec.f(dec.args..., x)
 
 name(d::WithInterpreter) = name(d.tile)
 
-render(d::WithInterpreter) = render(d.tile)
+render(d::WithInterpreter, state) = render(d.tile, state)
 
 #
 # Subscribe to a signal and register an interpreter
@@ -162,17 +162,17 @@ subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input}); absorb=true) =
 subscribe(t::WithInterpreter, s::Input; absorb=true) =
     subscribe(t.tile, name(t), (t.interpreter, s), absorb=absorb)
 
-render(sig::Subscription) =
-    render(sig.tile) <<
+render(sig::Subscription, state) =
+    render(sig.tile, state) <<
         Elem("signal-transport",
             # Note: setup_transport here adds (interpreter, input) pair
             # to a dict, returns the key - this fn is idempotent
             name=sig.name, signalId=setup_transport(sig.receiver))
 
-(>>>)(b::Behavior, s::Input) = subscribe(b, s)
+# Default definition of setup_transport
+setup_transport(x) = makeid(x)
 
-setup_transport(x) =
-    error("Looks like there is no trasport set up")
+(>>>)(b::Behavior, s::Input) = subscribe(b, s)
 
 ### Sampling
 
@@ -185,7 +185,7 @@ sampler() = Sampler(Dict(), Dict())
 interpret(s::Sampler, msg) = begin
     try
         d = Dict()
-        d[:_trigger] = msg["_trigger"]
+        d[:_trigger] = symbol(msg["_trigger"])
 
         for (name, interp) in s.triggers
            d[name] = interpret(interp, msg[string(name)])
@@ -220,8 +220,8 @@ trigger!(sampler::Sampler) = t -> trigger!(sampler, t)
     curry(tile::Tile)
     kwarg(name::Symbol=:_sampled)
 end
-render(s::Sampled) =
-    render(s.tile) <<
+render(s::Sampled, state) =
+    render(s.tile, state) <<
         Elem("signal-sampler",
             name=s.name,
             signals=collect(keys(s.sampler.watched)),
@@ -241,7 +241,8 @@ makeid(sig) = begin
         # todo ensure connection
         return signal_to_id[sig]
     else
-        id = get!(() -> string(uuid4()), signal_to_id, sig)
+        id = haskey(signal_to_id, sig) ?
+            signal_to_id[sig] : string(rand(Uint128))
         id_to_signal[id] = sig
         return id
     end
@@ -261,6 +262,18 @@ Stop a UI signal from propagating further.
 stoppropagation(tile::Tile, name::Symbol) =
     StopPropagation(tile, name)
 
-render(tile::StopPropagation) =
-    render(tile.tile) <<
+render(tile::StopPropagation, state) =
+    render(tile.tile, state) <<
         Elem("stop-propagation", name=tile.name)
+
+immutable SignalWrap <: Tile
+    signal::Signal
+end
+
+convert(::Type{Tile}, x::Signal) = SignalWrap(x)
+
+render(tile::SignalWrap, state) = begin
+    id = "signal-" * makeid(tile.signal)
+    state["embedded_signals"][id] = tile.signal
+    Elem("signal-container", attributes=@d(:id => id))
+end

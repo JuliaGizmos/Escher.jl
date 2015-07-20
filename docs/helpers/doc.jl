@@ -85,7 +85,7 @@ function argrow(arg)
     if haskey(arg, :default)
         push!(notes, badge("default=" * string(arg[:default])))
     end
-    hbox(code(string(arg[:name])), intersperse(hskip(0.8em), notes, true)...) |>
+    hbox(code(string(arg[:name])), intersperse(hskip(0.8em), notes, true)..., arg[:doc]) |>
          pad([top, bottom], 0.25em)
 end
 
@@ -102,8 +102,8 @@ function showdoc(fn)
     docmd = d[:doc]
 
     vbox(
-        vbox(signature(d),
-             hbox(hskip(1em), "→", hskip(0.5em), rettype(d[:type])) |> fontcolor("#777")) |>
+        hbox(signature(d),
+             hbox(hskip(1em), "→", hskip(0.5em), rettype(d[:type])) |> fontcolor("#777")) |> wrap |>
                 fonttype(monospace),
         vbox(
              pad([left], 1em, docmd),

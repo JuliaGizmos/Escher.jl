@@ -15,7 +15,7 @@ broadcast(c::CodeMirror) =
     hasstate(c, name=c.name, attr="currentValue", trigger="change")
 
 # Render to virtual DOM
-render(c::CodeMirror) =
+render(c::CodeMirror, state) =
     Elem("code-mirror",
         value=c.code,
         mode=c.language,

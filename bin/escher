@@ -1,4 +1,5 @@
 #!/usr/bin/env julia
+#!/home/shashi/code/julia/master/julia
 
 using ArgParse
 using Escher

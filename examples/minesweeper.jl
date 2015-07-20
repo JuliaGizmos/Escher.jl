@@ -39,11 +39,11 @@ function next(board, move)
     end
 end
 
-movesᵗ = Input((0, 0))
-initial_boardᵗ = Input{Board}(newboard(10, 10))
-boardᵗ = flatten(
-    lift(initial_boardᵗ) do b
-        foldl(next, b, movesᵗ; typ=Board)
+moves_signal = Input((0, 0))
+initial_board_signal = Input{Board}(newboard(10, 10))
+board_signal = flatten(
+    lift(initial_board_signal) do b
+        foldl(next, b, moves_signal; typ=Board)
     end
 )
 
@@ -59,33 +59,31 @@ box(content, color) =
 
 number(x) = box(x == -1 ? "" : string(x) |> fontweight(800), colors[x+2])
 mine = box(icon("report"), "#e58")
-tile(board::Board{true}, i, j) =
+block(board::Board{true}, i, j) =
     board.mines[i, j] ? mine :
         number(board.uncovered[i, j])
 
-tile(board, i, j) =
-     constant((i, j), clickable(number(board.uncovered[i, j]))) >>> movesᵗ
+block(board, i, j) =
+     constant((i, j), clickable(number(board.uncovered[i, j]))) >>> moves_signal
 
 gameover = vbox(
         title(2, "Game Over!") |> pad(1em),
-        addinterpreter(_ -> newboard(10, 10), broadcast(button("Start again"))) >>> initial_boardᵗ
+        addinterpreter(_ -> newboard(10, 10), broadcast(button("Start again"))) >>> initial_board_signal
     ) |> pad(1em) |> fillcolor("white")
 
 function showboard{lost}(board::Board{lost})
     m, n = size(board.mines)
-    b = hbox([vbox([tile(board, i, j) for j in 1:m]) for i in 1:n])
+    b = hbox([vbox([block(board, i, j) for j in 1:m]) for i in 1:n])
     lost ? inset(Escher.middle, b, gameover) : b
 end
 
 function main(window)
     push!(window.assets, "widgets")
 
-    lift(boardᵗ) do board
-        vbox(
-           vskip(2em),
-           title(3, "minesweeper"),
-           vskip(2em),
-           showboard(board),
-        ) |> packacross(center)
-    end
+    vbox(
+       vskip(2em),
+       title(3, "minesweeper"),
+       vskip(2em),
+       consume(showboard, board_signal, typ=Tile),
+    ) |> packacross(center)
 end

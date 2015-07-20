@@ -8,33 +8,11 @@ write_escher_prelude(io::IO) = begin
     write_patchwork_prelude(io)
 end
 
-@require Morsel begin
-    # Allow route handlers to return Patchwork nodes
-
-    import Meddle: MeddleRequest, Response
-
-    Morsel.prepare_response{ns, tag}(
-        data::Elem{ns, tag}, req::MeddleRequest, res::Response,
-    ) = begin
-        io = IOBuffer()
-        Patchwork.write_patchwork_prelude(io)
-
-        writemime(io, MIME"text/html"(), data)
-        prepare_response(takebuf_string(io), req, res)
-    end
-
-    Morsel.prepare_response(
-        data::Tile, req::MeddleRequest, res::Response,
-    ) = begin
-
-        io = IOBuffer()
-
-        Escher.write_escher_prelude(io)
-
-        writemime(io, MIME"text/html"(), render(data))
-        prepare_response(takebuf_string(io), req, res)
-    end
-end
+# FIXME: figure out a way to make this work for Escher
+#
+# immutable EscherDisplay <: Base.Display end
+#
+# pushdisplay(EscherDisplay())
 
 @require IJulia begin
     # Load custom element definitions
@@ -51,15 +29,35 @@ end
     end
 end
 
-@require Blink begin
-    # This is still defunct though
-    import BlinkDisplay, Graphics
+export drawing
 
-    Blink.windowinit() do w
-        Blink.head(w, custom_elements())
+@require Compose begin
+
+    # A declarative version of draw?
+    @api drawing => ComposeGraphic <: Tile begin
+        arg(img::Any)
+        curry(graphic::Any) # Either a plot or a compose node
+    end
+    drawing(p) =
+        drawing(Compose.Patchable(Compose.default_graphic_width,
+                        Compose.default_graphic_height), p)
+
+    convert(::Type{Tile}, p::Compose.Context) =
+        drawing(p)
+
+    compose_render(img::Compose.Patchable, pic) = begin
+        Compose.draw(img, pic)
     end
 
-    Graphics.media(Tile, Graphics.Media.Graphical)
+    compose_render(img, pic) = begin
+        Compose.draw(img, pic) # do the drawing side-effect
+        Elem(:img, src="""data:image/png;base64,$(base64(takebuf_array(img.out)))""")
+    end
+
+    render(d::ComposeGraphic, state) = begin
+        Elem(:div, compose_render(d.img, d.graphic), className="graphic-wrap")
+    end
+
 end
 
 @require Gadfly begin
@@ -69,34 +67,14 @@ end
         drawing(p)
 end
 
-export drawing
-
-@require Compose begin
-
-    @api drawing => ComposeGraphic <: Tile begin
-        arg(width::Compose.Measure)
-        arg(height::Compose.Measure)
-        curry(graphic::Any) # Either a plot or a compose node
-    end
-    drawing(p) =
-        drawing(Compose.default_graphic_width,
-                Compose.default_graphic_height, p)
-
-    convert(::Type{Tile}, p::Compose.Context) =
-        drawing(p)
-
-    render(d::ComposeGraphic) = begin
-        backend = Compose.Patchable(
-            d.width, d.height
-        )
-        Elem(:div, Compose.draw(backend, d.graphic), className="graphic-wrap")
-    end
-end
-
 @require DataFrames begin
     include(Pkg.dir("Escher", "src", "library", "table.jl"))
 
     import DataFrames: AbstractDataFrame
 
     convert(::Type{Tile}, df::AbstractDataFrame) = table(df)
+end
+
+@require Blink begin
+    include("blink.jl")
 end

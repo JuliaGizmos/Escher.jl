@@ -1,0 +1,429 @@
+<!--
+Copyright (c) 2014 David Mulder and Benjamin Monjoie
+-->
+
+<!--
+
+Material Design: <a href="http://www.google.com/design/spec/components/pickers.html">Date Picker</a>
+
+`paper-date-picker` is the standalone date picker element. It can be used to 
+ create inline date pickers or when building your own date picking component.
+
+Example:
+
+    <paper-date-picker></paper-date-picker>
+
+@group Paper Elements
+@element paper-date-picker
+@homepage https://github.com/David-Mulder/paper-date-picker
+-->
+
+<link href="../polymer/polymer.html" rel="import">
+<link href="../paper-ripple/paper-ripple.html" rel="import">
+
+<polymer-element name="paper-date-picker">
+
+<template>
+
+  <style>
+  
+    :host {
+      display: inline-block;
+      position: relative;
+      height: 250px;
+      width: 300px;
+    }
+    
+    #container{
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 0px 9px;
+      box-sizing: border-box;
+    }
+    
+    #container::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    #container::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.1); 
+      -webkit-border-radius: 10px;
+      border-radius: 10px;
+    }
+    
+    #container::-webkit-scrollbar-thumb {
+      -webkit-border-radius: 10px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.1); 
+    }
+    
+    #container::-webkit-scrollbar-thumb:window-inactive {
+    	background: rgba(255,0,0,0.2); 
+    }
+    
+    .days{
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+      align-content: stretch;
+      min-height: 210px;
+    }
+    
+    .day{
+      width: calc(14% - 6px);
+      text-align: center;
+      margin: 3px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .day[data-date]{
+      cursor: pointer;
+    }
+    
+    .day span{
+      display: block;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+    }
+    
+    .day.selected span{
+      background-color: #009688;
+      color: white;
+      border-radius: 100%;
+    }
+    
+    .day.title{
+      padding-top: 0px;
+      padding-bottom: 4px;
+      font-weight: bold;
+      color: rgba(0,0,0,.6);
+      cursor: default;
+    }
+    
+    .day[enabled='false']{
+      pointer-events: none;
+      color: rgba(0,0,0,.3);
+    }
+    
+    h1{
+      text-align: center;
+      font-size: 13px;
+      color: rgba(0,0,0,.8);
+      margin: 0px;
+      padding: 0.67em 0px;
+    }
+    
+  </style>
+  
+  <div on-tap="{{pickDate}}" id="container" on-scroll="{{scrollFinished}}">
+    <template repeat="{{ month in months }}">
+      <div class="month" data-month="{{month.number}}" data-year="{{month.year}}">
+        <h1>{{month.name}}</h1>
+          <div class="days">
+          
+          <template repeat="{{name in weekDayNames}}">
+            <div class="day title">{{name}}</div>
+          </template>
+          
+          <template repeat="{{ day in month.days }}">
+        
+            <template if="{{!day}}">
+              <div class="day"></div>
+            </template>
+            <template if="{{day}}">
+              <div class="day {{ { selected : day.n == currentDay && month.number == currentMonth && month.year == currentYear } | tokenList }}" enabled="{{day.enabled}}" data-date="{{day.n}}" data-month="{{month.number}}" data-year="{{month.year}}">
+                <span>{{day.day}}</span>
+              </div>
+            </template>
+            
+          </template>
+          
+        </div>
+      </div>
+    </template>
+  </div>
+  
+</template>
+
+<script>
+
+  (function(){
+
+    //temp function before I think of better solution
+    var cleanMonthDateArrayObject = function(obj){
+      var m = obj[0] % 12;
+      return [m < 0 ? m + 12: m, obj[1]+Math.floor(obj[0]/12)];
+    }
+
+    Polymer('paper-date-picker', {
+
+      publish: {
+        /**
+         * Current date
+         *
+         * @attribute date
+         * @type Date
+         * @default 'today\'s date'
+         */
+        date: new Date(),
+        
+        /**
+         * Lowest selectable date (inclusive)
+         *
+         * @attribute min
+         * @type Date
+         * @default 1/1/1900
+         */
+        min: new Date(1900,0,1),
+        
+        /**
+         * Highest selectable date (inclusive)
+         *
+         * @attribute max
+         * @type Date
+         * @default 31/12/2100
+         */
+        max: new Date(2100,11,31),
+        
+        /**
+         * Show only a single year at a time
+         * `'auto'` will cause this to be
+         * `false` for (most) mobile devices
+         * and `true` for other devices.
+         *
+         * @attribute infiniteScrolling
+         * @type String or boolean
+         * @default 'auto'
+         */
+        infiniteScrolling: 'auto',
+        
+        /**
+         * Locale setting per the HTML5 Intl API
+         * 
+         * @attribute locale
+         * @type Array
+         * @default undefined
+         * 
+         */
+        locale: undefined,
+        
+        /**
+         * Start day of week, expressed as 0-6
+         * 
+         * @attribute startDayOfWeek
+         * @type Integer
+         * @default 1
+         * 
+         */
+        startDayOfWeek: 1
+      },
+      
+      currentYear : 0,
+      currentMonth : 0,
+      currentDay : 0,
+      
+      loadedRange: 14,
+      triggerRange: 1,
+      loadPerTrigger: 7,
+      
+      weekDayNames: [],
+
+      months: [],
+      
+      nonNumericDates: false,
+      
+      intl: {
+        
+      },
+
+      renderMonths: function(start,end){
+        start = cleanMonthDateArrayObject(start);
+        end = cleanMonthDateArrayObject(end);
+
+        var curMonth = start[0];
+        var curYear = start[1];
+        var date, start, end;
+        
+        this.months = [];
+        
+        while(curYear < end[1] || (curYear == end[1] && curMonth <= end[0])){
+          
+          var month = {
+            days: [],
+            name: "",
+            number: curMonth,
+            year: curYear
+          };
+          
+          date = new Date(curYear, curMonth-1, 1);
+          startPoint = (date.getDay() - this.startDayOfWeek + 7) % 7;
+          month.name = Intl.DateTimeFormat(this.locale, {month: 'long', year: 'numeric' }).format(date);
+          date = new Date(curYear, curMonth, 0);
+          endPoint = date.getDate();      
+          
+          for(i=0;i<startPoint;i++){
+            month.days.push(undefined);
+          }
+          
+          for(i=1;i<=endPoint;i++){
+            var thisDate = new Date(curYear, curMonth-1, i);
+            month.days.push({
+              n:i,
+              day: this.intl.day(thisDate),
+              enabled: thisDate >= this.min && thisDate <= this.max
+            });
+          }
+          
+          this.months.push(month);
+          
+          curMonth++;
+          if(curMonth == 13){
+            curMonth = 1;
+            curYear++;
+          }
+          
+        }
+      },
+      
+      localeChanged: function(){
+        this.intl = {};
+        this.intl.day = Intl.DateTimeFormat(this.locale, {day: 'numeric' }).format;
+      },
+
+      pickDate: function(e){
+        var data = e.path[1].dataset.date ? e.path[1].dataset : e.path[0].dataset;
+        var day = data.date;
+        var month = data.month;
+        var year = data.year;
+        if(day && month && year){
+          this.date = new Date(year, month-1, day);
+          this.fire("date-picked");
+        }
+      },
+
+      refreshScrollPosition: function(){
+        var that = this;
+        
+        setTimeout(function(){
+          
+          var monthElements = that.shadowRoot.querySelectorAll(".month");
+          var startLoadedDateOutsideTriggerRange = new Date(monthElements[that.triggerRange].dataset.year,monthElements[that.triggerRange].dataset.month*1-1,1);
+          var endLoadedDateOutsideTriggerRange = new Date(monthElements[monthElements.length - that.triggerRange - 1].dataset.year,monthElements[monthElements.length - that.triggerRange - 1].dataset.month*1-1+1,1);
+          
+          if(!(that.date >= startLoadedDateOutsideTriggerRange && that.date < endLoadedDateOutsideTriggerRange)){
+            that.surroundDate(that.date);
+          }
+          
+        },0);
+        
+        setTimeout(function(){
+          
+          var monthElements = that.shadowRoot.querySelectorAll(".month");
+          var scrollTop = 0;
+          
+          for(var i=0;i<monthElements.length;i++){
+            if(monthElements[i].querySelector(".day.selected")){
+              break;
+            }else{
+              scrollTop += monthElements[i].clientHeight;
+            }
+          }
+
+          if(Math.abs(that.$.container.scrollTop-scrollTop) > that.$.container.clientHeight){
+            that.$.container.scrollTop = scrollTop;
+          }
+          
+        },0);
+        
+      },
+
+      dateChanged: function(){
+        this.setCurrentDateValues();
+        this.refreshScrollPosition();
+      },
+      
+      setCurrentDateValues:function() {
+        this.currentYear = this.date.getFullYear();
+        this.currentMonth = this.date.getMonth() + 1;
+        this.currentDay = this.date.getDate();
+      },
+      
+      scrollFinished: function(){
+        
+        if(this.infiniteScrolling == true){
+          var monthElements = this.shadowRoot.querySelectorAll(".month");
+          
+          for(var i=monthElements.length-1;i>=0;i--){
+            if(this.$.container.scrollTop+this.$.container.clientHeight/2 > monthElements[i].offsetTop){
+              
+              if(i<this.triggerRange){
+                var newStart = [monthElements[0].dataset.month*1-this.loadPerTrigger,monthElements[0].dataset.year*1];
+                var newEnd = [monthElements[monthElements.length-1].dataset.month*1-this.loadPerTrigger,monthElements[monthElements.length-1].dataset.year*1];
+                this.renderMonths(newStart, newEnd);
+                this.$.container.scrollTop += monthElements[0].clientHeight*this.loadPerTrigger;
+              }
+              
+              if(i>monthElements.length-this.triggerRange-1){
+                var newStart = [monthElements[0].dataset.month*1+this.loadPerTrigger,monthElements[0].dataset.year*1];
+                var newEnd = [monthElements[monthElements.length-1].dataset.month*1+this.loadPerTrigger,monthElements[monthElements.length-1].dataset.year*1];
+                this.renderMonths(newStart, newEnd);
+                this.$.container.scrollTop -= monthElements[0].clientHeight*this.loadPerTrigger;
+              }
+              
+              break;
+              
+            }
+          }
+        }
+        
+      },
+
+      surroundDate: function(date){
+        if(this.infiniteScrolling == true){
+          var prevDate = [date.getMonth()+1-Math.floor(this.loadedRange/2),date.getFullYear()];
+          var nextDate = [date.getMonth()+1+Math.ceil(this.loadedRange/2),date.getFullYear()];
+        }else{
+          var prevDate = [1,date.getFullYear()];
+          var nextDate = [12,date.getFullYear()];
+        }
+        
+        this.renderMonths(prevDate,nextDate);
+      },
+
+      domReady: function(){
+        console.log(this.date)
+        this.weekDayNames = [];
+        for(var i=this.startDayOfWeek-1;i<this.startDayOfWeek+6;i++){
+          var date = new Date(2000, 1, i, 0, 0, 0);
+          this.weekDayNames.push(new Intl.DateTimeFormat(this.locale, {weekday:'narrow'}).format(date));
+        }
+        
+        //Infininte scrolling doesn't work (nicely) on mobile devices, so
+        // it is disabled by default.
+        if(this.infiniteScrolling == 'auto'){
+          if(typeof window.orientation !== 'undefined'){
+            this.infiniteScrolling = false;
+          }else{
+            this.infiniteScrolling = true;
+          }
+        }
+
+        this.localeChanged();
+        this.surroundDate(this.date);
+        this.dateChanged();
+
+      }
+
+    });
+
+  })();
+
+</script>
+
+</polymer-element>

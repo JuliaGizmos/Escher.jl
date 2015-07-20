@@ -1,0 +1,171 @@
+<!--
+Copyright (c) 2014 David Mulder and Benjamin Monjoie
+-->
+
+<!--
+@group Paper Elements
+@element paper-year-picker
+@homepage https://github.com/David-Mulder/paper-date-picker
+-->
+
+<link href="../polymer/polymer.html" rel="import">
+<link href="../paper-button/paper-button.html" rel="import">
+
+<polymer-element name="paper-year-picker">
+  
+<template>
+
+  <style>
+  
+    :host {
+      display: block;
+      height: 250px;
+      width:100%;
+    }
+    #container {
+      display: block;
+      height: 250px;
+      width:100%;
+      overflow: auto;
+    }
+    
+    #container::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    #container::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.1); 
+      -webkit-border-radius: 10px;
+      border-radius: 10px;
+    }
+    
+    #container::-webkit-scrollbar-thumb {
+      -webkit-border-radius: 10px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.4); 
+    }
+    
+    #container::-webkit-scrollbar-thumb:window-inactive {
+    	background: rgba(255,0,0,0.2); 
+    }
+    
+    .year {
+      padding: 10px;
+      display: block;
+      text-align: center;
+      line-height: 42px;
+      cursor:pointer;
+    }
+    
+    .year.selected span {
+      background-color:rgba(0,159,136,.4);
+      border-radius:100%;
+      height: 42px;
+      display: inline-block;
+      width: 42px;
+    }
+    
+  </style>
+ 
+ <div id="container">
+    <template repeat="{{ y in yearArray }}">
+        <!--<paper-button class="year {{ { selected : y == year} | tokenList  }}" on-tap="{{ yearSelected }}" data-year="{{ y }}"><span>{{ y }}</span></paper-button>-->
+        <div class="year {{ { selected : y.n == year} | tokenList  }}" on-tap="{{ yearSelected }}" data-year="{{ y.n }}"><span>{{ y.year }}</span></div>
+    </template>
+  </div>
+
+</template>
+
+<script>
+(function(){
+  Polymer('paper-year-picker', {
+    
+    publish: {
+      /**
+       * The currently selected year
+       *
+       * @attribute year
+       * @type integer
+       * @default undefined
+       */
+      year: undefined,
+      
+      /**
+       * Lowest selectable date (inclusive)
+       *
+       * @attribute min
+       * @type Date
+       * @default 900
+       */
+      min: new Date(1900),
+      
+      /**
+       * Highest selectable date (inclusive)
+       *
+       * @attribute max
+       * @type Date
+       * @default 2100
+       */
+      max: new Date(2100),
+        
+      /**
+       * Locale setting per the HTML5 Intl API
+       * 
+       * @attribute locale
+       * @type Array
+       * @default undefined
+       * 
+       */
+      locale: undefined
+    },
+    
+    yearArray: [],
+    // TODO: Why in the world is this a hard coded variable?
+    yearElementHeight: 62,
+    
+    intl:{},
+    
+    localeChanged: function(){
+      this.intl = {};
+      this.intl.year = Intl.DateTimeFormat(this.locale, {year: 'numeric'}).format;
+    },
+    
+    setYearArray: function() {
+      this.yearArray = [];
+      for (var i = this.min.getFullYear(); i <= this.max.getFullYear(); i++) {
+        this.yearArray.push({
+          n:i,
+          year: this.intl.year(new Date(i,1,1))
+        });
+      }
+    },
+    
+    refreshScrollPosition: function(){
+      var that = this;
+      setTimeout(function(){
+        that.$.container.scrollTop = (that.year - that.min.getFullYear()+0.5) * that.yearElementHeight - that.$.container.clientHeight/2;
+      },0);
+    },
+    
+    yearChanged: function() {
+      this.setYearArray();
+      this.refreshScrollPosition();
+    },
+    
+    yearSelected: function(e) {
+      for(i=0;i<e.path.length;i++){
+        if(e.path[i].dataset && e.path[i].dataset.year){
+          return this.year = parseInt(e.path[i].dataset.year);
+        }
+      }
+    },
+    
+    ready: function(){
+      this.localeChanged();
+    }
+    
+  });
+})();
+</script>
+
+</polymer-element>

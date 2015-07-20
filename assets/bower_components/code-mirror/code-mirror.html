@@ -66,6 +66,7 @@ license that can be found in the LICENSE file.
         });
         var self = this
         this.mirror.on("change", function () {
+            console.log("Change")
             self.currentValue = self.mirror.getValue()
             self.fire("change")
         })

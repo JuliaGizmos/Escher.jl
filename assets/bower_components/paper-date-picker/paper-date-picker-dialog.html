@@ -1,0 +1,367 @@
+<!--
+Copyright (c) 2014 David Mulder and Benjamin Monjoie
+-->
+
+<!--
+
+Material Design: <a href="http://www.google.com/design/spec/components/pickers.html">Date Picker</a>
+
+`paper-date-picker-dialog` is a date picker dialog for selecting dates.
+
+Example:
+
+    <paper-date-picker-dialog id="picker" date="2000/1/1"></paper-date-picker-dialog>
+    
+and to open the dialog
+
+    this.$.picker.open();
+
+Events
+===
+
+The date picker dialog fires `value-changed` and `selection-changed` events when relevant.
+
+@group Paper Elements
+@element paper-date-picker-dialog
+@homepage https://github.com/David-Mulder/paper-date-picker
+-->
+
+<link href="../polymer/polymer.html" rel="import">
+<link href="../paper-dialog/paper-action-dialog.html" rel="import">
+<link href="../paper-button/paper-button.html" rel="import">
+<link href="../core-animated-pages/core-animated-pages.html" rel="import">
+
+<link href="paper-date-picker.html" rel="import">
+<link href="paper-year-picker.html" rel="import">
+
+<style shim-shadowdom>
+  html /deep/ .date-picker-dialog::shadow #scroller {
+    padding:0px;
+  }
+
+  html /deep/ .date-picker-dialog .header {
+    text-align: center;
+    color: rgba(255,255,255,.5);
+    background-color: #009688;
+  }
+  
+  html /deep/ .date-picker-dialog .header .dayOfWeekContainer {
+    padding: 5px;
+    background-color: #00695C;
+  }
+  
+  html /deep/ .date-picker-dialog .header .dayOfMonthContainer {
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  
+  html /deep/ .date-picker-dialog .header .monthContainer {
+    cursor: pointer;
+    font-size: 24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:24px;
+    font-weight: 300;
+  }
+  
+  html /deep/ .date-picker-dialog .header .yearContainer {
+    cursor: pointer;
+    font-size: 24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:24px;
+    font-weight: 400;
+  }
+  
+  html /deep/ .date-picker-dialog .datePickerContainer {
+    height: 255px;
+    width: 280px;
+  }
+  html /deep/ .date-picker-dialog #datePicker {
+    width: 280px;
+  }
+  
+  html /deep/ .date-picker-dialog .selected {
+    color: #FFFFFF;
+  }
+  
+  @media only screen and (orientation : portrait) {
+    html /deep/ .date-picker-dialog .header .yearContainer{
+      padding-bottom:10px;
+    }
+    html /deep/ .date-picker-dialog .header .monthContainer{
+      padding-top:10px;
+    }
+    html /deep/ .date-picker-dialog .header .dayOfMonthContainer {
+      font-size: 60px;
+      min-height: 60px;
+    }
+  }
+  @media only screen and (orientation : landscape) {
+    html /deep/ .date-picker-dialog {
+      width:570px;
+    }
+    
+    /* the second selector is for the polyfill version */
+    html /deep/ .date-picker-dialog >  #container , html /deep/ .date-picker-dialog #scroller >  #container {
+      display:flex;
+      flex-direction: row;
+      overflow:hidden;
+    }
+    
+    html /deep/ .date-picker-dialog .header .dayOfMonthContainer {
+      font-size: 89px;
+      min-height: 89px;
+    }
+  }
+  
+</style>
+
+<polymer-element name="paper-date-picker-dialog">
+  
+<template>
+
+  <style>
+    :host {
+      
+    }
+  </style>
+
+  <paper-action-dialog id="dialog" class="date-picker-dialog" backdrop on-core-overlay-open-completed="{{dialogOpened}}">
+    <div id="container">
+      <div class="header" layout vertical flex>
+        <div class="dayOfWeekContainer selected">{{ dayOfWeek }}</div>
+        <div class="monthContainer selected" on-tap="{{ showDatePicker }}" id="month" flex><span>{{ monthShortName }}</span></div>
+        <div class="dayOfMonthContainer selected" on-tap="{{ showDatePicker }}" id="day" flex><span>{{ dayOfMonth }}</span></div>
+        <div class="yearContainer" id="year" on-tap="{{ showYearPicker }}" flex><span>{{ formattedYear }}</span></div>
+      </div>
+      <core-animated-pages transitions="cross-fade" class="datePickerContainer" selected="{{page}}">
+        <section>
+          <paper-date-picker id="datePicker" min="{{min}}" max="{{max}}" date="{{ immediateDate }}" infiniteScrolling="{{infiniteScrolling}}" locale="{{locale}}" startDayOfWeek="{{startDayOfWeek}}" cross-fade></paper-date-picker>
+        </section>
+        <section>
+          <paper-year-picker id="yearPicker" min="{{min}}" max="{{max}}" year="{{ year }}" locale="{{locale}}" cross-fade></paper-year-picker>
+        </section>
+      </core-animated-pages>
+    </div>
+    <paper-button affirmative>Cancel</paper-button>
+    <paper-button affirmative on-tap={{setDate}}>OK</paper-button>
+
+  </paper-action-dialog>
+</template>
+
+<script>
+(function(){
+  
+  var dayOfWeekNames = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
+  ];
+  
+  var monthNames = [
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC'
+  ];
+
+  Polymer('paper-date-picker-dialog', {
+    publish: {
+      
+      /**
+       * `value`, the selected date.
+       *
+       * @attribute value
+       * @type String
+       * @default undefined
+       */
+      value: undefined,
+      
+      /**
+       * immediateDate, the currently selected
+       * date. Even before hitting 'ok'.
+       *
+       * @attribute immediateDate
+       * @type Date
+       * @default today
+       */
+      immediateDate: new Date(),
+        
+      /**
+       * Lowest selectable date (inclusive)
+       *
+       * @attribute min
+       * @type Date
+       * @default 1/1/1900
+       */
+      min: new Date(1900,0,1),
+      
+      /**
+       * Highest selectable date (inclusive)
+       *
+       * @attribute max
+       * @type Date
+       * @default 31/12/2100
+       */
+      max: new Date(2100,11,31),
+        
+      /**
+       * Show only a single year at a time
+       * `'auto'` will cause this to be
+       * `false` for (most) mobile devices
+       * and `true` for other devices.
+       *
+       * @attribute infiniteScrolling
+       * @type String or boolean
+       * @default 'auto'
+       */
+      infiniteScrolling: 'auto',
+        
+      /**
+       * Locale setting per the HTML5 Intl API
+       * 
+       * @attribute locale
+       * @type Array
+       * @default user system
+       * 
+       */
+      locale: undefined,
+      
+      /**
+       * Start day of week, expressed as 0-6
+       * 
+       * @attribute startDayOfWeek
+       * @type Integer
+       * @default 1
+       * 
+       */
+      startDayOfWeek: 1
+    },
+    
+    dayOfWeek: '',
+    dayOfMonth: 0,
+    monthShortName: '',
+    formattedYear: '',
+    year: 0,
+    page: 0,
+    
+    intl: {},
+    
+    localeChanged: function(){
+      this.intl = {};
+      this.intl.dayOfWeek = Intl.DateTimeFormat(this.locale, {weekday: 'long'}).format
+      this.intl.day = Intl.DateTimeFormat(this.locale, {day: 'numeric'}).format;
+      this.intl.shortMonth = Intl.DateTimeFormat(this.locale, {month: 'short'}).format;
+      this.intl.year = Intl.DateTimeFormat(this.locale, {year: 'numeric'}).format;
+    },
+    
+    immediateDateChanged: function() {
+      this.dayOfWeek = this.intl.dayOfWeek(this.immediateDate);
+      this.dayOfMonth = this.intl.day(this.immediateDate);
+      this.monthShortName = this.intl.shortMonth(this.immediateDate);
+      this.formattedYear = this.intl.year(this.immediateDate);
+      
+      this.year = this.immediateDate.getFullYear();
+      this.fire('selection-changed');
+    },
+    
+    open: function() {
+      this.$.dialog.open();
+    },
+
+    dialogOpened: function(){
+      this.$.datePicker.refreshScrollPosition();
+      this.$.yearPicker.refreshScrollPosition();
+    },
+    
+    yearChanged: function() {
+        var newDate = this.immediateDate.setYear(this.year);
+        if(newDate < this.min){
+          this.immediateDate = new Date(this.min); 
+        }else if(newDate > this.max){
+          this.immediateDate = new Date(this.max); 
+        }else{
+          this.immediateDate = new Date(newDate); 
+        }
+      this.page = 0;
+    },
+    
+    showYearPicker: function() {
+      this.page = 1;
+    },
+    
+    showDatePicker: function() {
+      this.page = 0;
+    },
+    
+    setDate: function(){
+      if(this.immediateDate <= this.max && this.immediateDate >= this.min){
+        this.value = this.immediateDate;
+        this.fire('value-changed');
+      }
+    },
+    
+    pageChanged: function() {
+      if (this.page == 0) {
+        this.$.day.classList.add("selected");
+        this.$.month.classList.add("selected");
+        this.$.year.classList.remove("selected");
+      } else {
+        this.$.day.classList.remove("selected");
+        this.$.month.classList.remove("selected");
+        this.$.year.classList.add("selected");
+      }
+      this.$.datePicker.refreshScrollPosition();
+      this.$.yearPicker.refreshScrollPosition();
+    },
+    
+    minChanged: function(){
+      if(typeof this.min == "string"){
+        this.min = new Date(this.min);
+      }
+    },
+    
+    maxChanged: function(){
+      if(typeof this.max == "string"){
+        this.max = new Date(this.max);
+      }
+    },
+    
+    valueChanged: function(){
+      if(typeof this.value == "string"){
+        this.value = new Date(this.value);
+      }
+    },
+    
+    ready:function() {
+      if(this.value){
+        this.valueChanged();
+        
+        this.immediateDate = this.value;
+      }
+      this.localeChanged();
+      this.immediateDateChanged();
+    }
+    
+  });
+})();
+</script>
+
+</polymer-element>

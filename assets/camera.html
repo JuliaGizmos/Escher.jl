@@ -1,0 +1,62 @@
+<polymer-element
+    name="camera-widget"
+    extends="reacitve-signal"
+    >
+<style>
+</style>
+<template>
+    <video id="mirror"></video>
+    <canvas id="hiddenCanvas" style="display:none"></canvas>
+</template>
+<script>
+Polymer({
+    audio: false,
+    video: true,
+    autoplay: true,
+    samplerate: 0,
+    domReady: function () {
+        var self = this;
+        navigator.getUserMedia = navigator.getUserMedia ||
+                                 navigator.webkitGetUserMedia ||
+                                 navigator.mozGetUserMedia;
+
+        var video = this.$.mirror
+        if (navigator.getUserMedia) {
+           navigator.getUserMedia({ audio: this.audio, video: this.video },
+              function(stream) {
+                 video.src = window.URL.createObjectURL(stream);
+                 video.onloadedmetadata = function(e) {
+                     if (self.autoplay) video.play();
+                     self.$.hiddenCanvas.height = video.videoHeight
+                     self.$.hiddenCanvas.width = video.videoWidth
+                 };
+              },
+              function(err) {
+                 console.log("The following error occured while initializing camera widget: " + err.name);
+              }
+           );
+        } else {
+           console.log("camera-widget: getUserMedia not supported")
+        }
+
+        if (this.samplerate != 0) {
+            // Fire change events so that a watch-state can pick it up.
+            setInterval(function () {
+                if (self.$.hiddenCanvas) {
+                    self.fire("change")
+                } else {
+                    console.log("ye kya yar")
+                }
+            }, 1000 / this.samplerate)
+        }
+    },
+    getPNG: function () {
+        var video = this.$.mirror,
+            canv = this.$.hiddenCanvas,
+            ctx = canv.getContext("2d");
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
+        return canv.toDataURL()
+    }
+})
+</script>
+</polymer-element>
