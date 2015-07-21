@@ -1,8 +1,9 @@
 export list, image, link, abbr
 
 @api list => List <: Tile begin
-    curry(tiles::TileList)
-    kwarg(ordered::Bool=false)
+    doc("Stylize a list of tiles as an itemized list.")
+    curry(tiles::TileList , doc="A tile or a vector of tiles.")
+    kwarg(ordered::Bool=false, doc=md"If set to `true`, numbering will be used.")
 end
 
 render(l::List, state) =
@@ -10,24 +11,35 @@ render(l::List, state) =
          map(x -> Elem(:li, render(x, state)), l.tiles.tiles))
 
 @api image => Image <: Tile begin
-    arg(url::String)
-    kwarg(alt::String="")
+    doc(md"""Show an image from a `url`. To read an image and display it, use
+             [`Images.imread`](https://github.com/timholy/Images.jl#readme).""")
+    arg(url::String, doc="The url of the image.")
+    kwarg(alt::String="", doc="Text to display if image does not load.")
 end
 
 render(i::Image, state) =
     Elem(:img, src=i.url, alt=i.alt, style=@d("width"=>"auto", "height"=>"auto", "display" => "block"))
 
 @api link => Hyperlink <: Tile begin
-    arg(url::String)
-    curry(tiles::TileList)
+    doc("A hyperlink.")
+    arg(url::String, doc="The destination of the link.")
+    curry(
+        tiles::TileList,
+        doc="""A tile or a vector of tiles. These tiles link to the url."""
+    )
 end
 
 render(a::Hyperlink, state) =
     Elem(:a, render(a.tiles, state), href=a.url)
 
 @api abbr => Abbr <: Tile begin
-    arg(title::String)
-    curry(tiles::TileList)
+    doc(md"""An abbreviation. When you hover over an abbreviation, the `title` is
+          shown in a tooltip.""")
+    arg(title::String, doc="The title to show.")
+    curry(
+        tiles::TileList,
+        doc="A tile or a vector of tiles. Hovering over these tiles triggers the tooltip."
+    )
 end
 
 render(a::Abbr, state) =

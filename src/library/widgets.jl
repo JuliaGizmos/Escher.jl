@@ -27,11 +27,21 @@ default_interpreter(w::Widget) =
 ## Button
 
 @api button => Button <: Widget begin
-    arg(label::Tile)
-    kwarg(name::Symbol=:_button)
-    kwarg(raised::Bool=false)
-    kwarg(disabled::Bool=false)
-    kwarg(noink::Bool=false)
+    doc("A button.")
+    arg(label::Tile, doc="The button label.")
+    kwarg(name::Symbol=:_button, doc="A name to identify the widget.")
+    kwarg(
+        raised::Bool=false,
+        doc="If set to true, the button appears raised from the plane of the page."
+    )
+    kwarg(
+        disabled::Bool=false,
+        doc="If set to true, the button is disabled and will not be clickable."
+    ) 
+    kwarg(
+        noink::Bool=false,
+        doc="If set to true, disables the ripple effect when clicked."
+    )
 end
 
 render(b::Button, state) =
@@ -49,13 +59,33 @@ broadcast(b::Button) =
 ## Slider
 
 @api slider => Slider <: Widget begin
-    arg(range::Range)
-    kwarg(name::Symbol=:_slider)
-    kwarg(value::Real=first(range))
-    kwarg(editable::Bool=true)
-    kwarg(pin::Bool=false)
-    kwarg(disabled::Bool=false)
-    kwarg(secondaryprogress::Real=0)
+    doc("""A slider. Use this to select values from within a continous range of
+           numbers.""")
+    arg(
+        range::Range,
+        doc="""The range specifying the minimum and maximum values that the slider
+             can take."""
+    )
+    kwarg(name::Symbol=:_slider, doc="A name to identify the widget")
+    kwarg(
+        value::Real=first(range),
+        doc="The initial value of the slider. Defaults to the first value in the range."
+    )
+    kwarg(
+        editable::Bool=true,
+        doc="""If set to true, shows an editable text box with the current value
+        of the slider."""
+    )
+    kwarg(
+        pin::Bool=false,
+        doc="""If set to true, shows a pin containing the current value as you
+        drag the slider."""
+    )
+    kwarg(disabled::Bool=false, doc="If set to true, the slider is disabled.")
+    kwarg(
+        secondaryprogress::Real=0,
+        doc="Highlight the slider bar from the beginning to this value."
+    )
 end
 
 broadcast(s::Slider) =
@@ -74,49 +104,92 @@ render(s::Slider, state) =
         secondaryProgress=s.secondaryprogress)
 
 
-## Boolean widgets: Checkbox and Toggle Button
-
-for (typ, fn, elem) in [(:Checkbox, :checkbox, "paper-checkbox"),
-                        (:ToggleButton, :togglebutton, "paper-toggle-button")]
-
-    @eval begin
-        @api $fn => $typ <: Widget begin
-            arg(value::Bool=false)
-            kwarg(name::Symbol=:_checkbox)
-            kwarg(label::String="")
-            kwarg(disabled::Bool=false)
-        end
-
-        broadcast(c::$typ) =
-            addinterpreter(ToType{Bool}(),
-                hasstate(c, name=c.name, attr="checked", trigger="change"))
-
-        render(c::$typ, state) =
-            Elem($elem,
-                checked=c.value,
-                label=c.label,
-                disabled=boolattr(c.disabled, "disabled"),
-            )
-    end
+## Checkbox 
+@api checkbox => Checkbox <: Widget begin
+    doc("A checkbox.")
+    arg(value::Bool=false, doc="State of the checkbox.")
+    kwarg(name::Symbol=:_checkbox,doc="Name to identify the widget.")
+    kwarg(label::String="", doc="The label.") #FIXME: Does this work?
+    kwarg(
+        disabled::Bool=false,
+        doc="If set to true, the checkbox will be disabled."
+    )
 end
+
+broadcast(c::Checkbox) =
+    addinterpreter(ToType{Bool}(),
+        hasstate(c, name=c.name, attr="checked", trigger="change"))
+
+render(c::Checkbox, state) =
+    Elem("paper-checkbox",
+        checked=c.value,
+        label=c.label,
+        disabled=boolattr(c.disabled, "disabled"),
+    )
+
+## Toggle Button
+@api togglebutton => ToggleButton <: Widget begin
+    doc("A toggle button.")
+    arg(value::Bool=false, doc="State of the toggle button.")
+    kwarg(name::Symbol=:_togglebutton, doc="Name to identify the widget.")
+    kwarg(label::String="", doc="The label.") #FIXME: Does this work?
+    kwarg(
+        disabled::Bool=false,
+        doc="If set to true, the toggle button will be disabled."
+    )
+end
+
+broadcast(c::ToggleButton) =
+    addinterpreter(ToType{Bool}(),
+        hasstate(c, name=c.name, attr="checked", trigger="change"))
+
+render(c::ToggleButton, state) =
+    Elem("paper-toggle-button",
+        checked=c.value,
+        label=c.label,
+        disabled=boolattr(c.disabled, "disabled"),
+    )
 
 ## Text input
 
 @api textinput => TextInput <: Widget begin
-    arg(value::String="")
-    kwarg(name::Symbol=:_textinput)
-    kwarg(label::String="")
-    kwarg(format::String="")
-    kwarg(error::String="")
-    kwarg(floatinglabel::Bool=true)
-    kwarg(multiline::Bool=false)
-    kwarg(rows::Int=0)
-    kwarg(maxrows::Int=0)
-    kwarg(maxlength::Int=0)
-    kwarg(charcounter::Bool=false)
-    kwarg(pattern::String="")
-    kwarg(autovalidate::Bool=true)
-    kwarg(disabled::Bool=false)
+    doc("A text input box.")
+    arg(value::String="", doc="The current content.")
+    kwarg(name::Symbol=:_textinput, doc="Name to identify the widget.")
+    kwarg(label::String="", doc="The label.")
+    kwarg(error::String="", doc="Error to display if invalid input is entered.")
+    kwarg(
+        floatinglabel::Bool=true,
+        doc="If set to true, the label floats above the input field when the
+        input field is non-empty."
+    )
+    kwarg(
+        multiline::Bool=false,
+        doc="If set to true, input can contain new lines."
+    )
+    kwarg(rows::Int=0, doc="(Only in multiline mode). Number of rows of text.")
+    kwarg(
+        maxrows::Int=0,
+        doc="""(Only in multiline mode). Maximum number of rows the input field
+        will expand to. More lines will make the text input scrollable.""")
+    kwarg(maxlength::Int=0, doc="Set the maximum length of input text.")
+    kwarg(
+        charcounter::Bool=false,
+        doc="If set to true, a character count is displayed below the input field."
+    )
+    kwarg(
+        pattern::String="",
+        doc=md"""Pattern of allowed inputs. The pattern must match the entire value,
+              not just some subset. The regular expression language is the same
+              as [JavaScript's]
+              (https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions)
+              ."""
+    )
+    #kwarg(autovalidate::Bool=true, doc="")
+    kwarg(
+        disabled::Bool=false,
+        doc="If set to true, the text input will be disabled."
+    )
 end
 
 broadcast(t::TextInput, event="input") =
@@ -161,7 +234,7 @@ render(t::TextInput, state) = begin
     elem &= @d(:label => t.label,
              :error => t.error,
              :floatingLabel => t.floatinglabel,
-             :autoValidate => t.autovalidate,
+             :autoValidate => true,
              :disabled => boolattr(t.disabled, "disabled"))
 
     if t.charcounter
@@ -171,8 +244,6 @@ render(t::TextInput, state) = begin
     elem
 end
 
-## Dropdown
-
 @api selectionitem => SelectionItem <: Tile begin
     arg(value::Any)
     curry(item::Tile)
@@ -181,15 +252,21 @@ end
 render(t::SelectionItem, state) =
     Elem("paper-item", render(t.tile, state), value=t.value)
 
-
-
 ## Radio buttons
 
 @api radio => RadioButton <: Tile begin
-    arg(name::Symbol)
-    curry(label::String)
-    kwarg(toggles::Bool=false)
-    kwarg(disabled::Bool=false)
+    doc(md"""A radio button. Usually many radio buttons are grouped in a
+    `radio group`.""")
+    arg(name::Symbol, doc="Name to identify the widget.")
+    curry(label::String, doc="The label.")
+    kwarg(
+        toggles::Bool=false,
+        doc="If set to true, the radio button allows de-selection by clicking again."
+    )
+    kwarg(
+        disabled::Bool=false,
+        doc="If set to true, the radio button will be disabled."
+    )
 end
 
 render(r::RadioButton, state) =
@@ -197,9 +274,11 @@ render(r::RadioButton, state) =
          name=r.name, toggles=r.toggles, disabled=r.disabled)
 
 @api radiogroup => RadioGroup <: Widget begin
-    arg(radios::AbstractArray)
-    kwarg(name::Symbol=:_radiogroup)
-    kwarg(value::Symbol=:_none)
+    doc("""A group of radio buttons. At any time, only one radio button in a group
+    can be selected.""")
+    arg(radios::AbstractArray, doc="A vector of radio buttons.")
+    kwarg(name::Symbol=:_radiogroup, doc="Name to identify the widget.")
+    kwarg(value::Symbol=:_none, doc="Currently selected value.") #FIXME: Check if this is correct.
 end
 
 wrapradio(x::RadioButton) = x
@@ -224,7 +303,8 @@ end
 ## Spinner
 
 @api spinner => Spinner <: Tile begin
-    arg(active::Bool=true)
+    doc("A spinner. Usually used to denote something is loading or underway.")
+    arg(active::Bool=true, doc="If set to false, the spinner will disappear.")
 end
 
 render(s::Spinner, state) = Elem("paper-spinner", active=s.active)
@@ -232,8 +312,12 @@ render(s::Spinner, state) = Elem("paper-spinner", active=s.active)
 ## Progress bar
 
 @api progress => ProgressBar <: Tile begin
-    arg(value::Real)
-    kwarg(secondaryprogress::Real=0)
+    doc("A progress bar.")
+    arg(value::Real, doc="Current primary progress.")
+    kwarg(
+        secondaryprogress::Real=0,
+        doc="The secondary progress displayed in a lighter color."
+    )
 end
 
 render(p::ProgressBar, state) =
@@ -243,9 +327,13 @@ render(p::ProgressBar, state) =
     )
 
 @api paper => PaperShadow <: Tile begin
-    arg(z::Int)
-    curry(tile::Tile)
-    kwarg(animated::Bool=true)
+    doc("Raise a tile above the plane of the page and create a realistic shadow.")
+    arg(z::Int, doc="The level to raise to. Valid values are Integers 1 to 5.")
+    curry(tile::Tile, doc="The tile to be raised.")
+    kwarg(
+        animated::Bool=true,
+        doc=md"If set to true, changes to `z` will be animated."
+    ) #FIXME: Does this work?
 end
 
 render(p::PaperShadow, state) =
@@ -270,12 +358,20 @@ default_interpreter(::DateSelection) = DateInterpreter()
 
 
 @api datepicker => DatePicker <: Widget begin
-    arg(date::Date=today())
-    kwarg(range::Range{Date}=Date("1971-01-01"):Date("2100-12-31"))
-    kwarg(name::Symbol=:_date)
+    doc("A date picker.")
+    arg(date::Date=today(), doc=md"The date. Requires the `Dates` module on Julia v0.3")
+    kwarg(
+        range::Range{Date}=Date("1971-01-01"):Date("2100-12-31"),
+        doc="The range of selectable dates."
+    )
+    kwarg(name::Symbol=:_date, doc="Name to identify the widget.")
 end
 render(d::DatePicker, state) =
-    Elem("paper-date-picker-two", value=string(d.date), attributes=@d(:min=>string(first(d.range)), :max=>string(last(d.range))))
+    Elem(
+        "paper-date-picker-two", 
+        value=string(d.date), 
+        attributes=@d(:min=>string(first(d.range)), :max=>string(last(d.range)))
+    )
 broadcast(p::DatePicker) = dateselection(p, name=p.name)
 
 # TODO: Interpret as bounds error if date exceeds range

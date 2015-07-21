@@ -2,13 +2,18 @@
 export codemirror
 
 @api codemirror => CodeMirror <: Widget begin
-    arg(code::String="")
-    kwarg(name::Symbol=:_code)
-    kwarg(readonly::Bool=false)
-    kwarg(language::String="julia")
-    kwarg(theme::String="elegant")
-    kwarg(linenumbers::Bool=true)
-    kwarg(tabsize::Int=4)
+    doc("Create a code viewer/editor")
+    arg(code::String="", doc="The code to display.")
+    kwarg(name::Symbol=:_code, doc="The name for the widget")
+    kwarg(readonly::Bool=false, doc="If set to true, editing will be disabled.")
+    kwarg(language::String="julia", doc="The language used for syntax highlighting.")
+    kwarg(
+        theme::String="elegant",
+        doc=md"""The theme. Valid values are `"ambiance"`,`"ambiance-mobile"`,
+                 `"elegant"`, `"monokai"`, `"solarized"` and `"twilight"`."""
+    )
+    kwarg(linenumbers::Bool=true, doc="If set to true, line numbers will be shown.")
+    kwarg(tabsize::Int=4, doc="The tab size.")
 end
 
 broadcast(c::CodeMirror) =
