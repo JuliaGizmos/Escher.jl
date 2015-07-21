@@ -140,14 +140,14 @@ abstract Position
 abstract Corner <: Position
 
 @terms Corner begin
-    topleft => TopLeft
-    midtop => MidTop
-    topright => TopRight
-    midleft => MidLeft
-    middle => Middle
-    midright => MidRight
-    bottomleft => BottomLeft
-    midbottom => MidBottom
+    topleft     => TopLeft
+    midtop      => MidTop
+    topright    => TopRight
+    midleft     => MidLeft
+    middle      => Middle
+    midright    => MidRight
+    bottomleft  => BottomLeft
+    midbottom   => MidBottom
     bottomright => BottomRight
 end
 
@@ -343,11 +343,13 @@ render(f::FloatingTile, state) =
     render(f.tile, state) & style(@d(:float => lowercase(name(f.side))))
 
 @api grow => Grow <: Tile begin
-    doc(md"Expand a tile along the main axis to fit extra space in the parent `hbox` or `vbox`.")
+    doc(md"""Expand a tile along the main axis to fit extra space in the parent
+    `hbox` or `vbox`.""")
 
     arg(
         factor::Float64,
-        doc="The relative rate at which this tile will expand compared to other tiles that can grow.",
+        doc="""The relative rate at which this tile will expand compared to other
+        tiles that can grow.""",
     )
 
     curry(
