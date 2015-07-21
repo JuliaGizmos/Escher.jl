@@ -38,9 +38,11 @@ export drawing
         arg(img::Any)
         curry(graphic::Any) # Either a plot or a compose node
     end
+    drawing(w, h, p) =
+        drawing(Compose.Patchable(w, h), p)
+
     drawing(p) =
-        drawing(Compose.Patchable(Compose.default_graphic_width,
-                        Compose.default_graphic_height), p)
+        drawing(Compose.default_graphic_width, Compose.default_graphic_height, p)
 
     convert(::Type{Tile}, p::Compose.Context) =
         drawing(p)
