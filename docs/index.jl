@@ -240,7 +240,7 @@ main(window) = compose(sierpinski(6))
 $(vskip(2em))
 $(drawing(3Compose.inch, sqrt(3)/2*3Compose.inch, compose(sierpinski(6))) |> pad([left], 8em))
 
-## Rule 2: functions that modify a tile return a *new* tile
+## Rule 2: functions that modify a tile return a new tile
 
 Library functions that take tiles as input do not modify the input, they return new tiles that contain the modifications intended. This is a corollary of Rule 1, since tiles cannot be modified.
 
@@ -400,7 +400,7 @@ $(vskip(1em))
 
 **Example 3.**
 
-The `pages` functions combines tiles into a set of *pages* - only a single page is visible at a time. Pages can be combined with tabs to allow switching between pages.
+The `pages` function combines tiles into a set of *pages* - only a single page is visible at a time. Pages can be combined with tabs to allow switching between pages.
 
 ```julia
 tabbar = tabs([
@@ -610,8 +610,18 @@ Below is a screen grab of a game that was just lost.
 
 The documentation is a work in progress. Here are the other bits available for now:
 
+### API Reference
+
+* [Layout API](layout-api.html)
+* [Embellishment API](embellishment-api.html)
+* [Typography API](typography-api.html)
+* [Content API](content-api.html)
+* [Widgets API](widgets-api.html)
+
+### WIP: User Guides
+
 * [Layout Guide](layout-guide.html)
-* [Typography API](typography.html)
+* [Typography](typography.html)
 * [Reactive programming Guide](reactive.html)
 
 Any help with documenting Escher will be appreciated. Take a look at [this issue](https://github.com/shashi/Escher.jl/issues/26) to see where you can contribute.
