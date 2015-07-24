@@ -71,6 +71,8 @@ rettype(typ) =
             abbr(string(typ.args[1]), string(typ.args[3])) :
             string(typ)
 
+rettype(typ::Symbol) = string(typ)
+
 function argrow(arg)
     notes = Any[]
     if !arg[:coerced]
