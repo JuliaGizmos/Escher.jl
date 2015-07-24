@@ -506,7 +506,7 @@ abstract Overflow
 end
 
 @api clip => Clip <: Tile begin
-    typedarg(overflow::Overflow)
+    typedarg(overflow::Overflow=auto)
     curry(tile::Tile)
 end
 
