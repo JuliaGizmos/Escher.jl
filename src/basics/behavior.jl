@@ -12,12 +12,27 @@ export hasstate,
 
 
 @api hasstate => WithState <: Behavior begin
-    curry(tile::Tile)
-    kwarg(name::Symbol=:_state)
-    kwarg(attr::String="value")
-    kwarg(elem::String="::parent")
-    kwarg(trigger::String="change")
-    kwarg(source::String="")
+    doc("Watch for changes to an attribute/property.")
+    curry(tile::Tile, doc="Tile to watch.")
+    kwarg(name::Symbol=:_state, doc="A name to identify the behavior.")
+    kwarg(
+        attr::String="value",
+        doc=md"""The attribute/property to watch. Note that this is the property
+                 of the DOM node and not of the `Tile`."""
+    )
+    kwarg(
+        elem::String="::parent",
+        doc="A CSS selector for the element to watch."
+        )
+    kwarg(
+        trigger::String="change",
+        doc="The event that triggers a re-read of the attribute/property."
+    )
+    kwarg(
+        source::String="",
+        doc="""If set to "target", the attribute is read from the element firing
+               the event."""
+    )
 end
 
 default_interpreter(::WithState) = identity
@@ -33,10 +48,15 @@ render(t::WithState, state) =
         )
 
 @api keypress => Keypress <: Behavior begin
-    arg(keys::String)
-    curry(tile::Tile)
-    kwarg(name::Symbol=:_keys)
-    kwarg(onpress::String="")
+    doc("A keypress listener.")
+    arg(
+        keys::String,
+        doc=md"""A space-separated list of keys. The grammar of valid keypress
+                 specifiers is [here](https://www.polymer-project.org/0.5/components/core-a11y-keys/index.html)."""
+    )
+    curry(tile::Tile, doc="The tile to watch keypresses from.")
+    kwarg(name::Symbol=:_keys, doc="Name to identify the behavior.")
+    kwarg(onpress::String="", doc="For internal use.")
 end
 
 render(k::Keypress, state) =
@@ -71,9 +91,14 @@ abstract MouseButton
 end
 
 @api clickable => Clickable <: Behavior begin
-    typedarg(buttons::AbstractArray=[leftbutton])
-    curry(tile::Tile)
-    kwarg(name::Symbol=:_clicks)
+    doc("Watch for clicks.")
+    typedarg(
+        buttons::AbstractArray=[leftbutton],
+        doc=md"""An array of mouse buttons to watch. Valid values are
+                 `leftbutton`, `rightbutton`, `scrollbutton`."""
+    )
+    curry(tile::Tile, doc="The tile to watch for clicks on.")
+    kwarg(name::Symbol=:_clicks, doc="Name to identify the behavior.")
 end
 
 button_number(::LeftButton) = 1
@@ -101,9 +126,10 @@ render(c::Clickable, state) =
         )
 
 @api selectable => Selectable <: Behavior begin
-    curry(tile::Tile)
-    kwarg(name::Symbol=:_clicks)
-    kwarg(elem::String="::parent")
+    doc("Watch for a selection in a selection widget.")
+    curry(tile::Tile, doc="A selection widget.")
+    kwarg(name::Symbol=:_clicks, doc="The name to identify the behavior.")
+    kwarg(elem::String="::parent", doc="For internal use.")
 end
 
 render(t::Selectable, state) =
@@ -154,6 +180,13 @@ send(chan::Symbol, watch::Symbol, b) =
 send(chan::Symbol, b::Behavior) =
     ChanSend(chan, name(b), broadcast(b))
 
+@apidoc send => ChanSend <: Behavior begin
+    doc("Emit changes to an attribute/property to a named channel.")
+    arg(chan::Symbol, doc="The name of the channel.")
+    arg(watch::Symbol, doc="The attribute/property to watch.")
+    arg(tile::Tile, doc="The tile to watch.")
+end
+
 render(chan::ChanSend, state) =
     render(chan.tile, state) <<
         Elem("chan-send", chan=chan.chan, watch=chan.watch)
@@ -167,10 +200,25 @@ end
 recv(chan::Symbol, t, attr) =
     ChanRecv(chan, attr, t)
 
+@apidoc recv => ChanSend <: Behavior begin
+    doc("Read values from a named channel.")
+    arg(chan::Symbol, doc="The name of the channel.")
+    arg(attr::Symbol, doc="The attribute/property to set.")
+    arg(tile::Tile, doc="The tile to set the property of.")
+end
+
 render(chan::ChanRecv, state) =
     render(chan.tile, state) <<
         Elem("chan-recv", chan=chan.chan, attr=chan.attr)
 
 wire(a, b, chan, attribute) =
     send(chan, a), recv(chan, b, attribute)
+
+@apidoc wire => ChanSend <: Behavior begin
+    doc("Connect attribute/property of two tiles over a named channel.")
+    arg(a::Tile, doc="The sender tile.")
+    arg(b::Tile, doc="The receiver tile.")
+    arg(chan::Symbol, doc="The name of the channel.")
+    arg(attr::Symbol, doc="The attribute/property to connect.")
+end
 

@@ -506,8 +506,13 @@ abstract Overflow
 end
 
 @api clip => Clip <: Tile begin
-    typedarg(overflow::Overflow=auto)
-    curry(tile::Tile)
+    doc(md"Clip a tile to the dimensions set using `width` and `height`.")
+    typedarg(
+        overflow::Overflow=auto,
+        doc=md"""The method for clipping. Valid values are `hidden`, `visible`,
+                 `scroll` and `auto`."""
+        )
+    curry(tile::Tile, doc="The tile to clip.")
 end
 
 name(::Hidden) = "hidden"
