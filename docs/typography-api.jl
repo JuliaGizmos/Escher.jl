@@ -13,8 +13,8 @@ $(vskip(1em))
 
 $(
    showdocs([fontsize, fontweight, fontcolor, fontstyle, fontfamily, fonttype,
-             fontcase, textalign, lineheight, letterspacing, heading, blockquote,
-             caption, emph, code])
+             fontcase, textalign, lineheight, letterspacing, title, heading, 
+             blockquote, caption, emph, code])
 )
 
 $(vskip(4em))

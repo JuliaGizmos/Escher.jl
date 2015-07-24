@@ -112,7 +112,7 @@ From a directory in which you want to serve Escher UI files, run:
 <Escher-package-path/bin>/escher --serve
 ```
 
-This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After runnnig the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
+This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After running the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
 
 See `escher --help` for other options to the exectuable.
 
@@ -610,8 +610,24 @@ Below is a screen grab of a game that was just lost.
 
 The documentation is a work in progress. Here are the other bits available for now:
 
+### API Reference
+
+* [Layout API](layout-api.html)
+* [Higher Order Layouts API](layout2-api.html)
+* [Embellishment API](embellishment-api.html)
+* [Typography API](typography-api.html)
+* [Content API](content-api.html)
+* [Widgets API](widgets-api.html)
+* [Behavior API](behavior-api.html)
+* [Signal API](signal-api.html)
+* [Slideshow API](slideshow-api.html)
+* [TeX API](tex-api.html)
+* [Util API](util-api.html)
+
+### WIP: User Guides
+
 * [Layout Guide](layout-guide.html)
-* [Typography API](typography.html)
+* [Typography](typography.html)
 * [Reactive programming Guide](reactive.html)
 
 Any help with documenting Escher will be appreciated. Take a look at [this issue](https://github.com/shashi/Escher.jl/issues/26) to see where you can contribute.

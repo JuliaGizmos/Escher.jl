@@ -249,6 +249,15 @@ heading(n::Int) = t -> heading(n,t)
 
 title(n::Int, txt) = class("title-$n", txt)
 
+@apidoc title => Class <: Tile begin
+    doc(md"Create a title.") 
+    arg(
+        level::Int,
+        doc="Title level. More is bigger. Valid values are integers 1 to 4."
+    )
+    curry(tile::TileList, doc="A tile or a vector of tiles.") 
+end
+
 h1(txt) = heading(1, txt)
 h2(txt) = heading(2, txt)
 h3(txt) = heading(3, txt)
