@@ -80,3 +80,8 @@ end
 @require Blink begin
     include("blink.jl")
 end
+
+@require SymPy begin
+    convert(::Type{Tile}, s::SymPy.Sym) =
+        tex(SymPy.latex(s))
+end
