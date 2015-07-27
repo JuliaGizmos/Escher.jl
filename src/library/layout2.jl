@@ -11,7 +11,7 @@ export tabs,
 # Higher-order layouts: e.g. tabs, pages
 
 # Icons and icon button
-@api icon => Icon <: Tile begin
+@api icon => (Icon <: Tile) begin
     doc("An Icon.")
     typedarg(
         icon::String="",
@@ -26,7 +26,7 @@ end
 render(i::Icon, state) =
     Elem("core-icon") & @d((i.url ? :src : :icon) => i.icon)
 
-@api iconbutton => IconButton <: Widget begin
+@api iconbutton => (IconButton <: Widget) begin
     doc("A button with an inset icon.")
     typedarg(
         icon::String="",
@@ -48,7 +48,7 @@ broadcast(w::IconButton) =
 
 abstract Selection <: Widget 
 
-@api pages => Pages <: Selection begin #FIXME: Why is this a widget?
+@api pages => (Pages <: Selection) begin #FIXME: Why is this a widget?
     doc("A set of pages. Only one selected page will be visible at any given time.")
     arg(tiles::TileList, doc="Pages.")
     kwarg(name::Symbol=:_pages, doc="A name to identify the widget.")
@@ -60,7 +60,7 @@ render(ps::Pages, state) =
         map(t -> Elem("section", render(t, state)), ps.tiles.tiles),
         selected=ps.selected-1)
 
-@api tabs => Tabs <: Selection begin
+@api tabs => (Tabs <: Selection) begin
     doc("A horizontal tab bar.")
     arg(tiles::TileList, doc="The tabs.")
     kwarg(name::Symbol=:_tabs, doc="A name to identify the widget.")
@@ -76,7 +76,7 @@ broadcast(t::Tabs) = selectable(t, name=t.name)
 
 # Menus
 
-@api menu => Menu <: Selection begin
+@api menu => (Menu <: Selection) begin
     doc("A menu.")
     arg(
         tiles::TileList,
@@ -92,7 +92,7 @@ render(m::Menu, state) =
 
 broadcast(m::Menu) = selectable(m, name=m.name)
 
-@api submenu => SubMenu <: Tile begin
+@api submenu => (SubMenu <: Tile) begin
     doc("A submenu. Must be put inside a menu.")
     arg(icon::String="", doc="An optional icon.")
     arg(label::String, doc="The title of the sub menu.")
@@ -108,7 +108,7 @@ render(m2::SubMenu, state) =
 
 # Toolbar
 
-@api toolbar => Toolbar <: Tile begin
+@api toolbar => (Toolbar <: Tile) begin
     doc("A toolbar.")
     arg(
         tiles::TileList,
@@ -122,7 +122,7 @@ render(t::Toolbar, state) =
 
 # Paper-item and dropdown
 
-@api item => Item <: Widget begin #FIXME: Is this only for dropdowns?
+@api item => (Item <: Widget) begin #FIXME: Is this only for dropdowns?
     doc("A menu item with an icon.")
     arg(tile::Tile, doc="The label.")
     kwarg(icon::String="", doc=md"An accompanying icon. See `icon` for more.")
@@ -133,7 +133,7 @@ broadcast(i::Item) = clickable(i)
 render(i::Item, state) =
     Elem("paper-item", render(i.tile, state), attributes=@d(:icon=>i.icon))
 
-@api dropdown => Dropdown <: Widget begin
+@api dropdown => (Dropdown <: Widget) begin
     doc(md"A dropdown. For a dropdown menu use `dropdownmenu`")
     arg(tile::Tile, doc="Contents of the dropdown.")
     kwarg(name::Symbol=:_dropdown, doc="Name to identify the widget.")
@@ -154,7 +154,7 @@ render(d::Dropdown, state) =
         halign=lowercase(name(d.halign)),
         valign=lowercase(name(d.valign)))
 
-@api dropdownmenu => DropdownMenu <: Selection begin
+@api dropdownmenu => (DropdownMenu <: Selection) begin
     doc("A dropdown menu.")
     arg(label::String="", doc="Placeholder label.")
     arg(items::TileList, doc="The menu items.")

@@ -61,7 +61,7 @@ export inset,
 
 # 0. Width and height
 
-@api width => Width <: Tile begin
+@api width => (Width <: Tile) begin
     doc("Set the width of a tile")
     typedarg(prefix::String="",
         doc=md"""either `""`, `"min"` or `"max"`. See `minwidth` and `maxwidth`.""")
@@ -73,7 +73,7 @@ render(t::Width, state) = begin
     render(t.tile, state) & style(@d(prefixed => t.width))
 end
 
-@api height => Height <: Tile begin
+@api height => (Height <: Tile) begin
     doc("Set the height of a tile")
     typedarg(prefix::String="",
         doc=md"""either `""`, `"min"` or `"max"`. See `minheight` and `maxheight`.""")
@@ -88,13 +88,13 @@ render(t::Height, state) =
 minwidth(w, x...) = width("min", w, x...)
 minheight(h, x...) = height("min", h, x...)
 
-@apidoc minwidth => Width <: Tile begin
+@apidoc minwidth => (Width <: Tile) begin
     doc("Set the minimum width of a tile")
     arg(height::Length, doc="the width")
     curry(tile::Tile, doc="the tile to set the width of")
 end
 
-@apidoc minheight => Height <: Tile begin
+@apidoc minheight => (Height <: Tile) begin
     doc("Set the minimum height of a tile")
     arg(height::Length, doc="the height")
     curry(tile::Tile, doc="the tile to set the height of")
@@ -103,13 +103,13 @@ end
 maxwidth(w, x...) = width("max", w, x...)
 maxheight(h, x...) = height("max", h, x...)
 
-@apidoc maxwidth => Width <: Tile begin
+@apidoc maxwidth => (Width <: Tile) begin
     doc("Set the maximum width of a tile")
     arg(height::Length, doc="the width")
     curry(tile::Tile, doc="the tile to set the width of")
 end
 
-@apidoc maxheight => Height <: Tile begin
+@apidoc maxheight => (Height <: Tile) begin
     doc("Set the maximum height of a tile")
     arg(height::Length, doc="the height")
     curry(tile::Tile, doc="the tile to set the height of")
@@ -120,7 +120,7 @@ size(w::Length, h::Length, t) =
 size(w::Length, h::Length) =
     t -> size(w, h, t)
 
-@apidoc size => Height <: Tile begin
+@apidoc size => (Height <: Tile) begin
     doc("Set the width and the height of a tile")
     arg(width::Length, doc="the width")
     arg(height::Length, doc="the height")
@@ -129,7 +129,7 @@ end
 container(w, h) =
     empty |> size(w, h)
 
-@apidoc container => Height <: Tile begin
+@apidoc container => (Height <: Tile) begin
     doc("Make an empty tile of a given size")
     arg(width::Length, doc="the width")
     arg(height::Length, doc="the height")
@@ -153,7 +153,7 @@ end
 
 name{C <: Corner}(::C) = string(C)
 
-@api offset => Relative{T <: Corner} <: Position begin
+@api offset => (Relative{T <: Corner} <: Position) begin
     doc("Create an offset relative to a corner")
     arg(c::T, doc="The corner to offset from")
     arg(x::Length, doc="The horizontal offset")
@@ -161,7 +161,7 @@ name{C <: Corner}(::C) = string(C)
     # z::Length
 end
 
-@api inset => Inset <: Tile begin
+@api inset => (Inset <: Tile) begin
     doc("Position a tile inside a container tile at a corner or an offset")
     typedarg(position::Position=topleft, doc="The corner or the offset")
     arg(container::Tile, doc="The container")
@@ -267,7 +267,7 @@ render(f::FlexContainer, state) =
     addclasses(render(f.tile, state), classes(f))
 
 
-@api flow => Flow{A <: FixedAxis} <: FlexContainer begin
+@api flow => (Flow{A <: FixedAxis} <: FlexContainer) begin
     doc("Flow a list of tiles along the horizontal or the vertical axis")
     typedarg(axis::A, doc="The axis to layout along")
     curry(tiles::TileList, doc="The list of tiles to layout")
@@ -293,7 +293,7 @@ render(f::Flow, state) =
 
 hbox(args...) = flow(horizontal, args...)
 
-@apidoc hbox => Flow <: Tile begin
+@apidoc hbox => (Flow <: Tile) begin
     doc(md"Arrange tiles horizontally. `hbox(args...)`
 is equivalent to `flow(horizontal, args...)`")
     arg(tiles::TileList)
@@ -302,7 +302,7 @@ end
 
 vbox(args...) = flow(vertical, args...)
 
-@apidoc vbox => Flow <: Tile begin
+@apidoc vbox => (Flow <: Tile) begin
     doc(md"Arrange tiles vertically. `hbox(args...)`
 is equivalent to `flow(vertical, args...)`")
     arg(tiles::TileList)
@@ -315,14 +315,14 @@ vskip(y) = size(0px, y, empty)
 hskip(x) = size(x, 0px, empty)
 
 
-@api ordering => FlowOrder <: FlexContainer begin
+@api ordering => (FlowOrder <: FlexContainer) begin
     arg(ordering::AbstractArray)
     curry(flow::FlexContainer)
 end
 
 # TODO: render ordering
 
-@api wrap => Wrap <: FlexContainer begin
+@api wrap => (Wrap <: FlexContainer) begin
     doc(md"Wrap a `flow` of tiles")
     arg(tile::FlexContainer, doc=md"Either a `vbox` or a `hbox`")
     kwarg(reverse::Bool=false, doc="Should the wrapping be reversed in direction?")
@@ -334,7 +334,7 @@ classes(f::Wrap) =
 
 # 3. Flexing and alignment
 
-@api floating => FloatingTile{T <: Side{Horizontal}} <: Tile begin
+@api floating => (FloatingTile{T <: Side{Horizontal}} <: Tile) begin
     typedarg(side::T)
     curry(tile::Tile)
 end
@@ -342,7 +342,7 @@ end
 render(f::FloatingTile, state) =
     render(f.tile, state) & style(@d(:float => lowercase(name(f.side))))
 
-@api grow => Grow <: Tile begin
+@api grow => (Grow <: Tile) begin
     doc(md"""Expand a tile along the main axis to fit extra space in the parent
     `hbox` or `vbox`.""")
 
@@ -363,7 +363,7 @@ grow(t::AbstractVector) = map(grow, t)
 render(t::Grow, state) =
     render(t.tile, state) & style(@d(:flexGrow => t.factor))
 
-@api shrink => Shrink <: Tile begin
+@api shrink => (Shrink <: Tile) begin
     doc(md"Shrink a tile along the main axis to accomodate space in the parent `hbox` or `vbox`.")
     arg(factor::Float64,
         doc="The relative rate at which this tile will shrink compared to other tiles that can shrink.")
@@ -376,7 +376,7 @@ shrink(t::AbstractVector) = map(shrink, t)
 render(t::Shrink, state) =
     render(t.tile, state) & style(@d(:flexShrink => t.factor))
 
-@api flexbasis => FlexBasis <: Tile begin
+@api flexbasis => (FlexBasis <: Tile) begin
     arg(basis::Union(Length, Symbol))
     curry(tile::Tile)
 end
@@ -397,7 +397,7 @@ flex(t::AbstractVector) =
 flex(factor::Real) = t -> flex(factor, t)
 flex{T <: Real}(factor::AbstractVector{T}) = t -> flex(factor, t)
 
-@apidoc flex => FlexBasis <: Tile begin
+@apidoc flex => (FlexBasis <: Tile) begin
     doc("Ignore the width (in a hbox) or height (in a vbox) and stretch or shrink a tile to fill / distribute remaining space")
     arg(tile::Tile, doc="The tile to flex")
 end
@@ -415,7 +415,7 @@ abstract Packing
     spacearound => SpaceAround
 end
 
-@api packlines => PackedLines{T <: Packing} <: FlexContainer begin
+@api packlines => (PackedLines{T <: Packing} <: FlexContainer) begin
     doc("Pack wrapped lines of tiles across the cross axis")
     typedarg(packing::T, doc="The kind of packing to use")
     curry(tile::FlexContainer, doc="The flex container")
@@ -429,7 +429,7 @@ classes(t::PackedLines{SpaceBetween}) = "pack-lines-space-between"
 classes(t::PackedLines{SpaceAround}) = "pack-lines-space-around"
 
 
-@api packitems => PackedItems{T <: Packing} <: FlexContainer begin
+@api packitems => (PackedItems{T <: Packing} <: FlexContainer) begin
     doc("Pack items in a flex container along the main axis")
     typedarg(packing::T, doc="The kind of packing to use")
     curry(tile::FlexContainer, doc="The flex container")
@@ -442,7 +442,7 @@ classes(t::PackedItems{SpaceBetween}) = "pack-space-between"
 classes(t::PackedItems{SpaceAround}) = "pack-space-around"
 
 
-@api packacross => PackedAcross{T <: Packing} <: FlexContainer begin
+@api packacross => (PackedAcross{T <: Packing} <: FlexContainer) begin
     doc("Stretch or provide spacing around items in the cross axis")
     typedarg(packing::T, doc="The kind of packing to use")
     curry(tile::FlexContainer, doc="The flex container")
@@ -464,7 +464,7 @@ end
 render(cont::Container, state) = Elem(:div, render(cont.tile, state))
 
 
-@api padcontent => PadContent <: Tile begin
+@api padcontent => (PadContent <: Tile) begin
     typedarg(sides::AbstractVector=allsides)
     arg(length::Length)
     curry(tile::Tile)
@@ -486,7 +486,7 @@ pad(sides::AbstractVector, len::Length, tile) =
 pad(sides::AbstractVector, len::Length) =
     tile -> padcontent(sides, len, Container(tile))
 
-@apidoc pad => PadContent <: Tile begin
+@apidoc pad => (PadContent <: Tile) begin
     doc("Wrap a tile in a container with the specified padding")
     typedarg(sides::AbstractVector=allsides, doc="Sides to pad")
     arg(length::Length, doc="Amount of padding")
@@ -505,7 +505,7 @@ abstract Overflow
     auto => AutoClip
 end
 
-@api clip => Clip <: Tile begin
+@api clip => (Clip <: Tile) begin
     doc(md"Clip a tile to the dimensions set using `width` and `height`.")
     typedarg(
         overflow::Overflow=auto,

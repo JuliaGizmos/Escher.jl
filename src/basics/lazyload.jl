@@ -34,7 +34,7 @@ export drawing
 @require Compose begin
 
     # A declarative version of draw?
-    @api drawing => ComposeGraphic <: Tile begin
+    @api drawing => (ComposeGraphic <: Tile) begin
         arg(img::Any)
         curry(graphic::Any) # Either a plot or a compose node
     end

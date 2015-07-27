@@ -1,6 +1,6 @@
 export slideshow, slide, fragment
 
-@api slideshow => SlideShow <: Selection begin
+@api slideshow => (SlideShow <: Selection) begin
     doc("A slideshow.")
     curry(tiles::TileList, doc="An array of slides.")
     kwarg(selected::Int=1, doc="Index of the current slide.")
@@ -10,7 +10,7 @@ render_slide(x, state) =
     packitems(center, packacross(center, vbox([x]))) |>
         (t -> render(t, state) & @d(:attributes => @d(:fit => :fit)))
 
-@api slide => Slide <: Tile begin
+@api slide => (Slide <: Tile) begin
     doc("A slide. Content of the slide is centered vertically and horizontally.")
     curry(tile::Tile, doc="Content of the slide.")
     kwarg(
@@ -23,7 +23,7 @@ render_slide(x, state) =
         )
 end
 
-@api fragment => Fragment <: Tile begin
+@api fragment => (Fragment <: Tile) begin
     typedarg(index::Int=0)
     curry(tile::Tile)
 end

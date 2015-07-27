@@ -53,7 +53,7 @@ wrapmany(t::TileList, wrap, state) =
         render(t.tiles[1], state) :
         Elem(wrap, map(t -> render(t, state), t.tiles))
 
-@api class => Class <: Tile begin
+@api class => (Class <: Tile) begin
     doc("Add a HTML class.")
     arg(class::String, doc="Space separated classes.")
     curry(content::TileList, doc="A tile or a vector of tiles.")

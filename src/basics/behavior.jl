@@ -11,7 +11,7 @@ export hasstate,
        scrollbutton
 
 
-@api hasstate => WithState <: Behavior begin
+@api hasstate => (WithState <: Behavior) begin
     doc("Watch for changes to an attribute/property.")
     curry(tile::Tile, doc="Tile to watch.")
     kwarg(name::Symbol=:_state, doc="A name to identify the behavior.")
@@ -47,7 +47,7 @@ render(t::WithState, state) =
             source=t.source,
         )
 
-@api keypress => Keypress <: Behavior begin
+@api keypress => (Keypress <: Behavior) begin
     doc("A keypress listener.")
     arg(
         keys::String,
@@ -90,7 +90,7 @@ abstract MouseButton
     scrollbutton => ScrollButton
 end
 
-@api clickable => Clickable <: Behavior begin
+@api clickable => (Clickable <: Behavior) begin
     doc("Watch for clicks.")
     typedarg(
         buttons::AbstractArray=[leftbutton],
@@ -125,7 +125,7 @@ render(c::Clickable, state) =
             buttons=string(map(button_number, c.buttons)),
         )
 
-@api selectable => Selectable <: Behavior begin
+@api selectable => (Selectable <: Behavior) begin
     doc("Watch for a selection in a selection widget.")
     curry(tile::Tile, doc="A selection widget.")
     kwarg(name::Symbol=:_clicks, doc="The name to identify the behavior.")
@@ -147,7 +147,7 @@ abstract MouseState
     mouseup => MouseUp
 end
 
-@api hoverable => Hoverable <: Behavior begin
+@api hoverable => (Hoverable <: Behavior) begin
     typedarg(get_coords::Bool=false)
     curry(tile::Tile)
     kwarg(name::Symbol=:_hover)
@@ -180,7 +180,7 @@ send(chan::Symbol, watch::Symbol, b) =
 send(chan::Symbol, b::Behavior) =
     ChanSend(chan, name(b), broadcast(b))
 
-@apidoc send => ChanSend <: Behavior begin
+@apidoc send => (ChanSend <: Behavior) begin
     doc("Emit changes to an attribute/property to a named channel.")
     arg(chan::Symbol, doc="The name of the channel.")
     arg(watch::Symbol, doc="The attribute/property to watch.")
@@ -200,7 +200,7 @@ end
 recv(chan::Symbol, t, attr) =
     ChanRecv(chan, attr, t)
 
-@apidoc recv => ChanSend <: Behavior begin
+@apidoc recv => (ChanSend <: Behavior) begin
     doc("Read values from a named channel.")
     arg(chan::Symbol, doc="The name of the channel.")
     arg(attr::Symbol, doc="The attribute/property to set.")
@@ -214,7 +214,7 @@ render(chan::ChanRecv, state) =
 wire(a, b, chan, attribute) =
     send(chan, a), recv(chan, b, attribute)
 
-@apidoc wire => ChanSend <: Behavior begin
+@apidoc wire => (ChanSend <: Behavior) begin
     doc("Connect attribute/property of two tiles over a named channel.")
     arg(a::Tile, doc="The sender tile.")
     arg(b::Tile, doc="The receiver tile.")

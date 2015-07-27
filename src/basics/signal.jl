@@ -61,7 +61,7 @@ addinterpreter(i::Interpreter, tile::Behavior) =
     WithInterpreter(Chained(i, default_interpreter(tile)), tile)
 addinterpreter(i::Interpreter) = t -> addinterpreter(i, t)
 
-@apidoc addinterpreter => WithInterpreter <: Behavior begin
+@apidoc addinterpreter => (WithInterpreter <: Behavior) begin
     doc("Attach an interpreter to a widget/behavior.")
     arg(interpreter::Interpreter, doc="An interpreter.")
     curry(tile::Behavior, doc="The widget/behavior.")
@@ -96,7 +96,7 @@ interpret(dec::PairWith, x) = (x, dec.value)
 pairwith(x) = addinterpreter(PairWith(x))
 pairwith(x, tile::Tile) = addinterpreter(PairWith(x), tile)
 
-@apidoc pairwith => WithInterpreter <: Behavior begin
+@apidoc pairwith => (WithInterpreter <: Behavior) begin
     doc("An interpreter that pairs the updated value with a constant.")
     arg(constant::Any, doc="The constant.")
     curry(tile::Tile, doc="The widget/behavior.")
@@ -112,7 +112,7 @@ interpret(dec::Const, _) = dec.value
 constant(x, tile) = addinterpreter(Const(x), tile)
 constant(x) = addinterpreter(Const(x))
 
-@apidoc constant => WithInterpreter <: Behavior begin
+@apidoc constant => (WithInterpreter <: Behavior) begin
     doc("""A constant interpreter. Ignores updated values and interpret them as 
            a constant.""")
     arg(x::Any, doc="The constant.")
@@ -168,7 +168,7 @@ subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input}); absorb=true) =
 subscribe(t::WithInterpreter, s::Input; absorb=true) =
     subscribe(t.tile, name(t), (t.interpreter, s), absorb=absorb)
 
-@apidoc subscribe => Subscription <: Tile begin
+@apidoc subscribe => (Subscription <: Tile) begin
     doc(md"""Subscribe to updates from a widget/behavior. `>>>` is an infix
              alias to subscribe"""
     )
@@ -199,7 +199,7 @@ setup_transport(x) = makeid(x)
 
 ### Sampling
 
-@api sampler => Sampler <: Interpreter begin
+@api sampler => (Sampler <: Interpreter) begin
     doc(md"""A means to make forms. Use `watch!` and `trigger!` to specify which
          widgets/behavior to watch and which widgets/behavior trigger the form.
          """) 
@@ -233,7 +233,7 @@ end
 
 watch!(sampler::Sampler) = t -> watch!(sampler, t)
 
-@apidoc watch! => Tile begin
+@apidoc watch! => (Tile) begin
     doc("""Make a sampler watch a widget/behavior. Returns the input 
          widget/behavior.""")
     arg(sampler::Sampler, doc="The sampler to add the watch on.")
@@ -247,14 +247,14 @@ end
 
 trigger!(sampler::Sampler) = t -> trigger!(sampler, t)
 
-@apidoc trigger! => Tile begin
+@apidoc trigger! => (Tile) begin
     doc("""Make a sampler trigger on a change to a widget/behavior. Returns the
          input widget/behavior.""")
     arg(sampler::Sampler, doc="The sampler to add the trigger on.")
     curry(tile::Tile, doc="The widget/behavior.")
 end
 
-@api plugsampler => Sampled <: Behavior begin
+@api plugsampler => (Sampled <: Behavior) begin
     doc("""Attach a sampler to a tile containing the widgets the sampler deals
            with.""")
     arg(sampler::Sampler, doc=md"The `sampler`." )
@@ -293,7 +293,7 @@ end
 fromid(id) = id_to_signal[id]
 
 # Don't allow a signal to propagate outward
-@api stoppropagation => StopPropagation <: Tile begin
+@api stoppropagation => (StopPropagation <: Tile) begin
     doc(md"""Stop bubbling of behavior/widget state in the web page. 
              `Subscribing` to a behavior by default adds a `stoppropagation` 
              to the tile."""

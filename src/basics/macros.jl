@@ -289,7 +289,7 @@ const escher_meta = Dict()
 @doc """
 `@api` is used to create new tile types and associated constructors
 
-    @api border => Bordered{T <: Side} <: Tile begin
+    @api border => (Bordered{T <: Side} <: Tile) begin
         arg(side::T)
         curry(tile::Tile)
         kwarg(color::ColorValue=color("black"))

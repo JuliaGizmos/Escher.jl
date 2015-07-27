@@ -17,7 +17,7 @@ export noborder,
 
 const allsides = Side[]
 
-@api bordercolor => BorderColor <: Tile begin
+@api bordercolor => (BorderColor <: Tile) begin
     doc(md"""Set the border color. Note that you need to set the `borderwidth` as
     well for the border to actually appear.""")
     typedarg(
@@ -36,7 +36,7 @@ render(t::BorderColor, state) =
         ) |> style
     )
 
-@api borderwidth => BorderWidth <: Tile begin
+@api borderwidth => (BorderWidth <: Tile) begin
     doc("Set the border width.") 
     typedarg(
         sides::AbstractArray=allsides,
@@ -65,7 +65,7 @@ name(::Solid) = "solid"
 name(::Dotted) = "dotted"
 name(::Dashed) = "dashed"
 
-@api borderstyle => BorderStyle <: Tile begin
+@api borderstyle => (BorderStyle <: Tile) begin
     doc(md"""Set the border style. Note that you need to set the `borderwidth`
              as well for the border to actually appear.""")
     typedarg(
@@ -107,7 +107,7 @@ border(style::StrokeStyle, width::Length, color::ColorValue, tile) =
 border(style::StrokeStyle, width, color) =
     tile -> border(style, width, color, tile)
 
-@apidoc border => BorderStyle <: Tile begin
+@apidoc border => (BorderStyle <: Tile) begin
     doc("A helper function for setting border properties.")
     typedarg(sides::AbstractArray=allsides, doc="An array of sides to set the border for. Valid values are `left`, `right`, `top` and `bottom`. By default the border is set for all sides.")
     arg(style::StrokeStyle, doc="The border style. Valid values are `noborder`, `dotted`, `dashed` and `solid`.")
@@ -120,7 +120,7 @@ const default_border_color = RGB(0.6, 0.6, 0.6)
 hline(;style=solid, width=1px, color=default_border_color) =
     border([bottom], style, width, color, empty)
 
-@apidoc hline => BorderStyle <: Tile begin
+@apidoc hline => (BorderStyle <: Tile) begin
     doc("Create a horizontal line. Returns a bordered tile of height 0.")
     kwarg(style::StrokeStyle, doc="The line style. Valid values are `noborder`, `dotted`, `dashed` and `solid`.")
     kwarg(width::Length, doc="The width.")
@@ -130,7 +130,7 @@ end
 vline(;style=solid, width=1px, color=default_border_color) =
     border([left], style, width, color, empty)
 
-@apidoc vline => BorderStyle <: Tile begin
+@apidoc vline => (BorderStyle <: Tile) begin
     doc("Create a vertical line. Returns a bordered tile of width 0.")
     kwarg(style::StrokeStyle, doc="The line style. Valid values are `noborder`, `dotted`, `dashed` and `solid`.")
     kwarg(width::Length, doc="The width.")
@@ -140,7 +140,7 @@ end
 ## RoundRects
 
 const allcorners = Corner[]
-@api roundcorner => RoundedRect <: Tile begin
+@api roundcorner => (RoundedRect <: Tile) begin
     doc("Round the corner of a tile.")
     typedarg(corners::AbstractArray=allcorners, doc=md"An array of corners to set the rounding for. By default, all corners are rounded. Valid corners are `topleft`,`midtop`,`topright`,`midleft`,`middle`,`midright`,`bottomleft`,`midbottom` and `bottomright`.")
     arg(radius::Length, doc="The radius.")
@@ -154,7 +154,7 @@ render(t::RoundedRect, state) =
 
 ## Box shadow
 
-@api shadow => Shadow <: Tile begin
+@api shadow => (Shadow <: Tile) begin
     doc("Show a shadow around a tile.")
     curry(tile::Tile, doc="A tile.")
     kwarg(inset::Bool=false, doc="Set whether the shadow falls inward or outward")
@@ -166,7 +166,7 @@ end
 
 ## Fill color
 
-@api fillcolor => FillColor <: Tile begin
+@api fillcolor => (FillColor <: Tile) begin
     doc("Fill a tile with a color.")
     arg(color::ColorValue, doc="The color.")
     curry(tile::Tile, doc="The tile.")

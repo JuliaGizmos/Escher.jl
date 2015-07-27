@@ -1,6 +1,6 @@
 export list, image, link, abbr
 
-@api list => List <: Tile begin
+@api list => (List <: Tile) begin
     doc("Stylize a list of tiles as an itemized list.")
     curry(tiles::TileList , doc="A tile or a vector of tiles.")
     kwarg(ordered::Bool=false, doc=md"If set to `true`, numbering will be used.")
@@ -10,7 +10,7 @@ render(l::List, state) =
     Elem(l.ordered ? :ol : :ul,
          map(x -> Elem(:li, render(x, state)), l.tiles.tiles))
 
-@api image => Image <: Tile begin
+@api image => (Image <: Tile) begin
     doc(md"""Show an image from a `url`. To read an image and display it, use
              [`Images.imread`](https://github.com/timholy/Images.jl#readme).""")
     arg(url::String, doc="The url of the image.")
@@ -20,7 +20,7 @@ end
 render(i::Image, state) =
     Elem(:img, src=i.url, alt=i.alt, style=@d("width"=>"auto", "height"=>"auto", "display" => "block"))
 
-@api link => Hyperlink <: Tile begin
+@api link => (Hyperlink <: Tile) begin
     doc("A hyperlink.")
     arg(url::String, doc="The destination of the link.")
     curry(
@@ -32,7 +32,7 @@ end
 render(a::Hyperlink, state) =
     Elem(:a, render(a.tiles, state), href=a.url)
 
-@api abbr => Abbr <: Tile begin
+@api abbr => (Abbr <: Tile) begin
     doc(md"""An abbreviation. When you hover over an abbreviation, the `title` is
           shown in a tooltip.""")
     arg(title::String, doc="The title to show.")

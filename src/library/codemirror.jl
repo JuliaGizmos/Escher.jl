@@ -1,7 +1,7 @@
 
 export codemirror
 
-@api codemirror => CodeMirror <: Widget begin
+@api codemirror => (CodeMirror <: Widget) begin
     doc("Create a code viewer/editor")
     arg(code::String="", doc="The code to display.")
     kwarg(name::Symbol=:_code, doc="The name for the widget")

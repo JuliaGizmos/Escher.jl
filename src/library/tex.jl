@@ -1,6 +1,6 @@
 export tex
 
-@api tex => TeX <: Tile begin
+@api tex => (TeX <: Tile) begin
     doc("Show TeX/LaTeX.")
     arg(source::String, doc="The source TeX code.")
     kwarg(

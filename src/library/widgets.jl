@@ -26,7 +26,7 @@ default_interpreter(w::Widget) =
 
 ## Button
 
-@api button => Button <: Widget begin
+@api button => (Button <: Widget) begin
     doc("A button.")
     arg(label::Tile, doc="The button label.")
     kwarg(name::Symbol=:_button, doc="A name to identify the widget.")
@@ -58,7 +58,7 @@ broadcast(b::Button) =
 
 ## Slider
 
-@api slider => Slider <: Widget begin
+@api slider => (Slider <: Widget) begin
     doc("""A slider. Use this to select values from within a continous range of
            numbers.""")
     arg(
@@ -105,7 +105,7 @@ render(s::Slider, state) =
 
 
 ## Checkbox 
-@api checkbox => Checkbox <: Widget begin
+@api checkbox => (Checkbox <: Widget) begin
     doc("A checkbox.")
     arg(value::Bool=false, doc="State of the checkbox.")
     kwarg(name::Symbol=:_checkbox,doc="Name to identify the widget.")
@@ -128,7 +128,7 @@ render(c::Checkbox, state) =
     )
 
 ## Toggle Button
-@api togglebutton => ToggleButton <: Widget begin
+@api togglebutton => (ToggleButton <: Widget) begin
     doc("A toggle button.")
     arg(value::Bool=false, doc="State of the toggle button.")
     kwarg(name::Symbol=:_togglebutton, doc="Name to identify the widget.")
@@ -152,7 +152,7 @@ render(c::ToggleButton, state) =
 
 ## Text input
 
-@api textinput => TextInput <: Widget begin
+@api textinput => (TextInput <: Widget) begin
     doc("A text input box.")
     arg(value::String="", doc="The current content.")
     kwarg(name::Symbol=:_textinput, doc="Name to identify the widget.")
@@ -244,7 +244,7 @@ render(t::TextInput, state) = begin
     elem
 end
 
-@api selectionitem => SelectionItem <: Tile begin
+@api selectionitem => (SelectionItem <: Tile) begin
     arg(value::Any)
     curry(item::Tile)
 end
@@ -254,7 +254,7 @@ render(t::SelectionItem, state) =
 
 ## Radio buttons
 
-@api radio => RadioButton <: Tile begin
+@api radio => (RadioButton <: Tile) begin
     doc(md"""A radio button. Usually many radio buttons are grouped in a
     `radio group`.""")
     arg(name::Symbol, doc="Name to identify the widget.")
@@ -273,7 +273,7 @@ render(r::RadioButton, state) =
     Elem("paper-radio-button", label=r.label,
          name=r.name, toggles=r.toggles, disabled=r.disabled)
 
-@api radiogroup => RadioGroup <: Widget begin
+@api radiogroup => (RadioGroup <: Widget) begin
     doc("""A group of radio buttons. At any time, only one radio button in a group
     can be selected.""")
     arg(radios::AbstractArray, doc="A vector of radio buttons.")
@@ -295,14 +295,14 @@ render(r::RadioGroup, state) =
 
 broadcast(r::RadioGroup) = selectable(r, name=r.name)
 
-@api selector => Selector <: Widget begin
+@api selector => (Selector <: Widget) begin
     arg(items::AbstractArray)
     kwarg(selected::Int=1)
 end
 
 ## Spinner
 
-@api spinner => Spinner <: Tile begin
+@api spinner => (Spinner <: Tile) begin
     doc("A spinner. Usually used to denote something is loading or underway.")
     arg(active::Bool=true, doc="If set to false, the spinner will disappear.")
 end
@@ -311,7 +311,7 @@ render(s::Spinner, state) = Elem("paper-spinner", active=s.active)
 
 ## Progress bar
 
-@api progress => ProgressBar <: Tile begin
+@api progress => (ProgressBar <: Tile) begin
     doc("A progress bar.")
     arg(value::Real, doc="Current primary progress.")
     kwarg(
@@ -326,7 +326,7 @@ render(p::ProgressBar, state) =
         secondaryProgress=p.secondaryprogress,
     )
 
-@api paper => PaperShadow <: Tile begin
+@api paper => (PaperShadow <: Tile) begin
     doc("Raise a tile above the plane of the page and create a realistic shadow.")
     arg(z::Int, doc="The level to raise to. Valid values are Integers 1 to 5.")
     curry(tile::Tile, doc="The tile to be raised.")
@@ -346,7 +346,7 @@ if VERSION < v"0.4.0-dev"
 end
 
 
-@api dateselection => DateSelection <: Behavior begin
+@api dateselection => (DateSelection <: Behavior) begin
     curry(tile::Tile)
     kwarg(name::Symbol=:_date)
 end
@@ -357,7 +357,7 @@ immutable DateInterpreter <: Interpreter end
 default_interpreter(::DateSelection) = DateInterpreter()
 
 
-@api datepicker => DatePicker <: Widget begin
+@api datepicker => (DatePicker <: Widget) begin
     doc("A date picker.")
     arg(date::Date=today(), doc=md"The date. Requires the `Dates` module on Julia v0.3")
     kwarg(
