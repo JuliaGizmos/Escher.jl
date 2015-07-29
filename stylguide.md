@@ -1,7 +1,7 @@
 # Coding style
 
-- do not break 80 column max-width unless for the occasional long string literals (e.g. Documentation).
-- multi-line and wrapping string literals should go on a line below and above code e.g.
+- Do not break 80 column max-width unless for the occasional long string literals (e.g. Documentation).
+- Multiline and wrapping string literals should go on a line below and above code e.g.
 
     ~~~julia
     foo(
@@ -11,20 +11,20 @@ woke up from troubled dreams
     )
     ~~~
     
-- use the `@api` macro wherever possible.
-- shorthand function expressions can be either:
-   - one line (if the line does not exceed 80 characters)
-   - or multiple lines but the first line must end with the `=`
-- multiline functions must start with a `begin`.
-- anonymous functoins should be one line if they do not overflow the line beyond 80 chars
-    - otherwise the arguments should come in the line as the assignment. e.g.
+- Use the `@api` macro wherever possible.
+- Shorthand function expressions can be either:
+   - One line (if the line does not exceed 80 characters)
+   - Or multiple lines but the first line must end with the `=`
+- Multiline functions must start with a `begin`.
+- Anonymous functions should be one line if they do not overflow the line beyond 80 chars
+    - Otherwise the arguments should come in the line as the assignment. e.g.
  
         ~~~julia
         comm.on_msg = (msg) ->
             push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
         ~~~
 
-- split long function calls like this:
+- Split long function calls like this:
 
     ~~~julia
     backend = Compose.Patchable(
@@ -34,7 +34,7 @@ woke up from troubled dreams
     ~~~
 
   Notice the extra comma at the end. This is to keep diffs clean.
-- long ternary expressions should be of the form:
+- Long ternary expressions should be of the form:
  
     ~~~julia
     foo(x) ?
@@ -42,7 +42,7 @@ woke up from troubled dreams
         case2
     ~~~
 
-- in infix expressions longer than 80 characters, the rhs should be indented
+- In infix expressions longer than 80 characters, the right-hand side should be indented
   e.g.
 
     ~~~julia

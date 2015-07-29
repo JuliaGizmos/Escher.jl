@@ -34,13 +34,15 @@ export drawing
 @require Compose begin
 
     # A declarative version of draw?
-    @api drawing => ComposeGraphic <: Tile begin
+    @api drawing => (ComposeGraphic <: Tile) begin
         arg(img::Any)
         curry(graphic::Any) # Either a plot or a compose node
     end
+    drawing(w, h, p) =
+        drawing(Compose.Patchable(w, h), p)
+
     drawing(p) =
-        drawing(Compose.Patchable(Compose.default_graphic_width,
-                        Compose.default_graphic_height), p)
+        drawing(Compose.default_graphic_width, Compose.default_graphic_height, p)
 
     convert(::Type{Tile}, p::Compose.Context) =
         drawing(p)
@@ -77,4 +79,9 @@ end
 
 @require Blink begin
     include("blink.jl")
+end
+
+@require SymPy begin
+    convert(::Type{Tile}, s::SymPy.Sym) =
+        tex(SymPy.latex(s))
 end

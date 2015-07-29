@@ -12,7 +12,7 @@ function main(window)
         size(50vw, 90vh)
     submit = trigger!(s, button("Submit code"))
 
-    form = sample(s, vbox(editor, vskip(1em), submit)) >>> input
+    form = plugsampler(s, vbox(editor, vskip(1em), submit)) >>> input
     
     lift(data -> hbox(form, string(data)), input)
 end

@@ -39,6 +39,16 @@ code {
     margin: 0.66em 0;
 }
 
+.blockquote {
+    color: #666;
+    border-left: 4px solid #999;
+    padding-left: 1em;
+}
+
+.md-blockquote {
+    margin: 1em;
+}
+
 .font-uppercase {
     text-transform: uppercase;
 }

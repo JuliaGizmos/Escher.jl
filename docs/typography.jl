@@ -35,15 +35,7 @@ $(h2("Headings"))
 
 $(headings |> pad([left], 4em) |> pad([top, bottom], 1em))
 
-# Low-level Functions
-
 $(vskip(1em))
-
-$(
-   showdocs([fontsize, fontweight, fontcolor, fontstyle])
-)
-
-$(vskip(4em))
 
     """ |> docpage
 end

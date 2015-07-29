@@ -53,11 +53,17 @@ wrapmany(t::TileList, wrap, state) =
         render(t.tiles[1], state) :
         Elem(wrap, map(t -> render(t, state), t.tiles))
 
-@api class => Class <: Tile begin
-    arg(class::String)
-    curry(content::TileList)
-    kwarg(wrap::Symbol=:div)
-    kwarg(forcewrap::Bool=false)
+@api class => (Class <: Tile) begin
+    doc("Add a HTML class.")
+    arg(class::String, doc="Space separated classes.")
+    curry(content::TileList, doc="A tile or a vector of tiles.")
+    kwarg(
+        forcewrap::Bool=false,
+        doc="""If set to true, contents will be put in a containing tag and the
+               classes are set on the container, even if there is only one tile.
+               """
+    )
+    kwarg(wrap::Symbol=:div, doc="The tag to use for the container.")
 end
 
 maybestring(s::String, state) = s
@@ -74,7 +80,7 @@ render(c::Class, state) =
                c.class)
 
 @doc """
-given a sentinal, vector of parts, prefix, suffix and a value,
+given a sentinal, vector of parts, prefix, suffix and a value, 
 
 if the vector of parts is referentially equal to the sentinal, then returns
     [prefix * suffix => value]

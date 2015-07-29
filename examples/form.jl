@@ -14,7 +14,7 @@ function main(window)
 
     lift(inp) do dict
         vbox(
-            sample(s, form) >>> inp,
+            plugsampler(s, form) >>> inp,
             vskip(2em),
             string(dict)
         ) |> pad(2em)

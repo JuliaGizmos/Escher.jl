@@ -6,10 +6,9 @@ export stoppropagation,
        constant,
        pairwith,
        sampler,
-       sample,
+       plugsampler,
        trigger!,
        watch!,
-       pairwithindex,
        subscribe
 #=
    Note: Maybe use
@@ -62,6 +61,12 @@ addinterpreter(i::Interpreter, tile::Behavior) =
     WithInterpreter(Chained(i, default_interpreter(tile)), tile)
 addinterpreter(i::Interpreter) = t -> addinterpreter(i, t)
 
+@apidoc addinterpreter => (WithInterpreter <: Behavior) begin
+    doc("Attach an interpreter to a widget/behavior.")
+    arg(interpreter::Interpreter, doc="An interpreter.")
+    curry(tile::Behavior, doc="The widget/behavior.")
+end
+
 default_interpreter(t::WithInterpreter) = t.interpreter
 
 
@@ -90,16 +95,12 @@ interpret(dec::PairWith, x) = (x, dec.value)
 
 pairwith(x) = addinterpreter(PairWith(x))
 pairwith(x, tile::Tile) = addinterpreter(PairWith(x), tile)
-pairwith(x::AbstractArray, tiles::AbstractArray) = map(pairwith, x, tiles)
-pairwith(x, tiles::AbstractArray) = map(pairwith(x))
 
-pairwithindex(tiles::AbstractVector) =
-    [pairwith(i, v)
-        for (i, v) in enumerate(tiles)]
-
-pairwithindex(tiles::AbstractMatrix) =
-    [pairwith((i, j), tiles[i, j])
-        for i=1:size(tiles, 1), j=1:size(tiles, 2)]
+@apidoc pairwith => (WithInterpreter <: Behavior) begin
+    doc("An interpreter that pairs the updated value with a constant.")
+    arg(constant::Any, doc="The constant.")
+    curry(tile::Tile, doc="The widget/behavior.")
+end
 
 # Instead of the signal value, use a constant
 immutable Const <: Interpreter
@@ -110,8 +111,13 @@ interpret(dec::Const, _) = dec.value
 
 constant(x, tile) = addinterpreter(Const(x), tile)
 constant(x) = addinterpreter(Const(x))
-constant(xs::AbstractArray, tiles::AbstractArray) = map(constant, xs, tiles)
-constant(x, tiles::AbstractArray) = map(constant(x), tiles)
+
+@apidoc constant => (WithInterpreter <: Behavior) begin
+    doc("""A constant interpreter. Ignores updated values and interpret them as 
+           a constant.""")
+    arg(x::Any, doc="The constant.")
+    curry(tile::Tile, doc="The widget/behavior.")
+end
 
 # Apply a function
 immutable InterpreterFn <: Interpreter
@@ -162,6 +168,23 @@ subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input}); absorb=true) =
 subscribe(t::WithInterpreter, s::Input; absorb=true) =
     subscribe(t.tile, name(t), (t.interpreter, s), absorb=absorb)
 
+@apidoc subscribe => (Subscription <: Tile) begin
+    doc(md"""Subscribe to updates from a widget/behavior. `>>>` is an infix
+             alias to subscribe"""
+    )
+    arg(tile::Tile, doc="The widget/behavior.")
+    arg(
+        input::Input,
+        doc=md"""The input signal to update. See
+            [Reactive.jl documentation](http://julialang.org/Reactive.jl/#a-tutorial-introduction) 
+            for more on input signals."""
+    )
+    kwarg(
+        absorb::Bool,
+        doc="If set to true, the update event will not bubble out from the widget."
+    )
+end
+
 render(sig::Subscription, state) =
     render(sig.tile, state) <<
         Elem("signal-transport",
@@ -176,11 +199,13 @@ setup_transport(x) = makeid(x)
 
 ### Sampling
 
-@api sampler => Sampler <: Interpreter begin
-    arg(triggers::Dict)
-    arg(watched::Dict)
+@api sampler => (Sampler <: Interpreter) begin
+    doc(md"""A means to make forms. Use `watch!` and `trigger!` to specify which
+         widgets/behavior to watch and which widgets/behavior trigger the form.
+         """) 
+    arg(triggers::Dict=Dict(), doc="Internal store for trigger elements.")
+    arg(watched::Dict=Dict(), doc="Internal store for watched elements.")
 end
-sampler() = Sampler(Dict(), Dict())
 
 interpret(s::Sampler, msg) = begin
     try
@@ -208,6 +233,13 @@ end
 
 watch!(sampler::Sampler) = t -> watch!(sampler, t)
 
+@apidoc watch! => (Tile) begin
+    doc("""Make a sampler watch a widget/behavior. Returns the input 
+         widget/behavior.""")
+    arg(sampler::Sampler, doc="The sampler to add the watch on.")
+    curry(tile::Tile, doc="The widget/behavior.")
+end
+
 trigger!(sampler::Sampler, tile) = begin
     sampler.triggers[name(tile)] = default_interpreter(tile)
     broadcast(tile)
@@ -215,11 +247,21 @@ end
 
 trigger!(sampler::Sampler) = t -> trigger!(sampler, t)
 
-@api sample => Sampled <: Behavior begin
-    arg(sampler::Sampler)
-    curry(tile::Tile)
-    kwarg(name::Symbol=:_sampled)
+@apidoc trigger! => (Tile) begin
+    doc("""Make a sampler trigger on a change to a widget/behavior. Returns the
+         input widget/behavior.""")
+    arg(sampler::Sampler, doc="The sampler to add the trigger on.")
+    curry(tile::Tile, doc="The widget/behavior.")
 end
+
+@api plugsampler => (Sampled <: Behavior) begin
+    doc("""Attach a sampler to a tile containing the widgets the sampler deals
+           with.""")
+    arg(sampler::Sampler, doc=md"The `sampler`." )
+    curry(tile::Tile, doc="The tile to attach the sampler to.")
+    kwarg(name::Symbol=:_sampled, doc="The name to identify the behavior.")
+end
+
 render(s::Sampled, state) =
     render(s.tile, state) <<
         Elem("signal-sampler",
@@ -251,16 +293,14 @@ end
 fromid(id) = id_to_signal[id]
 
 # Don't allow a signal to propagate outward
-immutable StopPropagation <: Tile
-    tile::Tile
-    name::Symbol
+@api stoppropagation => (StopPropagation <: Tile) begin
+    doc(md"""Stop bubbling of behavior/widget state in the web page. 
+             `Subscribing` to a behavior by default adds a `stoppropagation` 
+             to the tile."""
+    )
+    arg(tile::Tile, doc="Tile to contain the updates inside.")
+    arg(name::Symbol, doc="Name of the widget/behavior to stop.")
 end
-
-@doc """
-Stop a UI signal from propagating further.
-""" ->
-stoppropagation(tile::Tile, name::Symbol) =
-    StopPropagation(tile, name)
 
 render(tile::StopPropagation, state) =
     render(tile.tile, state) <<
