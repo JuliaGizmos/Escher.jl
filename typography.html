@@ -19,7 +19,7 @@ var isVPatch = require('./is-vpatch');
 var P = Patchwork = {
     nodes: {},
     debug: false,
-    Node: function (id, jlNode, el) {
+    Node: function (id, jlNode, el, renderOpts) {
         if (typeof(el) === "undefined") {
             el = document.getElementById(id)
         }
@@ -28,7 +28,7 @@ var P = Patchwork = {
             // Note: makes this.root
             var vnode = P.makeVNode(jlNode)
             P.log("makeVNode: ", jlNode, "=>", vnode)
-            this.mount(vnode, el)
+            this.mount(vnode, el, renderOpts)
         }
         P.nodes[id] = this
     },
@@ -136,7 +136,7 @@ var P = Patchwork = {
         case VPatch.ORDER:
             return vpatch(patch);
         case VPatch.INSERT:
-            return vpatch(P.makeVNode(patch)); // What about vtext?
+            return vpatch(P.makeVNode(patch));
         case VPatch.REMOVE:
             return vpatch(null);
         default:
@@ -151,8 +151,8 @@ var P = Patchwork = {
 }
 
 Patchwork.Node.prototype = {
-    mount: function (vnode, outer) {
-        var el = createElement(vnode);
+    mount: function (vnode, outer, renderOpts) {
+        var el = createElement(vnode, renderOpts);
         P.log("createElement: ", vnode, "=>", el)
         outer.appendChild(el)
         this.element = el
@@ -399,8 +399,12 @@ var handleThunk = require("vtree/handle-thunk")
 
 module.exports = createElement
 
+function id(x) { return x }
+
 function createElement(vnode, opts) {
+
     var doc = opts ? opts.document || document : document
+    var domWrap = opts ? opts.domWrap || id : id
     var warn = opts ? opts.warn : null
 
     vnode = handleThunk(vnode).a
@@ -417,8 +421,8 @@ function createElement(vnode, opts) {
     }
 
     var node = (vnode.namespace === null) ?
-        doc.createElement(vnode.tagName, vnode.properties.is) :
-        doc.createElementNS(vnode.namespace, vnode.tagName)
+        domWrap(doc.createElement(vnode.tagName, vnode.properties.is)) :
+        domWrap(doc.createElementNS(vnode.namespace, vnode.tagName))
 
     var props = vnode.properties
     applyProperties(node, props)
@@ -2135,10 +2139,10 @@ function vNodePatch(node, patch) {
 <link rel="import" href="assets/codemirror.html">
 
 <body>
-<div id="root">
+<signal-container id="root"></signal-container>
 </div>
 <script>
-    new Patchwork.Node("root", {"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"div","p":{"style":{"padding":"4.0em","maxWidth":"62.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"span","p":{"className":"title-3 "},"c":[{"txt":"Typography"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"className":"md-paragraph "},"c":[{"t":"span","c":[{"txt":"Escher provides primitives that directly map to CSS font styling properties, as well as higher-level functions which form a standard typographic scale you can use to give your documents a consistent, pleasant look. By default, Escher uses the "}]},{"t":"a","p":{"href":"http://www.google.com/fonts/specimen/Source+Sans+Pro"},"c":[{"t":"em","p":{"className":"emph "},"c":[{"txt":"Source Sans Pro"}]}]},{"t":"span","c":[{"txt":" (sans-serif) and "}]},{"t":"a","p":{"href":"http://www.google.com/fonts/specimen/Source+Code+Pro"},"c":[{"t":"em","p":{"className":"emph "},"c":[{"txt":"Source Code Pro"}]}]},{"t":"span","c":[{"txt":" (monospaced) font families for great-looking and legible type."}]}]},{"t":"h1","p":{"className":"md-heading heading-1 "},"c":[{"txt":"High-level Functions"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"h1","p":{"className":"heading-2 "},"c":[{"txt":"Titles"}]},{"t":"div","p":{"style":{"paddingTop":"1.0em","paddingBottom":"1.0em"}},"c":[{"t":"div","p":{"style":{"paddingLeft":"4.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(4, \"Title 4\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-4 "},"c":[{"txt":"Title 4"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(3, \"Title 3\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-3 "},"c":[{"txt":"Title 3"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(2, \"Title 2\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-2 "},"c":[{"txt":"Title 2"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(1, \"Title 1\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-1 "},"c":[{"txt":"Title 1"}]}]}]}]}]}]},{"t":"h1","p":{"className":"heading-2 "},"c":[{"txt":"Headings"}]},{"t":"div","p":{"style":{"paddingTop":"1.0em","paddingBottom":"1.0em"}},"c":[{"t":"div","p":{"style":{"paddingLeft":"4.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(1, \"Heading 1\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-1 "},"c":[{"txt":"Heading 1"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(2, \"Heading 2\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-2 "},"c":[{"txt":"Heading 2"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(3, \"Heading 3\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-3 "},"c":[{"txt":"Heading 3"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(4, \"Heading 4\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-4 "},"c":[{"txt":"Heading 4"}]}]}]}]}]}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}}]}]},{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}}]})
+    new Patchwork.Node("root", {"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}},{"t":"div","p":{"style":{"padding":"4.0em","maxWidth":"50.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"span","p":{"className":"title-3 "},"c":[{"txt":"Typography"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"className":"md-paragraph "},"c":[{"t":"span","c":[{"txt":"Escher provides primitives that directly map to CSS font styling properties, as well as higher-level functions which form a standard typographic scale you can use to give your documents a consistent, pleasant look. By default, Escher uses the "}]},{"t":"a","p":{"href":"http://www.google.com/fonts/specimen/Source+Sans+Pro"},"c":[{"t":"em","p":{"className":"emph "},"c":[{"txt":"Source Sans Pro"}]}]},{"t":"span","c":[{"txt":" (sans-serif) and "}]},{"t":"a","p":{"href":"http://www.google.com/fonts/specimen/Source+Code+Pro"},"c":[{"t":"em","p":{"className":"emph "},"c":[{"txt":"Source Code Pro"}]}]},{"t":"span","c":[{"txt":" (monospaced) font families for great-looking and legible type."}]}]},{"t":"h1","p":{"className":"md-heading heading-1 "},"c":[{"txt":"High-level Functions"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"h1","p":{"className":"heading-2 "},"c":[{"txt":"Titles"}]},{"t":"div","p":{"style":{"paddingTop":"1.0em","paddingBottom":"1.0em"}},"c":[{"t":"div","p":{"style":{"paddingLeft":"4.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(4, \"Title 4\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-4 "},"c":[{"txt":"Title 4"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(3, \"Title 3\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-3 "},"c":[{"txt":"Title 3"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(2, \"Title 2\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-2 "},"c":[{"txt":"Title 2"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"title(1, \"Title 1\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"span","p":{"className":"title-1 "},"c":[{"txt":"Title 1"}]}]}]}]}]}]},{"t":"h1","p":{"className":"heading-2 "},"c":[{"txt":"Headings"}]},{"t":"div","p":{"style":{"paddingTop":"1.0em","paddingBottom":"1.0em"}},"c":[{"t":"div","p":{"style":{"paddingLeft":"4.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(1, \"Heading 1\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-1 "},"c":[{"txt":"Heading 1"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(2, \"Heading 2\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-2 "},"c":[{"txt":"Heading 2"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(3, \"Heading 3\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-3 "},"c":[{"txt":"Heading 3"}]}]}]},{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"code-mirror","p":{"lineNumbers":false,"style":{"color":"#707070"},"theme":"elegant","value":"heading(4, \"Heading 4\")","mode":"julia","readOnly":true}},{"t":"div","p":{"style":{"paddingLeft":"2.0em"}},"c":[{"t":"h1","p":{"className":"heading-4 "},"c":[{"txt":"Heading 4"}]}]}]}]}]}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}}]}]},{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}}]})
 </script>
 </body>
 </html>
