@@ -60,7 +60,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         )
 
         <body>
-        <div id="root">
+        <signal-container id="root"></signal-container>
         </div>
         <script>
             new Patchwork.Node("root", $(Patchwork.jsonfmt(Escher.render(getvalue(ui), state)) |> json))
