@@ -67,7 +67,7 @@ vbox(
 hline(color=color("#e1e1e1")),
 vskip(2em),
 Escher.fontsize(2em,
-     "Escher lets you build beautiful interactive Web UIs in Julia.") |>
+     "With Escher you can build beautiful Web UIs entirely in Julia.") |>
         textalign(centertext) |>
         fontweight(200) |>
         lineheight(1.2em) |>
@@ -128,9 +128,9 @@ julia> escher_serve()
 This might be what you need if you installed Escher using a dmg file on OSX.
 # An Overview
 
-Escher is built around 5 core rules. Understanding these rules gives you a foundation to understanding Escher's comprehensive API.
+Escher's APi consitently employs some patterns. Understanding these rules gives you a great foundation to understanding Escher's comprehensive API.
 
-## Rule 1: UIs are immutable values
+## Pattern 1: UIs are immutable values
 
 A UI in Escher is simply an immutable Julia value of the abstract type `Tile`. A Tile is rendered into a browser [DOM tree](http://en.wikipedia.org/wiki/Document_Object_Model) to actually display the UI.
 
@@ -240,9 +240,9 @@ main(window) = compose(sierpinski(6))
 $(vskip(2em))
 $(drawing(3Compose.inch, sqrt(3)/2*3Compose.inch, compose(sierpinski(6))) |> pad([left], 8em))
 
-## Rule 2: functions that modify a tile return a new tile
+## Pattern 2: functions that modify a tile return a new tile
 
-Library functions that take tiles as input do not modify the input, they return new tiles that contain the modifications intended. This is a corollary of Rule 1, since tiles cannot be modified.
+Library functions that take tiles as input do not modify the input, they return new tiles that contain the modifications intended. This is a result of Pattern 1, since tiles cannot be modified in-place.
 
 **Example 1.**
 
@@ -281,7 +281,7 @@ end
 
 $(fillcolor("#eeb", fontcolor("#499", Escher.pad(5Escher.mm, Escher.tex("T = 2\\pi\\sqrt{L\\over g}")))))
 
-## Rule 3: Escher functions have curried methods
+## Pattern 3: Escher functions have curried methods
 
 Omitting the last tile argument to escher functions returns a 1-argument function that takes a tile.
 
@@ -335,7 +335,7 @@ $(vskip(1em))
 `map(pad([left, right], 1em), ["A", "B", "C", "D"])` returns a vector of 4 tiles that each have a padding of `1em` to their left and right. Note that `pad([left, right], 1em)` returns a 1-argument function, making this possible.
 `map(fillcolor, colors, padded)` takes corresponding elements from the `colors` vector and `padded` vector and combines them using `fillcolor`, resulting in 4 colored tiles.  `intersperse(hskip(1em), tiles))` takes the 4-element vector `tiles` and returns a 7-element vector where `hskip(1em)` is *interspered* between each pair of adjacent tiles in `tiles`. `hskip(1em)` is simply a `1em` empty space along the horizontal axis. Finally, `hbox` puts the result of `intersperse` in a horizontal layout.
 
-## Rule 4: layout functions combine many Tiles into one
+## Pattern 4: layout functions combine many Tiles into one
 
 **Example 1.**
 
@@ -443,7 +443,7 @@ end)
 
 Other higher-order layout functions to try are: `menu`, `submenu`, `slideshow`.
 
-## Rule 5: An interactive UI is a Signal of UIs
+## Pattern 5: An interactive UI is a Signal of UIs
 
 [Reactive.jl](http://julialang.org/Reactive.jl) package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time.  [Reactive.jl's documentation](http://julialang.org/Reactive.jl) provides an overview of the signal framework. At this point it is highly recommended that you read it.
 

@@ -1,13 +1,23 @@
 using Color
 
+import Escher: @d
+
 getdoc(fn) =
     Escher.escher_meta[fn]
 
-badge(x, bg="#f1f1f1") =
-    fontsize(0.8em, x) |>
-    pad([left, right], 0.25em) |>
-    fillcolor(bg) |>
-    roundcorner(0.25em)
+const badge_themes = @d(
+    :default => fillcolor("#e1f0e5"),
+    :curried => fillcolor("#72b5a1"),
+    :typedkwarg => fillcolor("#444A95"),
+    :kwarg => fillcolor("#DC7F38"),
+    :typedarg => fillcolor("#DCA938"),
+)
+
+badge(x, theme=:default) =
+    fontsize(0.94em, x) |>
+    pad([left, right], 0.4em) |>
+    badge_themes[theme] |>
+    pad(0.2em)
 
 #=
 @doc """
@@ -34,7 +44,7 @@ function argsig(arg)
 
     sig = [name, fontcolor("#aaa", "::"), fontcolor(typ_color, typ)]
     if haskey(arg, :default)
-        sig = [sig, "=", fontcolor("#888", string(arg[:default]))]
+        sig = [sig, "=", fontcolor("#888", print_val(arg[:default]))]
         if !arg[:kwarg]
             sig = ["[ ", sig, " ]"]
         end
@@ -61,7 +71,7 @@ function signature(meta)
         sig = [ sig, "; ", hskip(0.5em), intersperse(sep, kwargs) ]
     end
     sig = [ sig, ")" ]
-    hbox(sig) |> wrap
+    hbox(sig..., hskip(0.5em), "→", hskip(0.5em), rettype(meta[:type]) |> fontcolor("#777"))
 end
 
 rettype(typ) =
@@ -73,42 +83,64 @@ rettype(typ) =
 
 rettype(typ::Symbol) = string(typ)
 
+print_val(x::Symbol) = ":$x"
+print_val(x::Expr) = sprint(io -> print(io, x))
+print_val(x) = sprint(io -> show(io, x))
+
 function argrow(arg)
     notes = Any[]
     if !arg[:coerced]
-        push!(notes, badge(hbox("requires ", hskip(0.5em), code(string(arg[:type])))))
+        push!(notes, badge(hbox("type ", hskip(0.5em), code(string(arg[:type]))), :typedarg))
     end
     if arg[:kwarg]
-        push!(notes, badge(abbr("Keyword argument", "kwarg")))
+        push!(notes, badge(abbr("Keyword argument", "kwarg"), :kwarg))
     end
     if arg[:curried]
-        push!(notes, badge(abbr("Curried argument: if you leave this argument out, you will get a function which takes this argument", "curried")))
+        push!(notes, badge(abbr("Curried argument: if you leave this argument out, you will get a function which takes this argument", "curried"), :curried))
     end
     if haskey(arg, :default)
-        push!(notes, badge("default=" * string(arg[:default])))
+        push!(notes, badge("default=" * print_val(arg[:default])))
     end
-    hbox(code(string(arg[:name])), intersperse(hskip(0.8em), notes, true)..., arg[:doc]) |>
-         pad([top, bottom], 0.25em)
+    Any[code(string(arg[:name])), vskip(2em), hskip(1em), hbox(notes) |> wrap, hskip(1em), arg[:doc]]'
 end
 
 function argstable(args)
-    vbox(map(argrow, args))
+    table(
+        None[],
+        reduce(vcat, map(argrow, args))
+    )
 end
 
 
 band(t, bg="#f1f1f1", fg="#000") =
       fontweight(500, t) |> fontcolor(fg) |> fontstyle(italic)
 
+import Escher:@api, render
+
+@api table => (Table <: Tile) begin
+    arg(headers::AbstractVector)
+    arg(columns::AbstractMatrix)
+end
+
+render_cell(x, state) = Elem(:td, render(x, state))
+render_row(xs, state) = Elem(:tr, map(x -> render_cell(x, state), xs))
+
+render(t::Table, state) =
+    Elem(:table, [
+        isempty(t.headers) ? [] : Elem(:thead, Elem(:th, map(h -> render_cell(h, state), t.headers))),
+        Elem(:tbody, map(row -> render_row(row, state), Any[sub(t.columns, i, :) for i in 1:size(t.columns, 1)]))
+    ])
+
 function showdoc(fn)
     d = getdoc(fn)
     docmd = d[:doc]
 
     vbox(
-        hbox(signature(d),
-             hbox(hskip(1em), "→", hskip(0.5em), rettype(d[:type])) |> fontcolor("#777")) |> wrap |>
-                fonttype(monospace),
+        signature(d) |> wrap |> fonttype(monospace),
         vbox(
+             vskip(1em),
              pad([left], 1em, docmd),
+             vskip(1em),
              band("Arguments"),
              argstable(d[:args]) |> pad([left, right], 1em) |> pad([top, bottom], 0.5em)
         ) |> pad([left], 1em)
@@ -116,7 +148,7 @@ function showdoc(fn)
 end
 
 showdocs(fns) =
-   vbox(intersperse([vskip(1em), 
+   vbox(intersperse([vskip(2em), 
         border([bottom], solid, 1px, color("#ddd"), empty),
-        vskip(1em)],
+        vskip(2em)],
         map(showdoc, fns)))
