@@ -1,18 +1,4 @@
-include("helpers/repl.jl")
-
-listing(code, output=showoutput(code)) = begin
-    input = Input(code)
-    cell = hbox(
-        code_io(code, input) |> width(30em),
-        hskip(0.5em),
-        vline(),
-        hskip(0.5em),
-        vbox(
-            lift(showoutput, input, typ=Any, init=output)
-        ) |> wrap |> width(30em) |> Escher.pad(0.5em) |> fillcolor("white")
-    ) |> Escher.pad(1em) |> paper(1)
-    hbox(cell, flex())
-end
+include("helpers/listing.jl")
 
 hello_str = "\"Hello, World\""
 
@@ -57,11 +43,61 @@ function main(window)
         listing(md_str),
 
         vskip(1em),
+        h2("Code"),
+        md"""To show code with syntax highlighting, you can use the `codemirror` function. Codemirror requires the `"codemirror"` asset. 
+        
+        Use `push!(window.assets, "codemirror")` to do this.""",
+        vskip(1em),
+        listing("""
+            push!(window.assets, "codemirror")
+            
+            codemirror(\"\"\"
+                function foo()
+                42
+                end
+                \"\"\"
+            )
+            """,
+            codemirror("""
+                function foo()
+                    42
+                end
+                """
+            )
+        ),
+        md"""Note that you also need the `"codemirror"` asset to be loaded even if you are writing code inside `md`.""",
+
+        vskip(1em),
         h2("LaTeX"),
-        "LaTeX strings can be rendered with the `tex` function.",
+        md"LaTeX strings can be rendered with the `tex` function.",
         vskip(1em),
         listing("""
         tex("(a+b)^2=a^2+b^2+2ab")"""),
+        
+        md"[SymPy.jl](https://github.com/jverzani/SymPy.jl) can be used to generate mathematical expressions. Escher automatically typesets them to LaTex.",
+        vskip(1em),
+        listing("""
+        using SymPy
+        x = Sym("x")
+        SymPy.diff(sin(x^2), x, 5)"""),
+
+        h2("Images"),
+        md"External images can be included using the `image` function.",
+        vskip(1em),
+        listing("""
+        image(
+            "https://upload.wikimedia.org/wikipedia/en/thumb/2/24/Lenna.png/220px-Lenna.png",
+            alt="Lenna",
+        )
+        """),
+        
+        md"Images can also be read in from the [`Images.jl`](https://github.com/timholy/Images.jl/) package.",
+        vskip(1em),
+        listing("""
+        using Images
+        grayim(rand(100,100))
+        """),
+
 
     ) |> pad(2em)
 end
