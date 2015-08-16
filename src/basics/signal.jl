@@ -304,7 +304,7 @@ end
 
 render(tile::StopPropagation, state) =
     render(tile.tile, state) <<
-        Elem("stop-propagation", name=tile.name)
+        Elem("stop-propagation", names=[tile.name])
 
 immutable SignalWrap <: Tile
     signal::Signal
@@ -315,5 +315,5 @@ convert(::Type{Tile}, x::Signal) = SignalWrap(x)
 render(tile::SignalWrap, state) = begin
     id = "signal-" * makeid(tile.signal)
     state["embedded_signals"][id] = tile.signal
-    Elem("signal-container", attributes=@d(:id => id))
+    Elem("signal-container", signalId=id)
 end

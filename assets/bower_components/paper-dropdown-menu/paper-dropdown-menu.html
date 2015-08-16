@@ -1,5 +1,6 @@
 <!--
-Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
@@ -7,178 +8,325 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-styles/default-theme.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
+<link rel="import" href="../iron-behaviors/iron-control-state.html">
+<link rel="import" href="../iron-behaviors/iron-button-state.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-selector/iron-selectable.html">
+
 <!--
+`paper-dropdown-menu` is similar to a native browser select element.
+`paper-dropdown-menu` works with selectable content. The currently selected
+item is displayed in the control. If no item is selected, the `label` is
+displayed instead.
 
-`paper-dropdown-menu` works together with `paper-dropdown` and `core-menu` to
-implement a drop-down menu. The currently selected item is displayed in the
-control. If no item is selected, the `label` is displayed instead.
-
-The child element with the class `dropdown` will be used as the drop-down
-menu. It should be a `paper-dropdown` or other overlay element. You should
-also provide a `core-selector` or other selector element, such as `core-menu`,
-in the drop-down. You should apply the class `menu` to the selector element.
+The child element with the class `dropdown-content` will be used as the dropdown
+menu. It could be a `paper-menu` or element that triggers `iron-activate` when
+selecting its children.
 
 Example:
 
-    <paper-dropdown-menu label="Your favorite pastry">
-        <paper-dropdown class="dropdown">
-            <core-menu class="menu">
-                <paper-item>Croissant</paper-item>
-                <paper-item>Donut</paper-item>
-                <paper-item>Financier</paper-item>
-                <paper-item>Madeleine</paper-item>
-            </core-menu>
-        </paper-dropdown>
+    <paper-dropdown-menu label="Your favourite pastry">
+      <paper-menu class="dropdown-content">
+        <paper-item>Croissant</paper-item>
+        <paper-item>Donut</paper-item>
+        <paper-item>Financier</paper-item>
+        <paper-item>Madeleine</paper-item>
+      </paper-menu>
     </paper-dropdown-menu>
 
-This example renders a drop-down menu with 4 options.
+This example renders a dropdown menu with 4 options.
+
+### Styling
+
+The following custom properties and mixins are also available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-dropdown-menu` | A mixin that is applied to the element host | `{}`
+`--paper-dropdown-menu-disabled` | A mixin that is applied to the element host when disabled | `{}`
+`--paper-dropdown-menu-ripple` | A mixin that is applied to the internal ripple | `{}`
+`--paper-dropdown-menu-button` | A mixin that is applied to the internal menu button | `{}`
+`--paper-dropdown-menu-input` | A mixin that is applied to the internal paper input | `{}`
+`--paper-dropdown-menu-icon` | A mixin that is applied to the internal icon | `{}`
+
+You can also use any of the `paper-input-container` and `paper-menu-button`
+style mixins and custom properties to style the internal input and menu button
+respectively.
 
 @group Paper Elements
 @element paper-dropdown-menu
-@extends core-dropdown-base
-@mixins Polymer.CoreFocusable https://github.com/polymer/core-focusable
-@status unstable
-@homepage github.io
+@hero hero.svg
+@demo demo/index.html
 -->
 
-<!--
-Fired when an item's selection state is changed. This event is fired both
-when an item is selected or deselected. The `isSelected` detail property
-contains the selection state.
-
-@event core-select
-@param {Object} detail
-  @param {boolean} detail.isSelected true for selection and false for deselection
-  @param {Object} detail.item the item element
--->
-<link href="../polymer/polymer.html" rel="import">
-
-<link href="../core-a11y-keys/core-a11y-keys.html" rel="import">
-<link href="../core-dropdown/core-dropdown-base.html" rel="import">
-<link href="../core-focusable/core-focusable.html" rel="import">
-<link href="../core-icon/core-icon.html" rel="import">
-<link href="../core-icons/core-icons.html" rel="import">
-<link href="../paper-shadow/paper-shadow.html" rel="import">
-
-<style shim-shadowdom>
-  html /deep/ #paper-dropdown-menu-dropdown {
-    margin: 12px;
-    overflow: visible;
-  }
-
-  html /deep/ #paper-dropdown-menu-dropdown #menu {
-    padding: 8px 0;
-    margin: 0;
-  }
-
-  html /deep/ #paper-dropdown-menu-dropdown .menu-container {
-    overflow: auto;
-    max-height: 100%;
-    max-width: 100%;
-  }
-</style>
-
-<polymer-element name="paper-dropdown-menu" extends="core-dropdown-base" relative layout inline horizontal center tabindex="0">
-<template>
-
+<dom-module id="paper-dropdown-menu">
   <style>
     :host {
-      -moz-user-select: none;
-      -ms-user-select: none;
-      -webkit-user-select: none;
-      user-select: none;
+      display: inline-block;
+      position: relative;
+      text-align: left;
       cursor: pointer;
-      padding: 0.5em 0 0.25em;
-      margin: 1.1em 0;
-      border-bottom: 1px solid #757575;
-      outline: none;
+
+      --paper-input-container-input: {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        box-sizing: border-box;
+        cursor: pointer;
+      };
+
+      @apply(--paper-dropdown-menu);
     }
 
-    #label:not(.selectedItem), #arrow {
-      color: #757575;
+    :host([disabled]) {
+      @apply(--paper-dropdown-menu-disabled);
     }
 
-    #label {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+    :host([noink]) paper-ripple {
+      display: none;
     }
+
+    :host([no-label-float]) paper-ripple {
+      top: 8px;
+    }
+
+    paper-ripple {
+      top: 20px;
+      left: 8px;
+      bottom: 16px;
+      right: 8px;
+
+      @apply(--paper-dropdown-menu-ripple);
+    }
+
+    paper-menu-button {
+      @apply(--paper-dropdown-menu-button);
+    }
+
+    paper-input {
+      @apply(--paper-dropdown-menu-input);
+    }
+
+    iron-icon {
+      color: var(--disabled-text-color);
+
+      @apply(--paper-dropdown-menu-icon);
+    }
+
   </style>
-
-  <core-a11y-keys target="{{}}" keys="enter space" on-keys-pressed="{{toggleOverlay}}"></core-a11y-keys>
-
-  <div flex auto id="label">{{selectedItemLabel || label}}</div>
-  <core-icon id="arrow" icon="{{opened ? openedIcon : closedIcon}}"></core-icon>
-
-  <content></content>
-
-</template>
+  <template>
+    <paper-menu-button
+      id="menuButton"
+      vertical-align="top"
+      horizontal-align="right"
+      vertical-offset="[[_computeMenuVerticalOffset(noLabelFloat)]]"
+      disabled="[[disabled]]"
+      no-animations="[[noAnimations]]"
+      on-iron-activate="_onIronActivate"
+      opened="{{opened}}">
+      <div class="dropdown-trigger">
+        <paper-ripple></paper-ripple>
+        <paper-input
+          readonly
+          disabled="[[disabled]]"
+          value="[[selectedItemLabel]]"
+          placeholder="[[placeholder]]"
+          always-float-label="[[alwaysFloatLabel]]"
+          no-label-float="[[noLabelFloat]]"
+          label="[[label]]">
+          <iron-icon icon="arrow-drop-down" suffix></iron-icon>
+        </paper-input>
+      </div>
+      <div class="dropdown-content">
+        <content select=".dropdown-content"></content>
+      </div>
+    </paper-menu-button>
+  </template>
+</dom-module>
 <script>
+  (function() {
+    'use strict';
 
-(function() {
-
-  var p = {
-
-    publish: {
-
-      /**
-       * A label for the control. The label is displayed if no item is selected.
-       *
-       * @attribute label
-       * @type string
-       * @default 'Select an item'
-       */
-      label: 'Select an item',
+    Polymer({
+      is: 'paper-dropdown-menu',
 
       /**
-       * The icon to display when the drop-down is opened.
+       * Fired when the dropdown opens.
        *
-       * @attribute openedIcon
-       * @type string
-       * @default 'arrow-drop-up'
+       * @event paper-dropdown-open
        */
-      openedIcon: 'arrow-drop-up',
 
       /**
-       * The icon to display when the drop-down is closed.
+       * Fired when the dropdown closes.
        *
-       * @attribute closedIcon
-       * @type string
-       * @default 'arrow-drop-down'
+       * @event paper-dropdown-close
        */
-      closedIcon: 'arrow-drop-down'
 
-    },
+      behaviors: [
+        Polymer.IronControlState,
+        Polymer.IronButtonState
+      ],
 
-    selectedItemLabel: '',
+      properties: {
+        /**
+         * The derived "label" of the currently selected item. This value
+         * is the `label` property on the selected item if set, or else the
+         * trimmed text content of the selected item.
+         */
+        selectedItemLabel: {
+          type: String,
+          notify: true,
+          computed: '_computeSelectedItemLabel(selectedItem)'
+        },
 
-    overlayListeners: {
-      'core-overlay-open': 'openAction',
-      'core-activate': 'activateAction',
-      'core-select': 'selectAction'
-    },
+        /**
+         * The last selected item. An item is selected if the dropdown menu has
+         * a child with class `dropdown-content`, and that child triggers an
+         * `iron-activate` event with the selected `item` in the `detail`.
+         */
+        selectedItem: {
+          type: Object,
+          notify: true,
+          readOnly: true
+        },
 
-    activateAction: function(e) {
-      this.opened = false;
-    },
+        /**
+         * The label for the dropdown.
+         */
+        label: {
+          type: String
+        },
 
-    selectAction: function(e) {
-      var detail = e.detail;
-      if (detail.isSelected) {
-        this.$.label.classList.add('selectedItem');
-        this.selectedItemLabel = detail.item.label || detail.item.textContent;
-      } else {
-        this.$.label.classList.remove('selectedItem');
-        this.selectedItemLabel = '';
+        /**
+         * The placeholder for the dropdown.
+         */
+        placeholder: {
+          type: String
+        },
+
+        /**
+         * True if the dropdown is open. Otherwise, false.
+         */
+        opened: {
+          type: Boolean,
+          notify: true,
+          value: false
+        },
+
+        /**
+         * Set to true to disable the floating label. Bind this to the
+         * `<paper-input-container>`'s `noLabelFloat` property.
+         */
+        noLabelFloat: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+        },
+
+        /**
+         * Set to true to always float the label. Bind this to the
+         * `<paper-input-container>`'s `alwaysFloatLabel` property.
+         */
+        alwaysFloatLabel: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Set to true to disable animations when opening and closing the
+         * dropdown.
+         */
+        noAnimations: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      listeners: {
+        'tap': '_onTap'
+      },
+
+      keyBindings: {
+        'up down': 'open',
+        'esc': 'close'
+      },
+
+      hostAttributes: {
+        role: 'group',
+        'aria-haspopup': 'true'
+      },
+
+      /**
+       * Show the dropdown content.
+       */
+      open: function() {
+        this.$.menuButton.open();
+      },
+
+      /**
+       * Hide the dropdown content.
+       */
+      close: function() {
+        this.$.menuButton.close();
+      },
+
+      /**
+       * A handler that is called when `iron-activate` is fired.
+       *
+       * @param {CustomEvent} event An `iron-activate` event.
+       */
+      _onIronActivate: function(event) {
+        this._setSelectedItem(event.detail.item);
+      },
+
+      /**
+       * A handler that is called when the dropdown is tapped.
+       *
+       * @param {CustomEvent} event A tap event.
+       */
+      _onTap: function(event) {
+        if (Polymer.Gestures.findOriginalTarget(event) === this) {
+          this.open();
+        }
+      },
+
+      /**
+       * Compute the label for the dropdown given a selected item.
+       *
+       * @param {Element} selectedItem A selected Element item, with an
+       * optional `label` property.
+       */
+      _computeSelectedItemLabel: function(selectedItem) {
+        if (!selectedItem) {
+          return '';
+        }
+
+        return selectedItem.label || selectedItem.textContent.trim();
+      },
+
+      /**
+       * Compute the vertical offset of the menu based on the value of
+       * `noLabelFloat`.
+       *
+       * @param {boolean} noLabelFloat True if the label should not float
+       * above the input, otherwise false.
+       */
+      _computeMenuVerticalOffset: function(noLabelFloat) {
+        // NOTE(cdata): These numbers are somewhat magical because they are
+        // derived from the metrics of elements internal to `paper-input`'s
+        // template. The metrics will change depending on whether or not the
+        // input has a floating label.
+        return noLabelFloat ? -4 : 16;
       }
-    }
-
-  };
-
-  Polymer.mixin2(p, Polymer.CoreFocusable);
-  Polymer(p);
-
-})();
-
+    });
+  })();
 </script>
-</polymer-element>
+

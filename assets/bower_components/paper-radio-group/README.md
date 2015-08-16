@@ -1,7 +1,20 @@
 paper-radio-group
 =================
 
-**This element is compatible with Polymer 0.5 and lower only, and will be deprecated.**  
-You can check out a similar 0.8-compatible version of this element at [https://github.com/polymerelements/paper-radio-group](https://github.com/polymerelements/paper-radio-group)
+`paper-radio-group` allows user to select only one radio button from a set.
+Checking one radio button that belongs to a radio group unchecks any
+previously checked radio button within the same group. Use
+`selected` to get or set the selected radio button.
 
-See the [component page](https://www.polymer-project.org/0.5/docs/elements/paper-radio-group.html) for more information.
+Example:
+
+```html
+<paper-radio-group selected="small">
+  <paper-radio-button name="small">Small</paper-radio-button>
+  <paper-radio-button name="medium">Medium</paper-radio-button>
+  <paper-radio-button name="large">Large</paper-radio-button>
+</paper-radio-group>
+```
+
+See <a href="paper-radio-button.html">paper-radio-button</a> for more
+information about `paper-radio-button`.

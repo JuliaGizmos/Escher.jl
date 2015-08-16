@@ -8,6 +8,7 @@ export broadcast,
        togglebutton,
        textinput,
        progress,
+       spinner,
        paper,
        datepicker
 
@@ -47,9 +48,9 @@ end
 render(b::Button, state) =
     Elem("paper-button", render(b.label, state);
         attributes=@d(
-            :raised => boolattr(b.raised, "raised"),
-            :noink => boolattr(b.noink, "noink"),
-            :disabled => boolattr(b.disabled, "disabled")
+            :raised => boolattr(b.raised),
+            :noink => boolattr(b.noink),
+            :disabled => boolattr(b.disabled)
         )
     )
 
@@ -93,23 +94,25 @@ broadcast(s::Slider) =
         hasstate(s, name=s.name))
 
 render(s::Slider, state) =
-    Elem("paper-slider",
-        min=first(s.range),
-        max=last(s.range),
-        step=step(s.range),
-        value=s.value,
-        editable=s.editable,
-        pin=s.pin,
-        disabled=s.disabled,
-        secondaryProgress=s.secondaryprogress)
+    Elem("paper-slider", attributes=@d(
+        :min => first(s.range),
+        :max => last(s.range),
+        :step => step(s.range),
+        :value => s.value,
+        :editable => boolattr(s.editable),
+        :pin => boolattr(s.pin),
+        :disabled => boolattr(s.disabled),
+        :secondaryProgress => s.secondaryprogress,
+        )
+    )
 
 
 ## Checkbox 
 @api checkbox => (Checkbox <: Widget) begin
     doc("A checkbox.")
     arg(value::Bool=false, doc="State of the checkbox.")
+    arg(label::Tile="", doc="The label.")
     kwarg(name::Symbol=:_checkbox,doc="Name to identify the widget.")
-    kwarg(label::String="", doc="The label.") #FIXME: Does this work?
     kwarg(
         disabled::Bool=false,
         doc="If set to true, the checkbox will be disabled."
@@ -122,9 +125,11 @@ broadcast(c::Checkbox) =
 
 render(c::Checkbox, state) =
     Elem("paper-checkbox",
-        checked=c.value,
-        label=c.label,
-        disabled=boolattr(c.disabled, "disabled"),
+        render(c.label, state),
+        attributes = @d(
+            :checked=>boolattr(c.value),
+            :disabled=>boolattr(c.disabled),
+        )
     )
 
 ## Toggle Button
@@ -132,10 +137,13 @@ render(c::Checkbox, state) =
     doc("A toggle button.")
     arg(value::Bool=false, doc="State of the toggle button.")
     kwarg(name::Symbol=:_togglebutton, doc="Name to identify the widget.")
-    kwarg(label::String="", doc="The label.") #FIXME: Does this work?
     kwarg(
         disabled::Bool=false,
         doc="If set to true, the toggle button will be disabled."
+    )
+    kwarg(
+        toggles::Bool=true,
+        doc="If set to false, the user will not be able to change the state."
     )
 end
 
@@ -145,9 +153,11 @@ broadcast(c::ToggleButton) =
 
 render(c::ToggleButton, state) =
     Elem("paper-toggle-button",
-        checked=c.value,
-        label=c.label,
-        disabled=boolattr(c.disabled, "disabled"),
+        attributes = @d(
+            :checked=>boolattr(c.value),
+            :disabled=>boolattr(c.disabled),
+            :toggles=>boolattr(c.disabled),
+        )
     )
 
 ## Text input
@@ -171,8 +181,9 @@ render(c::ToggleButton, state) =
     kwarg(
         maxrows::Int=0,
         doc="""(Only in multiline mode). Maximum number of rows the input field
-        will expand to. More lines will make the text input scrollable.""")
+        will expand to. More lines will make the text input scrollable. (no limit if set to 0)""")
     kwarg(maxlength::Int=0, doc="Set the maximum length of input text.")
+    kwarg(minlength::Int=0, doc="Set the minimum length of input text (not available in multiline).")
     kwarg(
         charcounter::Bool=false,
         doc="If set to true, a character count is displayed below the input field."
@@ -183,6 +194,7 @@ render(c::ToggleButton, state) =
               not just some subset. The regular expression language is the same
               as [JavaScript's]
               (https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions)
+              (not available in multiline mode)
               ."""
     )
     #kwarg(autovalidate::Bool=true, doc="")
@@ -199,66 +211,60 @@ broadcast(t::TextInput, event="input") =
 render(t::TextInput, state) = begin
     if t.multiline
         if length(t.pattern) > 0
-            warn_once(
+            warn(
                 "Multi-line text input does not support pattern validation")
         end
-        base = Elem("textarea", t.value;
-            name=t.name,
-            id=t.name,
-        )
 
-        if t.maxlength > 0
-            base &= @d(:attributes => @d(:maxlength => t.maxlength))
-        end
+        elem = Elem("paper-textarea")
+
         if t.rows > 0
-            base &= @d(:attributes => @d(:rows => t.rows))
+            elem &= @d(:attributes => @d(:rows => t.rows))
         end
-        elem = Elem("paper-input-decorator",
-            Elem("paper-autogrow-textarea", base, maxRows=t.maxrows))
+
+        if t.maxrows > 0
+            elem &= @d(:attributes => @d(:maxRows => t.maxrows))
+        end
     else
-        base = Elem("input",
-            name=t.name,
-            id=t.name,
-            value=t.value,
-            attributes=@d(:is => "core-input")
-        )
+
+        elem = Elem("paper-input")
         if t.pattern != ""
-            base &= @d(:attributes => @d(:pattern => t.pattern))
+            elem &= @d(:attributes => @d("pattern" => t.pattern))
         end
-        if t.maxlength > 0
-            base &= @d(:attributes => @d(:maxlength => t.maxlength))
-        end
-        elem = Elem("paper-input-decorator", base)
     end
 
-    elem &= @d(:label => t.label,
-             :error => t.error,
-             :floatingLabel => t.floatinglabel,
-             :autoValidate => true,
-             :disabled => boolattr(t.disabled, "disabled"))
-
-    if t.charcounter
-        elem <<= Elem("polymer-char-counter", target=t.name)
+    if t.maxlength > 0
+        elem &= @d(:attributes => @d(:maxlength => t.maxlength))
     end
 
-    elem
-end
+    if t.minlength > 0
+        elem &= @d(:attributes => @d(:minlength => t.minlength))
+    end
 
-@api selectionitem => (SelectionItem <: Tile) begin
-    arg(value::Any)
-    curry(item::Tile)
+    elem & @d(:attributes => @d(
+                 "value" => t.value,
+                 "label" => t.label,
+                 "error-message" => t.error,
+                 "auto-validate" => boolattr(true),
+                 "disabled" => boolattr(t.disabled),
+                 "char-counter" => boolattr(t.charcounter),
+                 )
+             )
 end
-
-render(t::SelectionItem, state) =
-    Elem("paper-item", render(t.tile, state), value=t.value)
 
 ## Radio buttons
 
 @api radio => (RadioButton <: Tile) begin
     doc(md"""A radio button. Usually many radio buttons are grouped in a
     `radio group`.""")
-    arg(name::Symbol, doc="Name to identify the widget.")
-    curry(label::String, doc="The label.")
+    arg(
+        name::String,
+        doc=md"A name. The output of a `radiogroup` is the name of the selected radio button."
+    )
+    curry(label::Tile, doc="The label.")
+    kwarg(
+        value::Bool=false,
+        doc="Is this radio button selected. When using in a radiogroup set `selected` field in the group instead."
+    )
     kwarg(
         toggles::Bool=false,
         doc="If set to true, the radio button allows de-selection by clicking again."
@@ -270,30 +276,42 @@ render(t::SelectionItem, state) =
 end
 
 render(r::RadioButton, state) =
-    Elem("paper-radio-button", label=r.label,
-         name=r.name, toggles=r.toggles, disabled=r.disabled)
+    Elem("paper-radio-button",
+        render(r.label, state),
+        attributes=@d(
+            :name=>r.name,
+            :checked=>boolattr(r.value),
+            :toggles=>boolattr(r.toggles),
+            :disabled=>boolattr(r.disabled)
+        )
+    )
 
 @api radiogroup => (RadioGroup <: Widget) begin
     doc("""A group of radio buttons. At any time, only one radio button in a group
     can be selected.""")
     arg(radios::AbstractArray, doc="A vector of radio buttons.")
     kwarg(name::Symbol=:_radiogroup, doc="Name to identify the widget.")
-    kwarg(value::Symbol=:_none, doc="Currently selected value.") #FIXME: Check if this is correct.
+    kwarg(selected::String="", doc=md"Name of the currently selected `radiobutton`")
 end
 
 wrapradio(x::RadioButton) = x
 wrapradio(x) = begin
-    name, label = x
-    radio(name, label)
+    radio(string(x), x)
 end
 
 render(r::RadioGroup, state) =
     Elem("paper-radio-group",
         [render(wrapradio(b), state) for b in r.radios],
-        value=r.value,
-        name=r.name)
+        attributes=@d(
+            :selected=>r.selected,
+            :name=>r.name,
+        )
+    )
 
-broadcast(r::RadioGroup) = selectable(r, name=r.name)
+broadcast(r::RadioGroup) =
+    hasstate(r, name=r.name, attr="selected", trigger="paper-radio-group-changed") |>
+        addinterpreter(ToType{String}())
+
 
 @api selector => (Selector <: Widget) begin
     arg(items::AbstractArray)
@@ -307,7 +325,8 @@ end
     arg(active::Bool=true, doc="If set to false, the spinner will disappear.")
 end
 
-render(s::Spinner, state) = Elem("paper-spinner", active=s.active)
+render(s::Spinner, state) =
+    Elem("paper-spinner", attributes=@d(:active=>boolattr(s.active)))
 
 ## Progress bar
 
@@ -322,13 +341,15 @@ end
 
 render(p::ProgressBar, state) =
     Elem("paper-progress";
-        value=p.value,
-        secondaryProgress=p.secondaryprogress,
+        attributes = @d(
+            "value"=>p.value,
+            "secondary-progress"=>p.secondaryprogress,
+        )
     )
 
 @api paper => (PaperShadow <: Tile) begin
     doc("Raise a tile above the plane of the page and create a realistic shadow.")
-    arg(z::Int, doc="The level to raise to. Valid values are Integers 1 to 5.")
+    arg(elevation::Int, doc="The level to raise to. Valid values are Integers 1 to 5.")
     curry(tile::Tile, doc="The tile to be raised.")
     kwarg(
         animated::Bool=true,
@@ -337,9 +358,12 @@ render(p::ProgressBar, state) =
 end
 
 render(p::PaperShadow, state) =
-    Elem("paper-shadow", render(p.tile, state), z=p.z, animated=p.animated)
+    Elem("paper-material", render(p.tile, state),
+        attributes=@d(:elevation=>p.elevation, :animated=>p.animated))
 
 # Date picker
+
+# TODO: Migrate date picker to Polymer 1.0
 
 if VERSION < v"0.4.0-dev"
     using Dates
@@ -376,5 +400,5 @@ broadcast(p::DatePicker) = dateselection(p, name=p.name)
 
 # TODO: Interpret as bounds error if date exceeds range
 interpret(::DateInterpreter, d) = begin
-    date = Date(d["year"], d["month"], d["day"])
+    Date(d["year"], d["month"], d["day"])
 end
