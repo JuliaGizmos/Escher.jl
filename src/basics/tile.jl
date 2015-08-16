@@ -77,6 +77,7 @@ convert(::Type{TileList}, xs::AbstractArray) =
     TileList(xs)
 convert(::Type{TileList}, xs::Tuple) =
     TileList([x for x in xs])
+convert(::Type{TileList}, x::TileList) = x
 convert(::Type{TileList}, x) =
     TileList([x])
 

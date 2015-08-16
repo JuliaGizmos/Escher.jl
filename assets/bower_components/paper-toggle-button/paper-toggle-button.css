@@ -1,5 +1,6 @@
 /*
-Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
 The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
@@ -11,30 +12,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   display: inline-block;
 }
 
+:host([disabled]) {
+  pointer-events: none;
+}
+
 :host(:focus) {
-  outline: none;
+  outline:none;
 }
 
-/* Class selectors can be overridden by users. */
-
-.toggle-bar {
-  background-color: #000000;
+:host .toggle-bar {
+  background-color: var(--paper-toggle-button-unchecked-bar-color, #000000);
+  @apply(--paper-toggle-button-unchecked-bar);
 }
 
-.toggle-button {
-  background-color: #f1f1f1;
+:host .toggle-button {
+  background-color: var(--paper-toggle-button-unchecked-button-color, --paper-grey-50);
+  @apply(--paper-toggle-button-unchecked-button);
 }
 
-[checked] .toggle {
-  background-color: #0f9d58;
+:host([checked]) .toggle-bar {
+  background-color: var(--paper-toggle-button-checked-bar-color, --google-green-500);
+  @apply(--paper-toggle-button-checked-bar);
 }
 
-.toggle-ink {
-  color: #bbb;
+:host([checked]) .toggle-button {
+  background-color: var(--paper-toggle-button-checked-button-color, --google-green-500);
+  @apply(--paper-toggle-button-checked-button);
 }
 
-[checked] .toggle-ink {
-  color: #0f9d58;
+:host .toggle-ink {
+  color: var(--paper-toggle-button-unchecked-ink-color, --primary-text-color);
+}
+
+:host([checked]) .toggle-ink {
+  color: var(--paper-toggle-button-checked-ink-color, --google-green-500);
 }
 
 /* ID selectors should not be overriden by users. */
@@ -45,23 +56,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   height: 14px;
 }
 
-#toggleContainer[disabled] {
-  opacity: 0.3;
-  pointer-events: none;
-}
-
 #toggleBar {
   position: absolute;
   height: 100%;
   width: 100%;
   border-radius: 8px;
   pointer-events: none;
-  opacity: 0.26;
+  opacity: 0.4;
   transition: background-color linear .08s;
 }
 
-[checked] #toggleBar {
+:host([checked]) #toggleBar {
   opacity: 0.5;
+}
+
+:host([disabled]) #toggleBar {
+  background-color: #000;
+  opacity: 0.12;
 }
 
 #toggleButton {
@@ -70,9 +81,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.6);
   transition: -webkit-transform linear .08s, background-color linear .08s;
   transition: transform linear .08s, background-color linear .08s;
+  will-change: transform;
 }
 
 #toggleButton.dragging {
@@ -80,9 +92,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   transition: none;
 }
 
-[checked] #toggleButton {
+:host([checked]) #toggleButton {
   -webkit-transform: translate(16px, 0);
   transform: translate(16px, 0);
+}
+
+:host([disabled]) #toggleButton {
+  background-color: #bdbdbd;
+  opacity: 1;
 }
 
 #ink {
@@ -91,5 +108,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   left: -14px;
   width: 48px;
   height: 48px;
+  opacity: 0.5;
   pointer-events: none;
 }

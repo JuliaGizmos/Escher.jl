@@ -1,211 +1,268 @@
-<link rel="import" href="bower_components/core-a11y-keys/core-a11y-keys.html">
+<link rel="import" href="bower_components/iron-a11y-keys/iron-a11y-keys.html">
 
-<polymer-element
-    name="watch-state"
-    attributes="attr trigger"
-    extends="reactive-signal" >
+<dom-module
+  id="watch-state" >
+
+<template></template>
+
+<script>
+
+Polymer({
+  is: "watch-state",
+  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+  properties: {
+    attr: {
+      type: String,
+      value: "value"
+    },
+    trigger: {
+      type: String,
+      value: "change"
+    }
+  },
+  domInit: function () {
+    var self = this, elem = this.findElem()
+
+    this.setId()
+
+    // initialize
+    this.value = elem[self.attr]
+    if (typeof(val) === "undefined") {
+      this.value = elem.getAttribute(self.attr)
+    }
+
+    elem.addEventListener(this.trigger, function (ev) {
+      var val
+      if (self.source == "target") {
+        e = ev.target
+        val = e[self.attr]
+        if (typeof(val) === "undefined") {
+          val = e.getAttribute(self.attr)
+        }
+      } else {
+        val = elem[self.attr]
+        if (typeof(val) === "undefined") {
+          val = elem.getAttribute(self.attr)
+        }
+      }
+      self.value = val
+      self.update(elem)
+    })
+  }
+})
+
+</script>
+
+</dom-module>
+
+<dom-module
+  id="clickable-behavior">
+
 <template></template>
 
 <script>
 
 Polymer({
-    attr: "value",
-    trigger: "change",
-    elem: null,
-    domReady: function () {
-        //console.log("Setting up attr signal dom handler")
-        var self = this
-        this.elem = this.findElem()
-        var elem = this.elem
 
-        // initialize
-        this.value = elem[self.attr] || elem.getAttribute(self.attr)
+  is: "clickable-behavior",
+  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
 
-        elem.addEventListener(this.trigger, function (ev) {
-            var val;
-            if (self.source == "target") {
-                e = ev.target
-                val = e[self.attr] || e.getAttribute(self.attr)
-            } else {
-                val = elem[self.attr] || elem.getAttribute(self.attr)
-            }
-            if (typeof(val) === "function") {
-                val = val.call(elem)
-            }
-            self.value = val
-            self.update()
-        })
-        this.super()
+  properties: {
+    buttons: {
+      type:Array,
+      value: [1]
     }
-})
+  },
+  domInit: function () {
+    var self = this, elem = this.findElem()
 
-</script>
+    this.setId()
 
-</polymer-element>
-
-<polymer-element
-    name="clickable-behavior"
-    attributes="name buttons"
-    extends="reactive-signal" >
-
-<template><content></content></template>
-
-<script>
-Polymer({
-    buttons: [1],
-    domReady: function () {
-        var self = this
-
-        this.elem = this.findElem()
-        var elem = this.elem
-
-        this.value = 0
-        if (this.buttons.indexOf(2) >= 0) {
-            elem.addEventListener("contextmenu", function (ev) {
-                ev.preventDefault()
-                self.value = 2
-                self.update()
-                return false
-            })
+    this.value = 0
+    if (this.buttons.indexOf(2) >= 0) {
+      elem.addEventListener("contextmenu", function (ev) {
+        ev.preventDefault()
+        self.value = 2
+        self.update(elem)
+        return false
+      })
+    }
+    if (this.buttons.indexOf(1) >= 0 || this.buttons.indexOf(3) >= 0) {
+      elem.addEventListener("click", function (ev) {
+        if (ev.button == 0 && self.buttons.indexOf(1) >= 0) {
+          // Left click
+          self.value = 1
+          self.update(elem)
+        } else if(ev.button == 1 && self.buttons.indexOf(3) >= 0) {
+          // Right click
+          self.value = 3
+          self.update(elem)
         }
-        if (this.buttons.indexOf(1) >= 0 || this.buttons.indexOf(3) >= 0) {
-            elem.addEventListener("click", function (ev) {
-                if (ev.button == 0 && self.buttons.indexOf(1) >= 0) {
-                    // Left click
-                    self.value = 1
-                    self.update()
-                } else if(ev.button == 1 && self.buttons.indexOf(3) >= 0) {
-                    // Right click
-                    self.value = 3
-                    self.update()
-                }
-            })
-        }
+      })
     }
+  }
 })
+
 </script>
 
-</polymer-element>
-
-<polymer-element
-    name="signal-sampler"
-    attributes="signals triggers"
-    extends="reactive-signal" >
-
-<template><content></content></template>
-
-<script>
-Polymer({
-    signals: [],
-    triggers: [],
-    domReady: function () {
-        var self = this
-
-        console.log(this.signals, this.triggers)
-        this.elem = this.findElem()
-        var elem = this.elem
-
-        this.value = {}
-        elem.addEventListener("signal-updated", function (ev) {
-            if (self.triggers.indexOf(ev.detail.name) >= 0) {
-                var result = {}
-                for(var i=0, l=self.signals.length; i < l; i++) {
-                    var s = self.signals[i];
-                    result[s] = elem.querySelector("#signal-" + s).value
-                }
-                result[ev.target.name] = ev.target.value
-                result._trigger = ev.target.name
-                self.value = result
-                self.update()
-            }
-        })
-        this.super()
-    }
-})
-</script>
-
-</polymer-element>
+</dom-module>
 
 
-<polymer-element
-    name="selectable-behavior"
-    attributes="name"
-    extends="reactive-signal" >
 
-<template><content></content></template>
-
-<script>
-Polymer({
-    domReady: function () {
-        var self = this
-
-        this.elem = this.findElem()
-
-        this.elem.addEventListener("core-select", function (ev) {
-            self.value = (self.elem.selected || (self.elem.multi ? [] : 0))
-            self.update()
-        })
-        this.super()
-    }
-})
-</script>
-
-</polymer-element>
-
-
-<polymer-element
-    name="keypress-behavior"
-    attributes="name keys onpress"
-    extends="reactive-signal" >
-
-<template><core-a11y-keys id="keys" keys="{{keys}}"></core-a11y-keys></template>
-
-<script>
-Polymer({
-    domReady: function () {
-        var self = this
-
-        this.elem = this.findElem()
-
-        this.$.keys.target = this.elem
-        this.$.keys.addEventListener("keys-pressed", function (ev) {
-            self.value = ev.detail
-            self.value._ctr = "Key"
-            self.update()
-        })
-
-        this.super()
-    }
-})
-</script>
-
-</polymer-element>
-
-<polymer-element
-    name="date-selection"
-    extends="reactive-signal" >
+<dom-module
+  id="signal-sampler" >
 
 <template></template>
 
 <script>
 Polymer({
-    domReady: function () {
-        var self = this
 
-        this.elem = this.findElem()
+    is: "signal-sampler",
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
 
-        this.elem.addEventListener("date-picked", function (ev) {
-            var d = self.elem.immediateDate
-            self.value = {
-                "year" : d.getFullYear(),
-                "month": d.getMonth() + 1,
-                "day": d.getDate()
-            }
-            self.update()
-        })
+    properties: {
+      signals: {
+        type: Array,
+        value: []
+      },
+      triggers: {
+        type: Array,
+        value: []
+      }
+    },
+    domInit: function () {
+      var self = this,
+      elem = this.findElem()
 
-        this.super()
+      this.setId()
+
+      this.value = {}
+      elem.addEventListener("signal-updated", function (ev) {
+        if (self.triggers.indexOf(ev.detail.name) >= 0) {
+
+          ev.stopPropagation() // FIXME: Should this be configurable?
+
+          var result = {}
+          for(var i=0, l=self.signals.length; i < l; i++) {
+            var name = self.signals[i];
+            result[name] = Polymer.dom(elem).querySelector("#signal-" + name).value
+          }
+          result[ev.detail.name] = ev.detail.value
+          result._trigger = ev.detail.name
+          self.value = result
+          self.update(elem)
+        } else if (self.signals.indexOf(ev.detail.name) >= 0) {
+          ev.stopPropagation()
+        }
+      })
     }
 })
 </script>
-</polymer-element>
+
+</dom-module>
+
+
+<dom-module
+  id="selectable-behavior" >
+
+<template></template>
+
+<script>
+Polymer({
+
+  is: "selectable-behavior",
+  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+  properties: {
+    name: String,
+    multi: Boolean
+  },
+  domInit: function () {
+    var self = this, elem = this.findElem()
+
+    this.setId()
+    var handler = function (ev) {
+      if (self.multi) {
+        self.value = elem.selectedValues || []
+      } else {
+        self.value = elem.selected || 0
+      }
+      self.update(elem)
+    }
+
+    elem.addEventListener("iron-select", handler)
+    elem.addEventListener("iron-deselect", handler)
+  }
+})
+</script>
+
+</dom-module>
+
+
+<dom-module
+  id="keypress-behavior" >
+
+<template><iron-a11y-keys id="keys" keys="{{keys}}"></iron-a11y-keys></template>
+
+<script>
+Polymer({
+
+  is: "keypress-behavior",
+  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+  properties: {
+    keys: String,
+    notify: true
+  },
+  domInit: function () {
+    var self = this, elem = this.findElem()
+
+    this.setId()
+
+    var $keys = this.querySelctor("#keys")
+    $keys.target = elem
+    $keys.addEventListener("keys-pressed", function (ev) {
+        self.value = ev.detail
+        self.update(elem)
+    })
+  }
+})
+</script>
+
+</dom-module>
+
+<dom-module
+  id="date-selection" >
+
+<template></template>
+
+<script>
+
+Polymer({
+
+  is: "date-selection",
+  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+  domInit: function () {
+
+    var self = this, elem = this.findElem()
+
+    this.setId()
+
+    this.elem.addEventListener("date-picked", function (ev) {
+      var d = elem.immediateDate
+      self.value = {
+        "year" : d.getFullYear(),
+        "month": d.getMonth() + 1,
+        "day": d.getDate()
+      }
+      self.update()
+    })
+
+  }
+})
+
+</script>
+
+</dom-module>

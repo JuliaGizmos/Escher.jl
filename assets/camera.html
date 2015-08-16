@@ -1,20 +1,33 @@
-<polymer-element
-    name="camera-widget"
-    extends="reacitve-signal"
-    >
-<style>
-</style>
+<dom-module
+  id="camera-widget" >
 <template>
-    <video id="mirror"></video>
-    <canvas id="hiddenCanvas" style="display:none"></canvas>
+  <video id="mirror"></video>
+  <canvas id="hiddenCanvas" style="display:none"></canvas>
 </template>
+
 <script>
+
 Polymer({
-    audio: false,
-    video: true,
-    autoplay: true,
-    samplerate: 0,
-    domReady: function () {
+    is: "camera-widget",
+    properties: {
+      audio: {
+        type: Boolean,
+        value: false
+      },
+      video: {
+        type: Boolean,
+        value: false
+      },
+      autoplay: {
+        type: Boolean,
+        value: false
+      },
+      samplerate: {
+        type: Number,
+        value: 0
+      }
+    }
+    ready: function () {
         var self = this;
         navigator.getUserMedia = navigator.getUserMedia ||
                                  navigator.webkitGetUserMedia ||
@@ -59,4 +72,4 @@ Polymer({
     }
 })
 </script>
-</polymer-element>
+</dom-module>

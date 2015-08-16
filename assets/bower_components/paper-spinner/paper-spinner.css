@@ -1,13 +1,13 @@
-/*
-    @license
-    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
-    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-    Code distributed by Google as part of the polymer project is also
-    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
- */
+/**
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 
+*/
 /**************************/
 /* STYLES FOR THE SPINNER */
 /**************************/
@@ -36,6 +36,11 @@
 #spinnerContainer {
   width: 100%;
   height: 100%;
+
+  /* The spinner does not have any contents that would have to be
+   * flipped if the direction changes. Always use ltr so that the
+   * style works out correctly in both cases. */
+  direction: ltr;
 }
 
 #spinnerContainer.active {
@@ -59,20 +64,20 @@
   opacity: 0;
 }
 
-.blue {
-  border-color: #4285f4;
+.layer-1 {
+  border-color: var(--paper-spinner-layer-1-color, --google-blue-500);
 }
 
-.red {
-  border-color: #db4437;
+.layer-2 {
+  border-color: var(--paper-spinner-layer-2-color, --google-red-500);
 }
 
-.yellow {
-  border-color: #f4b400;
+.layer-3 {
+  border-color: var(--paper-spinner-layer-3-color, --google-yellow-500);
 }
 
-.green {
-  border-color: #0f9d58;
+.layer-4 {
+  border-color: var(--paper-spinner-layer-4-color, --google-blue-500);
 }
 
 /**
@@ -80,7 +85,7 @@
  *
  * iOS Safari (tested on iOS 8.1) does not handle animation-delay very well - it doesn't
  * guarantee that the animation will start _exactly_ after that value. So we avoid using
- * animation-delay and instead set custom keyframes for each color (as redundant as it
+ * animation-delay and instead set custom keyframes for each color (as layer-2undant as it
  * seems).
  *
  * We write out each animation in full (instead of separating animation-name,
@@ -88,28 +93,28 @@
  * specific properties properly, treats them as -webkit-animation, and overrides the
  * other animation rules. See https://github.com/Polymer/platform/issues/53.
  */
-.active .spinner-layer.blue {
+.active .spinner-layer.layer-1 {
   /* durations: 4 * ARCTIME */
-  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, blue-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
-  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, blue-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-1-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-1-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
-.active .spinner-layer.red {
+.active .spinner-layer.layer-2 {
   /* durations: 4 * ARCTIME */
-  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, red-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
-  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, red-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-2-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-2-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
-.active .spinner-layer.yellow {
+.active .spinner-layer.layer-3 {
   /* durations: 4 * ARCTIME */
-  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, yellow-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
-  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, yellow-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-3-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-3-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
-.active .spinner-layer.green {
+.active .spinner-layer.layer-4 {
   /* durations: 4 * ARCTIME */
-  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, green-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
-  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, green-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  -webkit-animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-4-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
+  animation: fill-unfill-rotate 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both, layer-4-fade-in-out 5332ms cubic-bezier(0.4, 0.0, 0.2, 1) infinite both;
 }
 
 @-webkit-keyframes fill-unfill-rotate {
@@ -143,7 +148,7 @@
  * - https://github.com/Polymer/paper-spinner/issues/9
  * - https://code.google.com/p/chromium/issues/detail?id=436255
  */
-@-webkit-keyframes blue-fade-in-out {
+@-webkit-keyframes layer-1-fade-in-out {
   from { opacity: 0.99; }
   25% { opacity: 0.99; }
   26% { opacity: 0; }
@@ -152,7 +157,7 @@
   100% { opacity: 0.99; }
 }
 
-@keyframes blue-fade-in-out {
+@keyframes layer-1-fade-in-out {
   from { opacity: 0.99; }
   25% { opacity: 0.99; }
   26% { opacity: 0; }
@@ -161,7 +166,7 @@
   100% { opacity: 0.99; }
 }
 
-@-webkit-keyframes red-fade-in-out {
+@-webkit-keyframes layer-2-fade-in-out {
   from { opacity: 0; }
   15% { opacity: 0; }
   25% { opacity: 0.99; }
@@ -169,7 +174,7 @@
   51% { opacity: 0; }
 }
 
-@keyframes red-fade-in-out {
+@keyframes layer-2-fade-in-out {
   from { opacity: 0; }
   15% { opacity: 0; }
   25% { opacity: 0.99; }
@@ -177,7 +182,7 @@
   51% { opacity: 0; }
 }
 
-@-webkit-keyframes yellow-fade-in-out {
+@-webkit-keyframes layer-3-fade-in-out {
   from { opacity: 0; }
   40% { opacity: 0; }
   50% { opacity: 0.99; }
@@ -185,7 +190,7 @@
   76% { opacity: 0; }
 }
 
-@keyframes yellow-fade-in-out {
+@keyframes layer-3-fade-in-out {
   from { opacity: 0; }
   40% { opacity: 0; }
   50% { opacity: 0.99; }
@@ -193,7 +198,7 @@
   76% { opacity: 0; }
 }
 
-@-webkit-keyframes green-fade-in-out {
+@-webkit-keyframes layer-4-fade-in-out {
   from { opacity: 0; }
   65% { opacity: 0; }
   75% { opacity: 0.99; }
@@ -201,7 +206,7 @@
   100% { opacity: 0; }
 }
 
-@keyframes green-fade-in-out {
+@keyframes layer-4-fade-in-out {
   from { opacity: 0; }
   65% { opacity: 0; }
   75% { opacity: 0.99; }
@@ -255,6 +260,8 @@
   border-radius: 50%;
   -webkit-animation: none;
   animation: none;
+
+  @apply(--layout-fit);
 }
 
 .circle-clipper.left .circle {

@@ -21,7 +21,7 @@ export hasstate,
                  of the DOM node and not of the `Tile`."""
     )
     kwarg(
-        elem::String="::parent",
+        selector::String="::parent",
         doc="A CSS selector for the element to watch."
         )
     kwarg(
@@ -43,7 +43,7 @@ render(t::WithState, state) =
             "watch-state",
             name=t.name,
             attr=t.attr, trigger=t.trigger,
-            elem=t.elem,
+            selector=t.selector,
             source=t.source,
         )
 
@@ -129,16 +129,24 @@ render(c::Clickable, state) =
     doc("Watch for a selection in a selection widget.")
     curry(tile::Tile, doc="A selection widget.")
     kwarg(name::Symbol=:_clicks, doc="The name to identify the behavior.")
-    kwarg(elem::String="::parent", doc="For internal use.")
+    kwarg(multi::Bool=false, doc="True when watching widgets that allow multiple selections")
+    kwarg(selector::String="::parent", doc="CSS selector of the selectable widget.")
 end
 
 render(t::Selectable, state) =
     render(t.tile, state) <<
-        Elem("selectable-behavior", name=t.name, elem=t.elem)
+        Elem("selectable-behavior", name=t.name, selector=t.selector, multi=t.multi)
 
 inc(x) = x+1
-default_interpreter(t::Selectable) =
-    Chained(InterpreterFn(inc), ToType{Int}())
+inc(x::AbstractArray) = map(inc, x)
+default_interpreter(t::Selectable) = begin
+    if t.multi
+        InterpreterFn(inc) # FIXME: How do I ToType{Int} each element?
+    else
+        Chained(InterpreterFn(inc), ToType{Int}())
+    end
+end
+
 
 abstract MouseState
 
@@ -189,7 +197,7 @@ end
 
 render(chan::ChanSend, state) =
     render(chan.tile, state) <<
-        Elem("chan-send", chan=chan.chan, watch=chan.watch)
+        Elem("chan-send", attributes=@d(:chan=>chan.chan, :watch=>chan.watch))
 
 
 immutable ChanRecv <: Tile
@@ -209,7 +217,7 @@ end
 
 render(chan::ChanRecv, state) =
     render(chan.tile, state) <<
-        Elem("chan-recv", chan=chan.chan, attr=chan.attr)
+        Elem("chan-recv", attributes = @d(:chan=>chan.chan, :attr=>chan.attr))
 
 wire(a, b, chan, attribute) =
     send(chan, a), recv(chan, b, attribute)
