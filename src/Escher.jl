@@ -17,7 +17,7 @@ using Patchwork
 using Reactive
 using JSON
 
-import Base: convert, writemime, <<, *, /, +, -
+import Base: convert, writemime, *, /, +, -
 
 # Polymer Setup
 custom_elements() =
