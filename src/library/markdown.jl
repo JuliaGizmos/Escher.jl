@@ -5,6 +5,7 @@ else
     const Markdown = Base.Markdown
 end
 
+export @md_str
 
 convert(::Type{Tile}, md::Markdown.MD) = blocktile(md)
 
