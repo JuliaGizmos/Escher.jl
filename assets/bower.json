@@ -50,7 +50,7 @@
     "paper-menu": "PolymerElements/paper-menu#^1.0.0",
     "paper-item": "PolymerElements/paper-item#^1.0.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^1.0.0",
-    "neon-animated-pages": "PolymerElements/neon-animated-pages#^1.0.0",
+    "neon-animation": "PolymerElements/neon-animation#^1.0.0",
     "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.0",
     "code-mirror": "shashi/code-mirror#master"
   }
