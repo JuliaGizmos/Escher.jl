@@ -1,5 +1,7 @@
 # Escher
 
+[![Join the chat at https://gitter.im/shashi/Escher.jl](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/shashi/Escher.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A toolkit for great-looking interactive Web UIs in Julia.
 
 Read [the overview](https://shashi.github.io/Escher.jl/).
