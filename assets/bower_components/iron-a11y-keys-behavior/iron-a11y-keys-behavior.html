@@ -323,6 +323,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return false;
       },
 
+      keyboardEventToKey: function (event) {
+        return {
+          shift: event.shiftKey,
+          ctrl: event.ctrlKey,
+          meta: event.metaKey,
+          alt: event.altKey,
+          key: normalizedKeyForEvent(event)
+        };
+      },
+
       _collectKeyBindings: function() {
         var keyBindings = this.behaviors.map(function(behavior) {
           return behavior.keyBindings;
@@ -376,7 +386,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           this._boundKeyHandlers.push([this.keyEventTarget, eventName, boundKeyHandler]);
 
-          this.keyEventTarget.addEventListener(eventName, boundKeyHandler);
+          this.keyEventTarget.addEventListener(eventName, function (ev) { boundKeyHandler(ev) });
+          //this.keyEventTarget.addEventListener(eventName, boundKeyHandler);
         }, this);
       },
 

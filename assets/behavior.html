@@ -203,7 +203,9 @@ Polymer({
 <dom-module
   id="keypress-behavior" >
 
-<template><iron-a11y-keys id="keys" keys="{{keys}}"></iron-a11y-keys></template>
+  <template>
+    <iron-a11y-keys id="keys" keys="{{keys}}"></iron-a11y-keys>
+  </template>
 
 <script>
 Polymer({
@@ -212,18 +214,23 @@ Polymer({
   behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
 
   properties: {
-    keys: String,
-    notify: true
+    keys: {
+      type: String,
+      notify: true
+    }
   },
   domInit: function () {
     var self = this, elem = this.findElem()
 
     this.setId()
 
-    var $keys = this.querySelctor("#keys")
-    $keys.target = elem
-    $keys.addEventListener("keys-pressed", function (ev) {
-        self.value = ev.detail
+    this.$.keys.target = elem
+    elem.addEventListener("keydown", function (ev) {
+      console.log("keydown", ev)
+    })
+
+    this.$.keys.addEventListener("keys-pressed", function (ev) {
+        self.value = this.keyboardEventToKey(ev.detail.keyboardEvent)
         self.update(elem)
     })
   }
