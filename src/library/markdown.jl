@@ -1,10 +1,3 @@
-if VERSION < v"0.4.0-dev"
-    using Markdown
-else
-    using Base.Markdown
-end
-
-export @md_str # This makes life simpler for users
 
 convert(::Type{Tile}, md::Markdown.MD) = blocktile(md)
 
