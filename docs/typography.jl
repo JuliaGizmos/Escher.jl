@@ -1,4 +1,3 @@
-using Markdown
 
 include("helpers/doc.jl")
 include("helpers/page.jl")

@@ -1,4 +1,3 @@
-using Markdown
 using Gadfly
 using Distributions
 

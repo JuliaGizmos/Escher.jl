@@ -1,4 +1,3 @@
-using Markdown
 using Color
 
 include("helpers/page.jl")
