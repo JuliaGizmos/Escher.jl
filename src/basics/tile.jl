@@ -1,5 +1,7 @@
 export Tile, render
 
+import Base: convert, writemime
+
 @doc """
 A `Tile` is the basic currency in Escher.
 Most of the functions in the Escher API take `Tile`s
