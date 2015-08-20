@@ -1,10 +1,10 @@
 if VERSION < v"0.4.0-dev"
-    require(Pkg.dir("Markdown", "src", "Markdown.jl"))
-    import Markdown
+    using Markdown
 else
-    const Markdown = Base.Markdown
+    using Base.Markdown
 end
 
+export @md_str # This makes life simpler for users
 
 convert(::Type{Tile}, md::Markdown.MD) = blocktile(md)
 

@@ -4,12 +4,6 @@ if VERSION < v"0.4.0-dev"
     using Docile
 end
 
-if VERSION < v"0.4.0-dev"
-    using Markdown
-else
-    using Base.Markdown
-end
-
 #@docstrings
 
 using Compat
