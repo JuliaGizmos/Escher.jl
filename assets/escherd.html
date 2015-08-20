@@ -185,6 +185,9 @@ function teelog(x) {
       createElement: function (x, y) {
         return new Sneaky(document.createElement(x, y))
       },
+      createElementNS: function (x, y) {
+        return new Sneaky(document.createElementNS(x, y))
+      },
       createTextNode: function (txt) {
         return document.createTextNode(txt)
       },
