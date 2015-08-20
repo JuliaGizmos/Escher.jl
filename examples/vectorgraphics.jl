@@ -17,12 +17,12 @@ function main(window)
 
     iterᵗ = Input(1)
 
-    lift(iterᵗ) do iter
-        vbox(title(2, "Sierpinski's Triangle"),
-            vskip(1em),
-            hbox("Iterations: ", slider(1:6) >>> iterᵗ),
-            vskip(1em),
-            sierpinski(iter),
-        ) |> pad(2em)
-    end
+    vbox(title(2, "Sierpinski's Triangle"),
+        vskip(1em),
+        hbox("Iterations: ", slider(1:6) >>> iterᵗ),
+        vskip(1em),
+        consume(iterᵗ) do iter
+            sierpinski(iter)
+        end
+    ) |> pad(2em)
 end
