@@ -198,6 +198,22 @@ function teelog(x) {
   // Polymer mixins (polymer calls them behaviors)
   var EscherMixins = {}
   window.EscherMixins = EscherMixins
+
+  EscherMixins.LifeCycle = {
+    _domInitCalled: false,
+    attached: function () {
+
+      // Use domInit instead of attached.
+      // attached is called twice in some places
+      // when using virtual-dom
+
+      if (!this._domInitCalled) {
+        this.domInit && this.domInit()
+        this._domInitCalled = true
+      }
+    }
+  }
+
 })();
 </script>
 
@@ -213,6 +229,7 @@ function teelog(x) {
   Polymer({
 
     is: "signal-container",
+    behaviors: [EscherMixins.LifeCycle],
 
     properties: {
       signalId: {
@@ -223,14 +240,11 @@ function teelog(x) {
       vnode: Object
     },
 
-    init: function () {
+    domInit: function () {
       var id = this.signalId
       console.log(this.signalId)
       this.vnode = new Patchwork.Node(id, {t: "div"}, new Sneaky(this), sneakyDoc);
       Escher.addSubtree(id, this.vnode)
-    },
-    attached: function () {
-      this.async(this.init)
     },
     idChanged: function (a, b) {
         if (a !== "") {

@@ -1,20 +1,5 @@
 <script>
 
-EscherMixins.LifeCycle = {
-  _domInitCalled: false,
-  attached: function () {
-
-    // Use domInit instead of attached.
-    // attached is called twice in some places
-    // when using virtual-dom
-
-    if (!this._domInitCalled) {
-      this.domInit && this.domInit()
-      this._domInitCalled = true
-    }
-  }
-}
-
 EscherMixins.ReactiveSignal = {
   properties: {
     name: String,
