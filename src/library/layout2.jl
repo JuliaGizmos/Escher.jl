@@ -52,7 +52,7 @@ render(i::IconButton, state) = begin
     end
 end
 
-broadcast(w::IconButton) =
+wrapbehavior(w::IconButton) =
     clickable(w, name=w.name)
 
 
@@ -82,7 +82,7 @@ render(tabs::Tabs, state) =
         map(t -> Elem("paper-tab", render(t, state)), tabs.tabs.tiles),
         attributes = @d(:selected=>tabs.selected-1))
 
-broadcast(t::Tabs) = selectable(t, name=t.name)
+wrapbehavior(t::Tabs) = selectable(t, name=t.name)
 
 # Menus
 
@@ -105,7 +105,7 @@ render(m::Menu, state) =
         map(x -> render(wrapitem(x), state), m.items.tiles),
         attributes = @d(:selected=>m.selected-1, :multi=>boolattr(m.multi)))
 
-broadcast(m::Menu) = selectable(m, name=m.name, multi=m.multi)
+wrapbehavior(m::Menu) = selectable(m, name=m.name, multi=m.multi)
 
 @api submenu => (SubMenu <: Selection) begin
     doc("A submenu. Must be put inside a menu.")
@@ -128,7 +128,7 @@ render(m2::SubMenu, state) =
          addclasses(render(menu(m2.items, multi=m2.multi,
                                 selected=m2.selected, name=m2.name), state), "menu-content")])
 
-broadcast(m::SubMenu) = selectable(m, name=m.name, multi=m.multi)
+wrapbehavior(m::SubMenu) = selectable(m, name=m.name, multi=m.multi)
 
 @api menuitem => (MenuItem <: Tile) begin
     arg(tile::Tile)
@@ -224,5 +224,5 @@ render(dm::DropdownMenu, state) = begin
         )
     )
 end
-broadcast(d::DropdownMenu) = selectable(d, name=d.name, selector=".dropdown-content")
+wrapbehavior(d::DropdownMenu) = selectable(d, name=d.name, selector=".dropdown-content")
 

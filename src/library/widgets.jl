@@ -1,5 +1,5 @@
 import Base: >>>
-export broadcast,
+export wrapbehavior,
        button,
        slider,
        checkbox,
@@ -13,17 +13,17 @@ export broadcast,
        datepicker
 
 # A widget can be coerced into a behavior
-# by calling `broadcast` on it.
+# by calling `wrapbehavior` on it.
 abstract Widget <: Behavior
 
 subscribe(w::Widget, x::Input; absorb=true) =
-    subscribe(broadcast(w), x, absorb=absorb)
+    subscribe(wrapbehavior(w), x, absorb=absorb)
 
 addinterpreter(i::Interpreter, w::Widget) =
-    addinterpreter(i, broadcast(w))
+    addinterpreter(i, wrapbehavior(w))
 
 default_interpreter(w::Widget) =
-    default_interpreter(broadcast(w))
+    default_interpreter(wrapbehavior(w))
 
 ## Button
 
@@ -54,7 +54,7 @@ render(b::Button, state) =
         )
     )
 
-broadcast(b::Button) =
+wrapbehavior(b::Button) =
     clickable(b, name=b.name)
 
 ## Slider
@@ -89,7 +89,7 @@ broadcast(b::Button) =
     )
 end
 
-broadcast(s::Slider) =
+wrapbehavior(s::Slider) =
     addinterpreter(ToType{eltype(s.range)}(),
         hasstate(s, name=s.name))
 
@@ -119,7 +119,7 @@ render(s::Slider, state) =
     )
 end
 
-broadcast(c::Checkbox) =
+wrapbehavior(c::Checkbox) =
     addinterpreter(ToType{Bool}(),
         hasstate(c, name=c.name, attr="checked", trigger="change"))
 
@@ -147,7 +147,7 @@ render(c::Checkbox, state) =
     )
 end
 
-broadcast(c::ToggleButton) =
+wrapbehavior(c::ToggleButton) =
     addinterpreter(ToType{Bool}(),
         hasstate(c, name=c.name, attr="checked", trigger="change"))
 
@@ -204,7 +204,7 @@ render(c::ToggleButton, state) =
     )
 end
 
-broadcast(t::TextInput, event="input") =
+wrapbehavior(t::TextInput, event="input") =
     hasstate(t, name=t.name, attr="value", trigger=event, source="target") |>
         addinterpreter(ToType{String}())
 
@@ -308,7 +308,7 @@ render(r::RadioGroup, state) =
         )
     )
 
-broadcast(r::RadioGroup) =
+wrapbehavior(r::RadioGroup) =
     hasstate(r, name=r.name, attr="selected", trigger="paper-radio-group-changed") |>
         addinterpreter(ToType{String}())
 
@@ -396,7 +396,7 @@ render(d::DatePicker, state) =
         value=string(d.date), 
         attributes=@d(:min=>string(first(d.range)), :max=>string(last(d.range)))
     )
-broadcast(p::DatePicker) = dateselection(p, name=p.name)
+wrapbehavior(p::DatePicker) = dateselection(p, name=p.name)
 
 # TODO: Interpret as bounds error if date exceeds range
 interpret(::DateInterpreter, d) = begin

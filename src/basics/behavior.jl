@@ -182,9 +182,9 @@ end
 # expose contained signal to outside
 name(c::ChanSend) = c.watch
 send(chan::Symbol, watch::Symbol, b) =
-    ChanSend(chan, watch, broadcast(b))
+    ChanSend(chan, watch, wrapbehavior(b))
 send(chan::Symbol, b::Behavior) =
-    ChanSend(chan, name(b), broadcast(b))
+    ChanSend(chan, name(b), wrapbehavior(b))
 
 @apidoc send => (ChanSend <: Behavior) begin
     doc("Emit changes to an attribute/property to a named channel.")

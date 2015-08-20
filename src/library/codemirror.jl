@@ -16,7 +16,7 @@ export codemirror
     kwarg(tabsize::Int=4, doc="The tab size.")
 end
 
-broadcast(c::CodeMirror) =
+wrapbehavior(c::CodeMirror) =
     hasstate(c, name=c.name, attr="currentValue", trigger="change")
 
 # Render to virtual DOM
