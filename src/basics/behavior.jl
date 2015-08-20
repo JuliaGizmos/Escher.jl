@@ -56,13 +56,11 @@ render(t::WithState, state) =
     )
     curry(tile::Tile, doc="The tile to watch keypresses from.")
     kwarg(name::Symbol=:_keys, doc="Name to identify the behavior.")
-    kwarg(onpress::String="", doc="For internal use.")
 end
 
 render(k::Keypress, state) =
-    render(k.tile, state) & @d(:attributes => @d(:tabindex => 1)) <<
-        Elem("keypress-behavior", keys=k.keys, name=k.name) &
-            (k.onpress != "" ? @d(:onpress => k.onpress) : Dict())
+    render(k.tile, state) & @d(:attributes => @d(:tabindex => 0)) <<
+        Elem("keypress-behavior", attributes = @d(:keys=>k.keys, :name=>k.name))
 
 immutable Key
     key::String
