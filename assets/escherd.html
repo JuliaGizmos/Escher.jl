@@ -239,8 +239,8 @@ function teelog(x) {
       vnode: Object
     },
 
-    _initCleanElement: function (id) {
-        // Initial value of tile signals is Escher.empty which is <div></div>
+    _initCleanSubtree: function (id) {
+        // XXX: Initial value of tile signals is Escher.empty which is <div></div>
         Polymer.dom(this).innerHTML = "<div></div>" 
         this.vnode = new Patchwork.Node(id, {t: "div"}, new Sneaky(this), sneakyDoc);
         Escher.addSubtree(id, this.vnode)
@@ -250,17 +250,17 @@ function teelog(x) {
     domInit: function () {
       var id = this.signalId
       console.log(this.signalId)
-      this._initCleanElement(id)
+      this._initCleanSubtree(id)
     },
 
-    _idChanged: function (id) {
-        if (typeof(this._prevId) !== "undefined") {
+    _idChanged: function (id, oldId) {
+        if (typeof(oldId) !== "undefined") {
             // This means we are in a SignalWrap inside a SignalWrap
             // (...which is probably inside another SignalWrap).
             // console.log("ID changed", this.signalId, this._prevId, this.vnode)
 
-            Escher.removeSubtree(this._prevId)
-            this._initCleanElement(id)
+            Escher.removeSubtree(oldId)
+            this._initCleanSubtree(id)
         }
     }
   })
