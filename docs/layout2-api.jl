@@ -11,7 +11,7 @@ $(vskip(1em))
 $(vskip(1em))
 
 $(
-    showdocs([ tabs, pages, menu, submenu, dropdown, dropdownmenu, item, icon,
+    showdocs([ tabs, pages, menu, submenu, dropdownmenu, icon,
                 iconbutton, toolbar])
 )
 """
