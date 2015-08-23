@@ -21,33 +21,24 @@ Polymer({
       value: "change"
     }
   },
+
+  getAttr: function (elem, attr) {
+    var val = elem[attr]
+    return (typeof val !== "undefined") ?
+      val : elem.getAttribute(attr)
+  },
+
+  getValue: function () {
+     return this.getAttr(this.findElem(), this.attr)
+  },
+
   domInit: function () {
     var self = this, elem = this.findElem()
 
     this.setId()
 
-    // initialize
-    this.value = elem[self.attr]
-    if (typeof(val) === "undefined") {
-      this.value = elem.getAttribute(self.attr)
-    }
-
     elem.addEventListener(this.trigger, function (ev) {
-      var val
-      if (self.source == "target") {
-        e = ev.target
-        val = e[self.attr]
-        if (typeof(val) === "undefined") {
-          val = e.getAttribute(self.attr)
-        }
-      } else {
-        val = elem[self.attr]
-        if (typeof(val) === "undefined") {
-          val = elem.getAttribute(self.attr)
-        }
-      }
-      self.value = val
-      self.update(elem)
+      self.update(elem, self.name, self.getValue())
     })
   }
 })
@@ -83,8 +74,7 @@ Polymer({
     if (this.buttons.indexOf(2) >= 0) {
       elem.addEventListener("contextmenu", function (ev) {
         ev.preventDefault()
-        self.value = 2
-        self.update(elem)
+        self.update(elem, self.name, 2)
         return false
       })
     }
@@ -92,12 +82,10 @@ Polymer({
       elem.addEventListener("click", function (ev) {
         if (ev.button == 0 && self.buttons.indexOf(1) >= 0) {
           // Left click
-          self.value = 1
-          self.update(elem)
+          self.update(elem, self.name, 1)
         } else if(ev.button == 1 && self.buttons.indexOf(3) >= 0) {
           // Right click
-          self.value = 3
-          self.update(elem)
+          self.update(elem, self.name, 3)
         }
       })
     }
@@ -139,19 +127,18 @@ Polymer({
 
       this.value = {}
       elem.addEventListener("signal-updated", function (ev) {
-        if (self.triggers.indexOf(ev.detail.name) >= 0) {
+        if (self.triggers.indexOf(ev.detail.name) >= 0) { // TODO: use a set
 
           ev.stopPropagation() // FIXME: Should this be configurable?
 
           var result = {}
           for(var i=0, l=self.signals.length; i < l; i++) {
             var name = self.signals[i];
-            result[name] = Polymer.dom(elem).querySelector("#signal-" + name).value
+            result[name] = Polymer.dom(elem).querySelector("#signal-" + name).getValue()
           }
           result[ev.detail.name] = ev.detail.value
           result._trigger = ev.detail.name
-          self.value = result
-          self.update(elem)
+          self.update(elem, self.name, result)
         } else if (self.signals.indexOf(ev.detail.name) >= 0) {
           ev.stopPropagation()
         }
@@ -183,12 +170,11 @@ Polymer({
 
     this.setId()
     var handler = function (ev) {
-      if (self.multi) {
-        self.value = elem.selectedValues || []
-      } else {
-        self.value = elem.selected || 0
-      }
-      self.update(elem)
+      var val = self.multi ?
+        (elem.selectedValues || []) :
+        (elem.selected || 0)
+
+      self.update(elem, self.name, val)
     }
 
     elem.addEventListener("iron-select", handler)
@@ -230,8 +216,8 @@ Polymer({
     })
 
     this.$.keys.addEventListener("keys-pressed", function (ev) {
-        self.value = this.keyboardEventToKey(ev.detail.keyboardEvent)
-        self.update(elem)
+        var key = this.keyboardEventToKey(ev.detail.keyboardEvent)
+        self.update(elem, self.name, key)
     })
   }
 })
@@ -257,14 +243,14 @@ Polymer({
 
     this.setId()
 
-    this.elem.addEventListener("date-picked", function (ev) {
+    elem.addEventListener("date-picked", function (ev) {
       var d = elem.immediateDate
-      self.value = {
+      var val = {
         "year" : d.getFullYear(),
         "month": d.getMonth() + 1,
         "day": d.getDate()
       }
-      self.update()
+      self.update(elem, self.name, val)
     })
 
   }

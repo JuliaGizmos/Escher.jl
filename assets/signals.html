@@ -12,6 +12,13 @@ EscherMixins.ReactiveSignal = {
       value: true
     },
   },
+
+  // This should be overriden by children
+  // for the benefit of signal-sampler
+  getValue: function () {
+    return this.value
+  },
+
   findElem: function () {
     var self = Polymer.dom(this)
     if (this.selector === "::parent") {
@@ -20,17 +27,22 @@ EscherMixins.ReactiveSignal = {
       return self.parentNode.querySelector(this.selector)
     }
   },
+
   setId: function (name) {
     return this.setAttribute("id", "signal-" + (name || this.name))
   },
+
   getNamedSignal: function (elem, name) {
     return elem._escherSignals && elem._escherSignals[name]
   },
-  update: function (elem) {
-    Polymer.Base.fire.call(elem, "signal-updated", {
-      name: this.name,
-      source: elem,
-      value: this.value
+
+  update: function (sourceElement, name, value) {
+    console.log("update", sourceElement, name, value)
+    this.value = value // Save for the sampler
+    Polymer.Base.fire.call(sourceElement, "signal-updated", {
+      name: name,
+      source: sourceElement,
+      value: value
     },
     { bubbles: this.bubbles }
     )
