@@ -83,15 +83,14 @@ function teelog(x) {
 
             window.addEventListener("beforeunload", closeHandler)
 
-            document.addEventListener("signal-transport", function (ev) {
-                    Escher.send({
-                        command: "signal-update",
-                        data: {
-                            signalId: ev.detail.signalId,
-                            value: ev.detail.value
-                        }
-                    })
-                    ev.stopPropagation()
+              document.addEventListener("signal-transport", function (ev) {
+                  Escher.send({
+                      command: "signal-update",
+                      data: {
+                          signalId: ev.detail.signalId,
+                          value: ev.detail.value
+                      }
+                  })
             })
         }
     // Store for patches of nodes as yet uncreated
@@ -127,34 +126,144 @@ function teelog(x) {
 
     Escher.subtrees = {ready: {}, destroyed: {}}
     window.Escher = Escher
+
+
+  function Sneaky (node) {
+    var lightNode = Polymer.dom(node)
+    this.lightNode = lightNode
+    this.node = lightNode.node
+  }
+
+  Sneaky.prototype = Polymer.dom()
+
+  Object.defineProperties(Sneaky.prototype, {
+
+    childNodes: {
+      get: function() {
+        var nodes = this.lightNode.childNodes
+        return nodes.map(function (node) { return new Sneaky(node) })
+      },
+      configurable: true
+    },
+
+    children: {
+      get: function() {
+        var nodes = this.lightNode.children
+        return nodes.map(function (node) { return new Sneaky(node) })
+      },
+      configurable: true
+    },
+
+    parentNode: {
+      get: function() {
+        return this.lightNode ? new Sneaky(this.lightNode.parentNode) : null
+      },
+      configurable: true
+    }
+  });
+
+  function getNode(x) {
+    return x.node ? x.node : x
+  }
+
+  // forward mutations to light DOM
+  Sneaky.prototype.appendChild = function (node) {
+    return new Sneaky(this.lightNode.appendChild(getNode(node)))
+  }
+
+  Sneaky.prototype.removeChild = function (node) {
+    return new Sneaky(this.lightNode.removeChild(getNode(node)))
+  }
+
+  Sneaky.prototype.insertBefore = function (node, refNode) {
+    return new Sneaky(this.lightNode.insertBefore(getNode(node), refNode && getNode(refNode) || null))
+  }
+
+  window.Sneaky = Sneaky;
+  window.sneakyDoc = {
+    document: {
+      createElement: function (x, y) {
+        return new Sneaky(document.createElement(x, y))
+      },
+      createElementNS: function (x, y) {
+        return new Sneaky(document.createElementNS(x, y))
+      },
+      createTextNode: function (txt) {
+        return document.createTextNode(txt)
+      },
+    },
+    extractNode: getNode
+  }
+
+  // Polymer mixins (polymer calls them behaviors)
+  var EscherMixins = {}
+  window.EscherMixins = EscherMixins
+
+  EscherMixins.LifeCycle = {
+    _domInitCalled: false,
+    attached: function () {
+
+      // Use domInit instead of attached.
+      // attached is called twice in some places
+      // when using virtual-dom
+
+      if (!this._domInitCalled) {
+        this.domInit && this.domInit()
+        this._domInitCalled = true
+      }
+    }
+  }
+
 })();
 </script>
 
-<polymer-element
-    name="signal-container">
+<dom-module
+  id="signal-container">
 
 <template>
-    <content></content>
+  <content></content>
 </template>
 
 <script>
 
-    Polymer("signal-container", {
-        id: "",
-        vnode: null,
-        domReady: function () {
-            // Starts with Escher.empty.
-            var id = this.getAttribute("id")
-            this.vnode = new Patchwork.Node(id, {t: "div"}, this)
-            Escher.addSubtree(id, this.vnode)
-        },
-        idChanged: function (a, b) {
-            if (a !== "") {
-                Escher.removeSubtree(a)
-                Escher.addSubtree(b, this.vnode)
-            }
+  Polymer({
+
+    is: "signal-container",
+    behaviors: [EscherMixins.LifeCycle],
+
+    properties: {
+      signalId: {
+        type: String,
+        observer: "_idChanged"
+      },
+      vnode: Object
+    },
+
+    _initCleanSubtree: function (id) {
+        // XXX: Initial value of tile signals is Escher.empty which is <div></div>
+        Polymer.dom(this).innerHTML = "<div></div>" 
+        this.vnode = new Patchwork.Node(id, {t: "div"}, new Sneaky(this), sneakyDoc);
+        Escher.addSubtree(id, this.vnode)
+        this._prevId = id
+    },
+
+    domInit: function () {
+      var id = this.signalId
+      console.log(this.signalId)
+      this._initCleanSubtree(id)
+    },
+
+    _idChanged: function (id, oldId) {
+        if (typeof(oldId) !== "undefined") {
+            // This means we are in a SignalWrap inside a SignalWrap
+            // (...which is probably inside another SignalWrap).
+            // console.log("ID changed", this.signalId, this._prevId, this.vnode)
+
+            Escher.removeSubtree(oldId)
+            this._initCleanSubtree(id)
         }
-    })
+    }
+  })
 </script>
 
-</polymer-element>
+</dom-module>

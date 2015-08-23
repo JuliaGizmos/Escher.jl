@@ -1,34 +1,46 @@
 
 <script src="bower_components/katex/build/katex.js"></script>
 
-<polymer-element
-    name="ka-tex"
-    attributes="source block" >
+<dom-module
+    id="ka-tex"
+    >
 
 <template>
-<link rel="stylesheet" href="bower_components/katex/build/katex.min.css">
-
-<span id="rendered"></span>
+  <link rel="stylesheet" href="bower_components/katex/build/katex.min.css">
+  <span id="rendered"></span>
 </template>
 
 <script>
 
 Polymer({
-    source: "",
-    block: false,
-    render: function () {
-        katex.render(this.source, this.$.rendered, {displayMode: this.block})
+  is: "ka-tex",
+  behaviors: [EscherMixins.LifeCycle],
+
+  properties: {
+    source: {
+      type: String,
+      value: "",
+      observer: "_sourceChanged"
     },
-    domReady: function () {
-        this.render()
+    block: {
+      type: Boolean,
+      value: false,
+      observer: "_blockChanged"
     },
-    sourceChanged: function () {
-        this.render()
-    },
-    blockChanged: function () {
-            this.render()
-    }
+  },
+  render: function () {
+    katex.render(this.source, this.$.rendered, {displayMode: this.block})
+  },
+  domInit: function () {
+    this.render()
+  },
+  _sourceChanged: function () {
+    this.render()
+  },
+  _blockChanged: function () {
+    this.render()
+  }
 })
 </script>
 
-</polymer-element>
+</dom-module>

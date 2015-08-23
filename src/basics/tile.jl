@@ -1,5 +1,7 @@
 export Tile, render
 
+import Base: convert, writemime
+
 @doc """
 A `Tile` is the basic currency in Escher.
 Most of the functions in the Escher API take `Tile`s
@@ -31,12 +33,12 @@ end
 
 render_fallback(m::MIME"text/plain", x) = Elem(:div, stringmime(m, x))
 render_fallback(m::MIME"text/html", x) = Elem(:div, innerHTML=stringmime(m, x))
-render_fallback(m::MIME"text/svg", x) = Elem(:div, innerHTML=stringmime(m, x))
+render_fallback(m::MIME"image/svg+xml", x) = Elem(:div, innerHTML=stringmime(m, x))
 render_fallback(m::MIME"image/png", x) =
     Elem(:img, src="data:image/png;base64," * stringmime(m, x))
 
-render(x::FloatingPoint, state) = @sprintf "%0.3f" x
-render(x::Symbol, state) = string(x)
+render(x::FloatingPoint, state) = render(@sprintf "%0.3f" x, state)
+render(x::Symbol, state) = render(string(x), state)
 render(x::String, state) = Elem(:span, x)
 
 render{T}(x::T, state) =
@@ -77,6 +79,7 @@ convert(::Type{TileList}, xs::AbstractArray) =
     TileList(xs)
 convert(::Type{TileList}, xs::Tuple) =
     TileList([x for x in xs])
+convert(::Type{TileList}, x::TileList) = x
 convert(::Type{TileList}, x) =
     TileList([x])
 

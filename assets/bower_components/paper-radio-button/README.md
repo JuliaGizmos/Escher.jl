@@ -1,7 +1,32 @@
-paper-radio-button
-===================
+# paper-radio-button
 
-**This element is compatible with Polymer 0.5 and lower only, and will be deprecated.**  
-You can check out a similar 0.8-compatible version of this element at [https://github.com/polymerelements/paper-radio-button](https://github.com/polymerelements/paper-radio-button)
+`paper-radio-button` is a button that can be either checked or unchecked.
+User can tap the radio button to check or uncheck it.
 
-See the [component page](https://www.polymer-project.org/0.5/docs/elements/paper-radio-button.html) for more information.
+Use a `<paper-radio-group>` to group a set of radio buttons.  When radio buttons
+are inside a radio group, exactly one radio button in the group can be checked
+at any time.
+Example:
+
+```html
+<paper-radio-button></paper-radio-button>
+<paper-radio-button>Item label</paper-radio-button>
+```
+Styling a radio button:
+
+```html
+<style is="custom-style">
+  :root {
+    /* Unchecked state colors. */
+    --paper-radio-button-unchecked-color: #5a5a5a;
+    --paper-radio-button-unchecked-background-color: #fff;
+    --paper-radio-button-unchecked-ink-color: #5a5a5a;
+
+    /* Checked state colors. */
+    --paper-radio-button-checked-color: #009688;
+    --paper-radio-button-checked-ink-color: #0f9d58;
+
+    --paper-radio-button-label-color: black;
+  }
+</style>
+```

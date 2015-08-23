@@ -1,13 +1,14 @@
 
 # An infinite number of mathematicians walk into a bar...
 using Color
+using Compat
 
 colors = distinguishable_colors(9)
 
 box(w, h, n) =
     empty |> fillcolor(colors[n % 9 + 1]) |> size(w, h)
 
-cut(w, h, ::(Escher.Vertical, Bool)) =
+cut(w, h, ::@compat Tuple{Escher.Vertical, Bool}) =
     (w, h/2)
 cut(w, h, ::Any) =
     (w/2, h)

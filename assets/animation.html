@@ -1,119 +1,94 @@
-<link rel="import" href="bower_components/core-animated-pages/core-animated-pages.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/cascade-transition.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/core-transition-pages.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/cross-fade.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/hero-transition.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/list-cascade.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/scale-up.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/slide-down.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/slide-from-bottom.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/slide-from-right.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/slide-up.html">
-<link rel="import" href="bower_components/core-animated-pages/transitions/tile-cascade.html">
+<link rel="import" href="bower_components/neon-animation/neon-animated-pages.html">
+<link rel="import" href="bower_components/neon-animation/animations/fade-in-animation.html">
+<link rel="import" href="bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="bower_components/neon-animation/neon-animatable-behavior.html">
 
-<style>
-  slide-show, core-animated-pages {
-    opacity: 1;
-    transition: opacity 300ms;
-    overflow: hidden;
-  }
-  slide-show:unresolved, core-animated-pages:unresolved {
-    opacity: 0;
-  }
-  slide-show {
-    width: 100vw;
-    height: 100vh;
-  }
-</style>
+<dom-module
+    id="slide-tile">
 
-<polymer-element
-    name="slide-fragment">
 <template>
     <style>
-        :host {
-            opacity: 0;
-        }
+      #slide {
+        min-height: 100%;
+        min-width: 100%;
+      }
     </style>
-    <content></content>
-</template>
-<script>
-    Polymer({
-        show: function () {
-            this.style.opacity = "1";
-        }
-    })
-</script>
-</polymer-element>
-
-<polymer-element
-    name="slide-tile"
-    layout horizontal center center-justified>
-<template>
-    <section >
+    <section id="slide" class="flow vertical pack-center pack-across-center">
         <content></content>
     </section>
 </template>
+
 <script>
     Polymer({
+        is: "slide-tile",
+        behaviors: [Polymer.NeonAnimatableBehavior]
     })
 </script>
-</polymer-element>
+</dom-module>
 
-<polymer-element
+<dom-module
     name="slide-show"
-    extends="core-animated-pages"
-    tabindex="0"
     >
 
 <template>
-<style>
-    :host {
-        position: relative;
-        outline: none;
+  <style>
+    #slides {
+      height: 100vh;
     }
-</style>
-    <shadow></shadow>
+  </style>
+  <neon-animated-pages entry-animation="fade-in-animation" exit-animation="fade-out-animation" id="slides" selected="{{selected}}" tabindex="0" style="position:relative; height:100vh; width: 100vw;"
+  >
+    <content></content>
+  </neon-animated-pages>
     <!-- TODO: touch guestures, esc for overview -->
-    <core-a11y-keys target="{{}}" keys="up down left right enter ctrl+left ctrl+right shift+left shift+right" on-keys-pressed="{{arrowHandler}}"></core-a11y-keys>
+    <iron-a11y-keys target="{{}}" keys="up down left right enter ctrl+left ctrl+right shift+left shift+right" on-keys-pressed="arrowHandler"></iron-a11y-keys>
 </template>
 
 <script>
 Polymer({
-    // Refresh any code-mirror tile in the currently selected slide
+    is: "slide-show",
+    properties: {
+      selected: {
+        type: Number,
+        value: 0,
+        notify: true
+      }
+    },
+    behaviors: [EscherMixins.LifeCycle],
+
     refreshCodeMirror: function () {
 
-        var cs = this.selectedItem.querySelectorAll("code-mirror");
+      // Refresh any code-mirror tile in the currently selected slide
+        var cs = this.$.slides.selectedItem.querySelectorAll("code-mirror");
         for (var i=0, l=cs.length; i < l; i++) {
             cs[i].mirror.refresh()
         }
     },
-    domReady: function () {
+    domInit: function () {
         var self = this
-        this.super()
+        this.setAttribute("tabindex", 0)
     },
     transitionToSlide: function (i) {
-        var s = this.items[i]
-        // do nothing if the item does not exist
-        if (!s) {
-            return
+        var self = this;
+        if (!this.$.slides.items[i]) {
+          return
         }
-        this.transitions = s.inTransitions || ''
-
-        var self = this
-        this.selectIndex(i)
+        this.$.slides.selected = i
         setTimeout(function () {
             self.refreshCodeMirror()
         }, 0)
     },
     showNext: function (wrapped) {
+        var slides = this.$.slides
         var i = wrapped &&
-            this.selectedIndex >= this.items.length - 1 ?
-                0 : this.selectedIndex + 1
+            slides.selected >= slides.items.length - 1 ?
+                0 : slides.selected + 1
         this.transitionToSlide(i)
     },
     showPrev: function (wrapped) {
-        var i = wrapped && !this.selectedIndex ?
-            this.items.length - 1 : this.selectedIndex - 1;
+        var slides = this.$.slides
+        var i = wrapped && !slides.selected ?
+            slides.items.length - 1 : slides.selected - 1;
         this.transitionToSlide(i)
     },
     arrowHandler: function (ev) {
@@ -133,5 +108,5 @@ Polymer({
 })
 </script>
 
-</polymer-element>
+</dom-module>
 

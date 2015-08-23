@@ -7,7 +7,7 @@
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-// @version 0.7.5
+// @version 0.7.11
 window.WebComponents = window.WebComponents || {};
 
 (function(scope) {
@@ -4694,7 +4694,7 @@ if (WebComponents.flags.shadow) {
         }
       }
     };
-    var selectorRe = /([^{]*)({[\s\S]*?})/gim, cssCommentRe = /\/\*[^*]*\*+([^\/*][^*]*\*+)*\//gim, cssCommentNextSelectorRe = /\/\*\s*@polyfill ([^*]*\*+([^\/*][^*]*\*+)*\/)([^{]*?){/gim, cssContentNextSelectorRe = /polyfill-next-selector[^}]*content\:[\s]*?['"](.*?)['"][;\s]*}([^{]*?){/gim, cssCommentRuleRe = /\/\*\s@polyfill-rule([^*]*\*+([^\/*][^*]*\*+)*)\//gim, cssContentRuleRe = /(polyfill-rule)[^}]*(content\:[\s]*['"](.*?)['"])[;\s]*[^}]*}/gim, cssCommentUnscopedRuleRe = /\/\*\s@polyfill-unscoped-rule([^*]*\*+([^\/*][^*]*\*+)*)\//gim, cssContentUnscopedRuleRe = /(polyfill-unscoped-rule)[^}]*(content\:[\s]*['"](.*?)['"])[;\s]*[^}]*}/gim, cssPseudoRe = /::(x-[^\s{,(]*)/gim, cssPartRe = /::part\(([^)]*)\)/gim, polyfillHost = "-shadowcsshost", polyfillHostContext = "-shadowcsscontext", parenSuffix = ")(?:\\((" + "(?:\\([^)(]*\\)|[^)(]*)+?" + ")\\))?([^,{]*)";
+    var selectorRe = /([^{]*)({[\s\S]*?})/gim, cssCommentRe = /\/\*[^*]*\*+([^/*][^*]*\*+)*\//gim, cssCommentNextSelectorRe = /\/\*\s*@polyfill ([^*]*\*+([^/*][^*]*\*+)*\/)([^{]*?){/gim, cssContentNextSelectorRe = /polyfill-next-selector[^}]*content\:[\s]*?['"](.*?)['"][;\s]*}([^{]*?){/gim, cssCommentRuleRe = /\/\*\s@polyfill-rule([^*]*\*+([^/*][^*]*\*+)*)\//gim, cssContentRuleRe = /(polyfill-rule)[^}]*(content\:[\s]*['"](.*?)['"])[;\s]*[^}]*}/gim, cssCommentUnscopedRuleRe = /\/\*\s@polyfill-unscoped-rule([^*]*\*+([^/*][^*]*\*+)*)\//gim, cssContentUnscopedRuleRe = /(polyfill-unscoped-rule)[^}]*(content\:[\s]*['"](.*?)['"])[;\s]*[^}]*}/gim, cssPseudoRe = /::(x-[^\s{,(]*)/gim, cssPartRe = /::part\(([^)]*)\)/gim, polyfillHost = "-shadowcsshost", polyfillHostContext = "-shadowcsscontext", parenSuffix = ")(?:\\((" + "(?:\\([^)(]*\\)|[^)(]*)+?" + ")\\))?([^,{]*)";
     var cssColonHostRe = new RegExp("(" + polyfillHost + parenSuffix, "gim"), cssColonHostContextRe = new RegExp("(" + polyfillHostContext + parenSuffix, "gim"), selectorReSuffix = "([>\\s~+[.,{:][\\s\\S]*)?$", colonHostRe = /\:host/gim, colonHostContextRe = /\:host-context/gim, polyfillHostNoCombinator = polyfillHost + "-no-combinator", polyfillHostRe = new RegExp(polyfillHost, "gim"), polyfillHostContextRe = new RegExp(polyfillHostContext, "gim"), shadowDOMSelectorsRe = [ />>>/g, /::shadow/g, /::content/g, /\/deep\//g, /\/shadow\//g, /\/shadow-deep\//g, /\^\^/g, /\^/g ];
     function stylesToCssText(styles, preserveComments) {
       var cssText = "";
@@ -6034,7 +6034,7 @@ window.HTMLImports.addModule(function(scope) {
   var IMPORT_SELECTOR = "link[rel=" + IMPORT_LINK_TYPE + "]";
   var importParser = {
     documentSelectors: IMPORT_SELECTOR,
-    importsSelectors: [ IMPORT_SELECTOR, "link[rel=stylesheet]", "style", "script:not([type])", 'script[type="application/javascript"]', 'script[type="text/javascript"]' ].join(","),
+    importsSelectors: [ IMPORT_SELECTOR, "link[rel=stylesheet]:not([type])", "style:not([type])", "script:not([type])", 'script[type="application/javascript"]', 'script[type="text/javascript"]' ].join(","),
     map: {
       link: "parseLink",
       script: "parseScript",
@@ -6085,6 +6085,7 @@ window.HTMLImports.addModule(function(scope) {
       }
     },
     parseImport: function(elt) {
+      elt.import = elt.__doc;
       if (window.HTMLImports.__importsParsingHook) {
         window.HTMLImports.__importsParsingHook(elt);
       }
@@ -6147,6 +6148,8 @@ window.HTMLImports.addModule(function(scope) {
     trackElement: function(elt, callback) {
       var self = this;
       var done = function(e) {
+        elt.removeEventListener("load", done);
+        elt.removeEventListener("error", done);
         if (callback) {
           callback(e);
         }
@@ -6184,7 +6187,9 @@ window.HTMLImports.addModule(function(scope) {
       script.src = scriptElt.src ? scriptElt.src : generateScriptDataUrl(scriptElt);
       scope.currentScript = scriptElt;
       this.trackElement(script, function(e) {
-        script.parentNode.removeChild(script);
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
         scope.currentScript = null;
       });
       this.addElementToDocument(script);
@@ -6200,7 +6205,7 @@ window.HTMLImports.addModule(function(scope) {
         for (var i = 0, l = nodes.length, p = 0, n; i < l && (n = nodes[i]); i++) {
           if (!this.isParsed(n)) {
             if (this.hasResource(n)) {
-              return nodeIsImport(n) ? this.nextToParseInDoc(n.import, n) : n;
+              return nodeIsImport(n) ? this.nextToParseInDoc(n.__doc, n) : n;
             } else {
               return;
             }
@@ -6223,7 +6228,7 @@ window.HTMLImports.addModule(function(scope) {
       return this.dynamicElements.indexOf(elt) >= 0;
     },
     hasResource: function(node) {
-      if (nodeIsImport(node) && node.import === undefined) {
+      if (nodeIsImport(node) && node.__doc === undefined) {
         return false;
       }
       return true;
@@ -6297,7 +6302,7 @@ window.HTMLImports.addModule(function(scope) {
           }
           this.documents[url] = doc;
         }
-        elt.import = doc;
+        elt.__doc = doc;
       }
       parser.parseNext();
     },
@@ -6501,29 +6506,23 @@ window.CustomElements.addModule(function(scope) {
   var flags = scope.flags;
   var forSubtree = scope.forSubtree;
   var forDocumentTree = scope.forDocumentTree;
-  function addedNode(node) {
-    return added(node) || addedSubtree(node);
+  function addedNode(node, isAttached) {
+    return added(node, isAttached) || addedSubtree(node, isAttached);
   }
-  function added(node) {
-    if (scope.upgrade(node)) {
+  function added(node, isAttached) {
+    if (scope.upgrade(node, isAttached)) {
       return true;
     }
-    attached(node);
+    if (isAttached) {
+      attached(node);
+    }
   }
-  function addedSubtree(node) {
+  function addedSubtree(node, isAttached) {
     forSubtree(node, function(e) {
-      if (added(e)) {
+      if (added(e, isAttached)) {
         return true;
       }
     });
-  }
-  function attachedNode(node) {
-    attached(node);
-    if (inDocument(node)) {
-      forSubtree(node, function(e) {
-        attached(e);
-      });
-    }
   }
   var hasPolyfillMutations = !window.MutationObserver || window.MutationObserver === window.JsMutationObserver;
   scope.hasPolyfillMutations = hasPolyfillMutations;
@@ -6554,12 +6553,10 @@ window.CustomElements.addModule(function(scope) {
     }
   }
   function _attached(element) {
-    if (element.__upgraded__ && (element.attachedCallback || element.detachedCallback)) {
-      if (!element.__attached && inDocument(element)) {
-        element.__attached = true;
-        if (element.attachedCallback) {
-          element.attachedCallback();
-        }
+    if (element.__upgraded__ && !element.__attached) {
+      element.__attached = true;
+      if (element.attachedCallback) {
+        element.attachedCallback();
       }
     }
   }
@@ -6579,18 +6576,16 @@ window.CustomElements.addModule(function(scope) {
     }
   }
   function _detached(element) {
-    if (element.__upgraded__ && (element.attachedCallback || element.detachedCallback)) {
-      if (element.__attached && !inDocument(element)) {
-        element.__attached = false;
-        if (element.detachedCallback) {
-          element.detachedCallback();
-        }
+    if (element.__upgraded__ && element.__attached) {
+      element.__attached = false;
+      if (element.detachedCallback) {
+        element.detachedCallback();
       }
     }
   }
   function inDocument(element) {
     var p = element;
-    var doc = wrap(document);
+    var doc = window.wrap(document);
     while (p) {
       if (p == doc) {
         return true;
@@ -6608,7 +6603,7 @@ window.CustomElements.addModule(function(scope) {
       }
     }
   }
-  function handler(mutations) {
+  function handler(root, mutations) {
     if (flags.dom) {
       var mx = mutations[0];
       if (mx && mx.type === "childList" && mx.addedNodes) {
@@ -6623,13 +6618,14 @@ window.CustomElements.addModule(function(scope) {
       }
       console.group("mutations (%d) [%s]", mutations.length, u || "");
     }
+    var isAttached = inDocument(root);
     mutations.forEach(function(mx) {
       if (mx.type === "childList") {
         forEach(mx.addedNodes, function(n) {
           if (!n.localName) {
             return;
           }
-          addedNode(n);
+          addedNode(n, isAttached);
         });
         forEach(mx.removedNodes, function(n) {
           if (!n.localName) {
@@ -6651,7 +6647,7 @@ window.CustomElements.addModule(function(scope) {
     }
     var observer = node.__observer;
     if (observer) {
-      handler(observer.takeRecords());
+      handler(node, observer.takeRecords());
       takeMutations();
     }
   }
@@ -6660,7 +6656,7 @@ window.CustomElements.addModule(function(scope) {
     if (inRoot.__observer) {
       return;
     }
-    var observer = new MutationObserver(handler);
+    var observer = new MutationObserver(handler.bind(this, inRoot));
     observer.observe(inRoot, {
       childList: true,
       subtree: true
@@ -6670,7 +6666,8 @@ window.CustomElements.addModule(function(scope) {
   function upgradeDocument(doc) {
     doc = window.wrap(doc);
     flags.dom && console.group("upgradeDocument: ", doc.baseURI.split("/").pop());
-    addedNode(doc);
+    var isMainDocument = doc === window.wrap(document);
+    addedNode(doc, isMainDocument);
     observe(doc);
     flags.dom && console.groupEnd();
   }
@@ -6687,28 +6684,27 @@ window.CustomElements.addModule(function(scope) {
   }
   scope.watchShadow = watchShadow;
   scope.upgradeDocumentTree = upgradeDocumentTree;
+  scope.upgradeDocument = upgradeDocument;
   scope.upgradeSubtree = addedSubtree;
   scope.upgradeAll = addedNode;
-  scope.attachedNode = attachedNode;
+  scope.attached = attached;
   scope.takeRecords = takeRecords;
 });
 
 window.CustomElements.addModule(function(scope) {
   var flags = scope.flags;
-  function upgrade(node) {
+  function upgrade(node, isAttached) {
     if (!node.__upgraded__ && node.nodeType === Node.ELEMENT_NODE) {
       var is = node.getAttribute("is");
-      var definition = scope.getRegisteredDefinition(is || node.localName);
+      var definition = scope.getRegisteredDefinition(node.localName) || scope.getRegisteredDefinition(is);
       if (definition) {
-        if (is && definition.tag == node.localName) {
-          return upgradeWithDefinition(node, definition);
-        } else if (!is && !definition.extends) {
-          return upgradeWithDefinition(node, definition);
+        if (is && definition.tag == node.localName || !is && !definition.extends) {
+          return upgradeWithDefinition(node, definition, isAttached);
         }
       }
     }
   }
-  function upgradeWithDefinition(element, definition) {
+  function upgradeWithDefinition(element, definition, isAttached) {
     flags.upgrade && console.group("upgrade:", element.localName);
     if (definition.is) {
       element.setAttribute("is", definition.is);
@@ -6716,8 +6712,10 @@ window.CustomElements.addModule(function(scope) {
     implementPrototype(element, definition);
     element.__upgraded__ = true;
     created(element);
-    scope.attachedNode(element);
-    scope.upgradeSubtree(element);
+    if (isAttached) {
+      scope.attached(element);
+    }
+    scope.upgradeSubtree(element, isAttached);
     flags.upgrade && console.groupEnd();
     return element;
   }
@@ -6845,16 +6843,22 @@ window.CustomElements.addModule(function(scope) {
       var nativePrototype = HTMLElement.prototype;
       if (definition.is) {
         var inst = document.createElement(definition.tag);
-        var expectedPrototype = Object.getPrototypeOf(inst);
-        if (expectedPrototype === definition.prototype) {
-          nativePrototype = expectedPrototype;
-        }
+        nativePrototype = Object.getPrototypeOf(inst);
       }
       var proto = definition.prototype, ancestor;
-      while (proto && proto !== nativePrototype) {
+      var foundPrototype = false;
+      while (proto) {
+        if (proto == nativePrototype) {
+          foundPrototype = true;
+        }
         ancestor = Object.getPrototypeOf(proto);
-        proto.__proto__ = ancestor;
+        if (ancestor) {
+          proto.__proto__ = ancestor;
+        }
         proto = ancestor;
+      }
+      if (!foundPrototype) {
+        console.warn(definition.tag + " prototype not found in prototype chain for " + definition.is);
       }
       definition.native = nativePrototype;
     }
@@ -6917,6 +6921,9 @@ window.CustomElements.addModule(function(scope) {
   var isInstance;
   if (!Object.__proto__ && !useNative) {
     isInstance = function(obj, ctor) {
+      if (obj instanceof ctor) {
+        return true;
+      }
       var p = obj;
       while (p) {
         if (p === ctor.prototype) {
@@ -6985,6 +6992,7 @@ window.CustomElements.addModule(function(scope) {
     initializeModules();
   }
   var upgradeDocumentTree = scope.upgradeDocumentTree;
+  var upgradeDocument = scope.upgradeDocument;
   if (!window.wrap) {
     if (window.ShadowDOMPolyfill) {
       window.wrap = window.ShadowDOMPolyfill.wrapIfNeeded;
@@ -6995,22 +7003,26 @@ window.CustomElements.addModule(function(scope) {
       };
     }
   }
+  if (window.HTMLImports) {
+    window.HTMLImports.__importsParsingHook = function(elt) {
+      if (elt.import) {
+        upgradeDocument(wrap(elt.import));
+      }
+    };
+  }
   function bootstrap() {
     upgradeDocumentTree(window.wrap(document));
-    if (window.HTMLImports) {
-      window.HTMLImports.__importsParsingHook = function(elt) {
-        upgradeDocumentTree(wrap(elt.import));
-      };
-    }
     window.CustomElements.ready = true;
-    setTimeout(function() {
-      window.CustomElements.readyTime = Date.now();
-      if (window.HTMLImports) {
-        window.CustomElements.elapsed = window.CustomElements.readyTime - window.HTMLImports.readyTime;
-      }
-      document.dispatchEvent(new CustomEvent("WebComponentsReady", {
-        bubbles: true
-      }));
+    requestAnimationFrame(function() {
+      setTimeout(function() {
+        window.CustomElements.readyTime = Date.now();
+        if (window.HTMLImports) {
+          window.CustomElements.elapsed = window.CustomElements.readyTime - window.HTMLImports.readyTime;
+        }
+        document.dispatchEvent(new CustomEvent("WebComponentsReady", {
+          bubbles: true
+        }));
+      });
     });
   }
   if (isIE11OrOlder && typeof window.CustomEvent !== "function") {
@@ -7082,35 +7094,6 @@ window.CustomElements.addModule(function(scope) {
         clearTimeout(id);
       };
     }();
-  }
-  var elementDeclarations = [];
-  var polymerStub = function(name, dictionary) {
-    if (typeof name !== "string" && arguments.length === 1) {
-      Array.prototype.push.call(arguments, document._currentScript);
-    }
-    elementDeclarations.push(arguments);
-  };
-  window.Polymer = polymerStub;
-  scope.consumeDeclarations = function(callback) {
-    scope.consumeDeclarations = function() {
-      throw "Possible attempt to load Polymer twice";
-    };
-    if (callback) {
-      callback(elementDeclarations);
-    }
-    elementDeclarations = null;
-  };
-  function installPolymerWarning() {
-    if (window.Polymer === polymerStub) {
-      window.Polymer = function() {
-        throw new Error("You tried to use polymer without loading it first. To " + 'load polymer, <link rel="import" href="' + 'components/polymer/polymer.html">');
-      };
-    }
-  }
-  if (HTMLImports.useNative) {
-    installPolymerWarning();
-  } else {
-    window.addEventListener("DOMContentLoaded", installPolymerWarning);
   }
 })(window.WebComponents);
 

@@ -16,14 +16,17 @@ export codemirror
     kwarg(tabsize::Int=4, doc="The tab size.")
 end
 
-broadcast(c::CodeMirror) =
-    hasstate(c, name=c.name, attr="currentValue", trigger="change")
+wrapbehavior(c::CodeMirror) =
+    hasstate(c, name=c.name, attr="immediateValue", trigger="change")
 
 # Render to virtual DOM
 render(c::CodeMirror, state) =
     Elem("code-mirror",
-        value=c.code,
-        mode=c.language,
-        readOnly=c.readonly,
-        theme=c.theme,
-        lineNumbers=c.linenumbers)
+        attributes = @d(
+            :value=>c.code,
+            :mode=>c.language,
+            :readOnly=>c.readonly,
+            :theme=>c.theme,
+            :lineNumbers=>c.linenumbers,
+        )
+    )

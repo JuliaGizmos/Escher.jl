@@ -1,5 +1,3 @@
-using Markdown
-
 import Escher: @api, render
 
 desc = md"""

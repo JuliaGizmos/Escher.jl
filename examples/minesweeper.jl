@@ -68,7 +68,7 @@ block(board, i, j) =
 
 gameover = vbox(
         title(2, "Game Over!") |> pad(1em),
-        addinterpreter(_ -> newboard(10, 10), broadcast(button("Start again"))) >>> initial_board_signal
+        addinterpreter(_ -> newboard(10, 10), button("Start again")) >>> initial_board_signal
     ) |> pad(1em) |> fillcolor("white")
 
 function showboard{lost}(board::Board{lost})

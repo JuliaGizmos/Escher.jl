@@ -1,15 +1,40 @@
 {
   "name": "paper-tabs",
+  "version": "1.0.1",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "description": "Material design tabs",
   "private": true,
-  "dependencies": {
-    "core-icons": "Polymer/core-icons#^0.5",
-    "core-selector": "Polymer/core-selector#^0.5",
-    "core-toolbar": "Polymer/core-toolbar#^0.5",
-    "core-media-query": "Polymer/core-media-query#^0.5",
-    "font-roboto": "Polymer/font-roboto#^0.5",
-    "paper-icon-button": "Polymer/paper-icon-button#^0.5",
-    "paper-ripple": "Polymer/paper-ripple#^0.5",
-    "core-resizable": "Polymer/core-resizable#^0.5"
+  "main": "paper-tabs.html",
+  "authors": [
+    "The Polymer Authors"
+  ],
+  "keywords": [
+    "web-components",
+    "polymer",
+    "tabs",
+    "control"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/PolymerElements/paper-tabs.git"
   },
-  "version": "0.5.6"
+  "dependencies": {
+    "iron-behaviors": "polymerelements/iron-behaviors#^1.0.0",
+    "iron-flex-layout": "polymerelements/iron-flex-layout#^1.0.0",
+    "iron-icon": "polymerelements/iron-icon#^1.0.0",
+    "iron-iconset-svg": "polymerelements/iron-iconset-svg#^1.0.0",
+    "iron-menu-behavior": "polymerelements/iron-menu-behavior#^1.0.0",
+    "iron-resizable-behavior": "polymerelements/iron-resizable-behavior#^1.0.0",
+    "paper-ripple": "polymerelements/paper-ripple#^1.0.0",
+    "paper-styles": "polymerelements/paper-styles#^1.0.0",
+    "polymer": "Polymer/polymer#^1.0.0",
+    "paper-icon-button": "polymerelements/paper-icon-button#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "paper-toolbar": "polymerelements/paper-toolbar#^1.0.0",
+    "test-fixture": "polymerelements/test-fixture#^1.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
+    "web-component-tester": "*"
+  }
 }

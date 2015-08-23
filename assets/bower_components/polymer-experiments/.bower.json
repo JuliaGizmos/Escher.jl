@@ -1,0 +1,13 @@
+{
+  "name": "polymer-experiments",
+  "homepage": "https://github.com/PolymerLabs/polymer-experiments",
+  "_release": "29f7d16756",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "29f7d167561a23590c06b1222c138ddc58ed6075"
+  },
+  "_source": "git://github.com/PolymerLabs/polymer-experiments.git",
+  "_target": "master",
+  "_originalSource": "PolymerLabs/polymer-experiments"
+}

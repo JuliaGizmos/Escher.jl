@@ -18,7 +18,7 @@ export intersperse
 
 # Utility functions for Elem
 
-boolattr(a, name) = a ? name : nothing
+boolattr(a) = a ? true : nothing # I know, this is insane
 
 @doc """
 Intersperse a value in between elements in a vector

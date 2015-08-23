@@ -21,7 +21,7 @@ export hasstate,
                  of the DOM node and not of the `Tile`."""
     )
     kwarg(
-        elem::String="::parent",
+        selector::String="::parent",
         doc="A CSS selector for the element to watch."
         )
     kwarg(
@@ -43,7 +43,7 @@ render(t::WithState, state) =
             "watch-state",
             name=t.name,
             attr=t.attr, trigger=t.trigger,
-            elem=t.elem,
+            selector=t.selector,
             source=t.source,
         )
 
@@ -56,13 +56,11 @@ render(t::WithState, state) =
     )
     curry(tile::Tile, doc="The tile to watch keypresses from.")
     kwarg(name::Symbol=:_keys, doc="Name to identify the behavior.")
-    kwarg(onpress::String="", doc="For internal use.")
 end
 
 render(k::Keypress, state) =
-    render(k.tile, state) & @d(:attributes => @d(:tabindex => 1)) <<
-        Elem("keypress-behavior", keys=k.keys, name=k.name) &
-            (k.onpress != "" ? @d(:onpress => k.onpress) : Dict())
+    render(k.tile, state) & @d(:attributes => @d(:tabindex => 0)) <<
+        Elem("keypress-behavior", attributes = @d(:keys=>k.keys, :name=>k.name))
 
 immutable Key
     key::String
@@ -129,16 +127,24 @@ render(c::Clickable, state) =
     doc("Watch for a selection in a selection widget.")
     curry(tile::Tile, doc="A selection widget.")
     kwarg(name::Symbol=:_clicks, doc="The name to identify the behavior.")
-    kwarg(elem::String="::parent", doc="For internal use.")
+    kwarg(multi::Bool=false, doc="True when watching widgets that allow multiple selections")
+    kwarg(selector::String="::parent", doc="CSS selector of the selectable widget.")
 end
 
 render(t::Selectable, state) =
     render(t.tile, state) <<
-        Elem("selectable-behavior", name=t.name, elem=t.elem)
+        Elem("selectable-behavior", name=t.name, selector=t.selector, multi=t.multi)
 
 inc(x) = x+1
-default_interpreter(t::Selectable) =
-    Chained(InterpreterFn(inc), ToType{Int}())
+inc(x::AbstractArray) = map(inc, x)
+default_interpreter(t::Selectable) = begin
+    if t.multi
+        InterpreterFn(inc) # FIXME: How do I ToType{Int} each element?
+    else
+        Chained(InterpreterFn(inc), ToType{Int}())
+    end
+end
+
 
 abstract MouseState
 
@@ -176,9 +182,9 @@ end
 # expose contained signal to outside
 name(c::ChanSend) = c.watch
 send(chan::Symbol, watch::Symbol, b) =
-    ChanSend(chan, watch, broadcast(b))
+    ChanSend(chan, watch, wrapbehavior(b))
 send(chan::Symbol, b::Behavior) =
-    ChanSend(chan, name(b), broadcast(b))
+    ChanSend(chan, name(b), wrapbehavior(b))
 
 @apidoc send => (ChanSend <: Behavior) begin
     doc("Emit changes to an attribute/property to a named channel.")
@@ -189,7 +195,7 @@ end
 
 render(chan::ChanSend, state) =
     render(chan.tile, state) <<
-        Elem("chan-send", chan=chan.chan, watch=chan.watch)
+        Elem("chan-send", attributes=@d(:chan=>chan.chan, :watch=>chan.watch))
 
 
 immutable ChanRecv <: Tile
@@ -209,7 +215,7 @@ end
 
 render(chan::ChanRecv, state) =
     render(chan.tile, state) <<
-        Elem("chan-recv", chan=chan.chan, attr=chan.attr)
+        Elem("chan-recv", attributes = @d(:chan=>chan.chan, :attr=>chan.attr))
 
 wire(a, b, chan, attribute) =
     send(chan, a), recv(chan, b, attribute)

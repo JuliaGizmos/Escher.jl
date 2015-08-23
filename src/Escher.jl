@@ -10,14 +10,13 @@ else
     using Base.Markdown
 end
 
+export @md_str, @md_mstr
 #@docstrings
 
 using Compat
 using Patchwork
 using Reactive
 using JSON
-
-import Base: convert, writemime
 
 # Polymer Setup
 custom_elements() =

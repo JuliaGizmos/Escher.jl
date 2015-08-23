@@ -1,7 +1,7 @@
 # Length
 
 using JSON
-import Base: convert
+import Base: convert, *, /, +, -
 
 export em, cm, mm, inch, pt, pc, px, ex, vw, vh, vmin, cent
 

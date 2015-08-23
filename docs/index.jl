@@ -1,4 +1,3 @@
-using Markdown
 using Color
 import Compose: compose, context, polygon
 using Lazy
@@ -159,7 +158,6 @@ $(vskip(1em))
 
 The `md""` string macro can generate markdown tiles from a markdown string.
 ```julia
-using Markdown
 
 function main(window)
     md\"\"\"

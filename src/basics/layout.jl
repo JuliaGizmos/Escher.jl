@@ -90,7 +90,7 @@ minheight(h, x...) = height("min", h, x...)
 
 @apidoc minwidth => (Width <: Tile) begin
     doc("Set the minimum width of a tile")
-    arg(height::Length, doc="the width")
+    arg(width::Length, doc="the width")
     curry(tile::Tile, doc="the tile to set the width of")
 end
 
@@ -105,7 +105,7 @@ maxheight(h, x...) = height("max", h, x...)
 
 @apidoc maxwidth => (Width <: Tile) begin
     doc("Set the maximum width of a tile")
-    arg(height::Length, doc="the width")
+    arg(width::Length, doc="the width")
     curry(tile::Tile, doc="the tile to set the width of")
 end
 
