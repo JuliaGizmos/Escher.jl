@@ -1,5 +1,3 @@
-using Markdown
-
 const content = 
     vbox(
         title(1, "Content"),
