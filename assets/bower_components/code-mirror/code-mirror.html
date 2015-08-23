@@ -28,65 +28,73 @@
       value: {
         type: String,
         value: '',
-        notify: true
+        observer: "_valueChanged"
       },
       mode: {
         type: String,
         value: 'julia',
-        notify: true
+        observer: "_modeChanged"
       },
       theme: {
         type: String,
         value: 'elegant',
-        notify: true
+        observer: "_themeChanged"
       },
       tabSize: {
         type: Number,
         value: 2,
-        notify: true
+        observer: "_tabSizeChanged"
       },
       lineNumbers: {
         type: Boolean,
         value: true,
-        notify: true
+        observer: "_lineNumbersChanged"
       }
     },
-    listeners: {
-      "value-changed": function() {
+
+    // mutation observers
+    _valueChanged: function() {
+      if (this.mirror) {
         this.mirror.setValue(this.value);
-      },
-      "mode-changed": function() {
-        this.$.mode.src = this._modeScript(this.mode)
-        console.log("loading JS", this.mode)
-        this.mirror.setOption('mode', this.mode)
-      },
-      "theme-changed": function() {
-        this.$.theme.href = this._themeStylesheet(this.theme)
-        console.log("loading CSS", this.theme)
-        this.mirror.setOption('theme', this.theme);
-      },
-      "tabSize-changed": function() {
-        this.mirror.setOption('tabSize', this.tabSize);
-      },
-      "line-numbers-changed": function () {
-        this.mirror.setOption('lineNumbers', this.lineNumbers);
-      },
+      }
     },
+    _modeChanged: function() {
+      //this.$.mode.src = this._modeScript(this.mode)
+      //console.log("loading JS", this.mode)
+      if (this.mirror) {
+        this.mirror.setOption('mode', this.mode)
+      }
+    },
+    _themeChanged: function() {
+      //this.$.theme.href = this._themeStylesheet(this.theme)
+      //console.log("loading CSS", this.theme)
+      if (this.mirror) {
+        this.mirror.setOption('theme', this.theme);
+      }
+    },
+    _tabSizeChanged: function() {
+      if (this.mirror) {
+        this.mirror.setOption('tabSize', this.tabSize);
+      }
+    },
+    _lineNumbersChanged: function () {
+      if (this.mirror) {
+        this.mirror.setOption('lineNumbers', this.lineNumbers);
+      }
+    },
+
+
+    // utility functions
     _themeStylesheet: function (theme) {
       return "codemirror/theme/" + theme + ".css"
     },
-    _modeScript: function (theme) {
+    _modeScript: function (mode) {
       return "codemirror/mode/" + mode + "/" + mode + ".js"
     },
 
-    domInit: function() {
-      //this.$.theme.href = this._themeStylesheet(this.theme)
-      //this.$.mode.src = this._modeScript(this.mode)
-      if (!this.value) {
-        this.value = this.textContent;
-      }
+    ready: function () {
       this.mirror = CodeMirror(this, {
-        value: this.value,
+        value: this.value || this.textContent,
         mode: this.mode,
         theme: this.theme,
         tabSize: this.tabSize,
@@ -96,10 +104,23 @@
         foldGutter: true,
         gutters: ["CodeMirror-linenumbers"]
       });
+   },
+
+  get immediateValue () {
+    if (this.mirror) {
+      return this.mirror.getValue()
+    } else {
+      return ""
+    }
+  },
+    domInit: function() {
+      //this.$.theme.href = this._themeStylesheet(this.theme)
+      //this.$.mode.src = this._modeScript(this.mode)
+
 
       var self = this
+
       this.mirror.on("change", function () {
-          self.currentValue = self.mirror.getValue()
           self.fire("change")
       })
 
