@@ -1,11 +1,13 @@
-texᵗ = Input("f(x) = \\int_{-\\infty}^\\infty
-           \\hat f(\\xi)\\,e^{2 \\pi i \\xi x}
-           \\,d\\xi")
-modeᵗ = Input(false)
 
 function main(window)
     push!(window.assets, "tex")
     push!(window.assets, "widgets")
+
+    texᵗ = Input("f(x) = \\int_{-\\infty}^\\infty
+               \\hat f(\\xi)\\,e^{2 \\pi i \\xi x}
+               \\,d\\xi")
+
+    modeᵗ = Input(false)
 
     lift(texᵗ, modeᵗ) do t, mode
         vbox(h1("LaTeX"),

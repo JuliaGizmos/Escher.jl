@@ -20,12 +20,12 @@ Polymer({
     source: {
       type: String,
       value: "",
-      notify: true
+      observer: "_sourceChanged"
     },
     block: {
       type: Boolean,
       value: false,
-      notify: true
+      observer: "_blockChanged"
     },
   },
   render: function () {
@@ -34,10 +34,10 @@ Polymer({
   domInit: function () {
     this.render()
   },
-  sourceChanged: function () {
+  _sourceChanged: function () {
     this.render()
   },
-  blockChanged: function () {
+  _blockChanged: function () {
     this.render()
   }
 })

@@ -11,4 +11,4 @@ export tex
 end
 
 render(l::TeX, state) =
-    Elem("ka-tex", source=l.source, block=l.block)
+    Elem("ka-tex", attributes=@d(:source=>l.source, :block=>boolattr(l.block)))
