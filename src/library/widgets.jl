@@ -205,7 +205,7 @@ render(c::ToggleButton, state) =
 end
 
 wrapbehavior(t::TextInput, event="input") =
-    hasstate(t, name=t.name, attr="value", trigger=event, source="target") |>
+    hasstate(t, name=t.name, attr="value", trigger=event) |>
         addinterpreter(ToType{String}())
 
 render(t::TextInput, state) = begin
@@ -354,7 +354,7 @@ render(p::ProgressBar, state) =
     kwarg(
         animated::Bool=true,
         doc=md"If set to true, changes to `z` will be animated."
-    ) #FIXME: Does this work?
+    )
 end
 
 render(p::PaperShadow, state) =
