@@ -16,8 +16,8 @@ export wrapbehavior,
 # by calling `wrapbehavior` on it.
 abstract Widget <: Behavior
 
-subscribe(w::Widget, x::Input; absorb=true) =
-    subscribe(wrapbehavior(w), x, absorb=absorb)
+subscribe(w::Widget, x::Input) =
+    subscribe(wrapbehavior(w), x)
 
 addinterpreter(i::Interpreter, w::Widget) =
     addinterpreter(i, wrapbehavior(w))

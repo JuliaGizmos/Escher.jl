@@ -28,11 +28,6 @@ export hasstate,
         trigger::String="change",
         doc="The event that triggers a re-read of the attribute/property."
     )
-    kwarg(
-        source::String="",
-        doc="""If set to "target", the attribute is read from the element firing
-               the event."""
-    )
 end
 
 default_interpreter(::WithState) = identity
@@ -40,11 +35,12 @@ default_interpreter(::WithState) = identity
 render(t::WithState, state) =
     render(t.tile, state) <<
         Elem(
-            "watch-state",
-            name=t.name,
-            attr=t.attr, trigger=t.trigger,
-            selector=t.selector,
-            source=t.source,
+            "watch-state", attributes=@d(
+                :name=>t.name,
+                :attr=>t.attr,
+                :trigger=>t.trigger,
+                :selector=>t.selector,
+            )
         )
 
 @api keypress => (Keypress <: Behavior) begin
@@ -119,8 +115,10 @@ interpret(c::ClickInterpreter, x) =
 render(c::Clickable, state) =
     render(c.tile, state) <<
         Elem("clickable-behavior";
-            name=c.name,
-            buttons=string(map(button_number, c.buttons)),
+            attributes=@d(
+                :name=>c.name,
+                :buttons=>string(map(button_number, c.buttons)),
+            )
         )
 
 @api selectable => (Selectable <: Behavior) begin
@@ -133,7 +131,13 @@ end
 
 render(t::Selectable, state) =
     render(t.tile, state) <<
-        Elem("selectable-behavior", name=t.name, selector=t.selector, multi=t.multi)
+        Elem("selectable-behavior",
+            attributes = @d(
+                :name=>t.name,
+                :selector=>t.selector,
+                :multi=>t.multi
+            )
+        )
 
 inc(x) = x+1
 inc(x::AbstractArray) = map(inc, x)
