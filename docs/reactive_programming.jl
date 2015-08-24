@@ -1,4 +1,4 @@
-using Color
+using Colors
 
 include("helpers/page.jl")
 
@@ -68,7 +68,7 @@ end)
 Let's say we want to use the slider to set the hue of a rectangle in the UI. The statement of this problem naturally guides the next step -- we need a function that given the slider value, returns a rectangle with a specific hue.
 
 ```julia
-    using Color
+    using Colors
 
     with_hue(hue, tile=size(6em, 6em, empty)) =
         fillcolor(HSV(hue, 0.6, 0.6), tile) # HSV color space
@@ -82,7 +82,7 @@ Let's see if this function actually works by drawing colored squares for hues in
 
 $(begin
     with_hue(hue, tile=size(4em, 4em, empty)) =
-        fillcolor(Color.HSV(hue, 0.6, 0.6), tile)
+        fillcolor(Colors.HSV(hue, 0.6, 0.6), tile)
 
     hbox(intersperse(hskip(1em), map(with_hue, 0:45:270))) |> hbox |> packitems(center) |> fig
 end)
