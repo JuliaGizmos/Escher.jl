@@ -92,7 +92,10 @@ Polymer({
         this.transitionToSlide(i)
     },
     arrowHandler: function (ev) {
-        // TODO: fragments and custom transition
+      // TODO: fragments and custom transition
+
+      if (ev.detail.keyboardEvent.target === this.$.slides) {
+        // Only take action if the keyboard event target is the neon-animation element
         switch(ev.detail.key) {
         case "left":
         case "up":
@@ -104,6 +107,7 @@ Polymer({
             this.showNext()
             break;
         }
+      }
     }
 })
 </script>
