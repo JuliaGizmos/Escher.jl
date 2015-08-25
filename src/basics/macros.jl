@@ -292,16 +292,16 @@ const escher_meta = Dict()
     @api border => (Bordered{T <: Side} <: Tile) begin
         arg(side::T)
         curry(tile::Tile)
-        kwarg(color::ColorValue=color("black"))
+        kwarg(color::Color=colorant"black")
     end
  
  Should result in:
 
      immutable Bordered{T <: Side} <: Tile
          tile::Tile
-         color::ColorValue
+         color::Color
      end
-     border(side, tiles; color::ColorValue=color("black")) = Bordered(side, tiles, color)
+     border(side, tiles; color::Color=colorant"black") = Bordered(side, tiles, color)
      border(side; kwargs...) = tiles -> border(tiles; kwargs...)
 
 """ -> 

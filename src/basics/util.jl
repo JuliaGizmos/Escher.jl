@@ -1,4 +1,4 @@
-using Color
+using Colors
 
 # Dict macro
 macro d(xs...)
@@ -9,8 +9,8 @@ macro d(xs...)
   end
 end
 
-convert(::Type{ColorValue}, s::String) =
-    color(s)
+convert(::Type{Color}, s::String) =
+    parse(Colorant, s)
 
 render_color(c) = string("#" * hex(c))
 
@@ -80,7 +80,7 @@ render(c::Class, state) =
                c.class)
 
 @doc """
-given a sentinal, vector of parts, prefix, suffix and a value, 
+given a sentinal, vector of parts, prefix, suffix and a value,
 
 if the vector of parts is referentially equal to the sentinal, then returns
     [prefix * suffix => value]
@@ -101,4 +101,3 @@ teeprint(x, fn=println) = begin
     fn(x)
     x
 end
-

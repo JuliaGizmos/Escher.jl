@@ -1,4 +1,4 @@
-using Color
+using Colors
 export plaintext,
        fontfamily,
        fontsize,
@@ -91,7 +91,7 @@ const allowed_font_weights = 100:100:900
 @api fontweight => (WithFontWeight{T <: Union(Int, FontWeight)} <: Tile) begin
     doc("Set the font weight of text in one or more tiles.")
     arg(
-        weight::T, 
+        weight::T,
         doc="Font weight. Valid font weights are multiplies of 100 between 100 and 900."
     )
     curry(
@@ -113,12 +113,12 @@ render{T <: FontWeight}(t::WithFontWeight{T}, state) =
 
 @api fontcolor => (FontColor <: Tile) begin
     doc("Set the font color.")
-    arg(color::ColorValue, doc="The color.")
+    arg(color::Color, doc="The color.")
     curry(tiles::TileList, doc="A tile or a vector of tiles.")
 end
 
-fontcolor(c::String) = fontcolor(color(c))
-fontcolor(c::String, tiles) = fontcolor(color(c), tiles)
+fontcolor(c::String) = fontcolor(parse(Colorant, c))
+fontcolor(c::String, tiles) = fontcolor(parse(Colorant, c), tiles)
 
 render(t::FontColor, state) =
     wrapmany(t.tiles, :span, state) & style(@d(:color => render_color(t.color)))
@@ -142,7 +142,7 @@ end
 @api fonttype => (WithFontType <: Tile) begin
     doc("Set the font type.")
     arg(
-        typ::FontType, 
+        typ::FontType,
         doc=md"""The font type. Valid font types are `serif`, `sanserif`,
                  `slabserif` and `monospace`."""
     )
@@ -170,7 +170,7 @@ classes(::Italic) = "font-italic"
 @api fontstyle => (WithFontStyle <: Tile) begin
     doc("Set the font style.")
     arg(
-        style::FontStyle, 
+        style::FontStyle,
         doc=md"The font style. Valid font styles are `normal`, `slanted` and `italic`."
     )
     curry(tiles::TileList, doc="A tile or a vector of tiles.")
@@ -250,12 +250,12 @@ heading(n::Int) = t -> heading(n,t)
 title(n::Int, txt) = class("title-$n", txt)
 
 @apidoc title => (Class <: Tile) begin
-    doc(md"Create a title.") 
+    doc(md"Create a title.")
     arg(
         level::Int,
         doc="Title level. More is bigger. Valid values are integers 1 to 4."
     )
-    curry(tile::TileList, doc="A tile or a vector of tiles.") 
+    curry(tile::TileList, doc="A tile or a vector of tiles.")
 end
 
 h1(txt) = heading(1, txt)
@@ -264,9 +264,9 @@ h3(txt) = heading(3, txt)
 h4(txt) = heading(4, txt)
 
 @apidoc heading => (Class <: Tile) begin
-    doc(md"Create a heading. You can use `h1`, `h2`, `h3`, `h4` for brevity.") 
+    doc(md"Create a heading. You can use `h1`, `h2`, `h3`, `h4` for brevity.")
     arg(level::Int, doc="Heading level.")
-    curry(tile::TileList, doc="A tile or a vector of tiles.") 
+    curry(tile::TileList, doc="A tile or a vector of tiles.")
 end
 
 blockquote(txt) = class("blockquote", txt, forcewrap=true, wrap=:blockquote)

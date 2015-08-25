@@ -1,6 +1,6 @@
 
 # An infinite number of mathematicians walk into a bar...
-using Color
+using Colors
 using Compat
 
 colors = distinguishable_colors(9)

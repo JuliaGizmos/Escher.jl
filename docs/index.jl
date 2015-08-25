@@ -1,4 +1,4 @@
-using Color
+using Colors
 import Compose: compose, context, polygon
 using Lazy
 using Gadfly
@@ -63,7 +63,7 @@ $(vskip(1em))
 $(
 
 vbox(
-hline(color=color("#e1e1e1")),
+hline(color=colorant"#e1e1e1"),
 vskip(2em),
 Escher.fontsize(2em,
      "With Escher you can build beautiful Web UIs entirely in Julia.") |>
@@ -73,7 +73,7 @@ Escher.fontsize(2em,
         maxwidth(15em) |>
         x -> hbox(flex(), x, flex()),
 vskip(2em),
-hline(color=color("#e1e1e1")),
+hline(color=colorant"#e1e1e1"),
 )
 )
 $(vskip(3em))
@@ -216,7 +216,7 @@ plot(z=(x,y) -> x*exp(-(x-int(x))^2-y^2),
 
 ```julia
 using Compose
-using Color
+using Colors
 
 function sierpinski(n)
     if n == 0
@@ -503,7 +503,7 @@ part2 = md"""
 This is Minesweeper in about 80 SLOC!
 
 ```julia
-using Color
+using Colors
 using Lazy
 
 #### Model ####
