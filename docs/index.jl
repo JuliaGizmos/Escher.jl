@@ -500,7 +500,7 @@ part2 = md"""
 
 **Example 3.**
 
-This is Minesweeper in about 80 SLOC!
+This is Minesweeper in 70 SLOC! About 89 with comments.
 
 ```julia
 using Colors
