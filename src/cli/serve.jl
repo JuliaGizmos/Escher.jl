@@ -8,6 +8,8 @@ using JSON
 using Reactive
 using Patchwork
 
+import Mux: @d
+
 function loadfile(filename)
     if isfile(filename)
         try
@@ -58,18 +60,18 @@ function setup_socket(file)
 end
 
 mount_cmd(node, id="root") =
-   [ "command" => "mount",
+   @d( "command" => "mount",
     "id" => id,
-    "data" => Patchwork.jsonfmt(node)] |> JSON.json
+    "data" => Patchwork.jsonfmt(node)) |> JSON.json
 
 import_cmd(asset) =
-    [ "command" => "import",
-      "data" => Escher.resolve_asset(asset) ] 
+    @d( "command" => "import",
+      "data" => Escher.resolve_asset(asset) )
 
 patch_cmd(id, diff) =
-   [ "command" => "patch",
+   @d( "command" => "patch",
     "id" => id,
-    "data" => Patchwork.jsonfmt(diff)] |> JSON.json
+    "data" => Patchwork.jsonfmt(diff) ) |> JSON.json
 
 swap!(tilestream, next::Signal) =
     push!(tilestream, next)
@@ -127,14 +129,14 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
             end
         end
         for (key, sig) in st["embedded_signals"]
-            start_updates(sig, window, sock, key) 
+            start_updates(sig, window, sock, key)
         end
 
         rendered_next
     end
 
     for (key, sig) in state["embedded_signals"]
-        start_updates(sig, window, sock, key) 
+        start_updates(sig, window, sock, key)
     end
 end
 
@@ -204,11 +206,18 @@ uisocket(dir) = (req) -> begin
 
 end
 
+# Return files from the requested package, in the supplied directory
+packagefiles(dir, dirs = true) =
+  branch(req -> Mux.validpath(Pkg.dir(req[:params][:pkg], dir ), joinpath(req[:path]...), dirs=dirs),
+         req -> Mux.fresp(joinpath(Pkg.dir(req[:params][:pkg], dir), req[:path]...)))
+
+
 function escher_serve(port=5555, dir="")
     # App
     @app static = (
         Mux.defaults,
         route("assets", Mux.files(Pkg.dir("Escher", "assets")), Mux.notfound()),
+        route("pkg/:pkg", packagefiles( "assets"), Mux.notfound()),
         route("/:file", req -> setup_socket(req[:params][:file])),
         route("/", req -> setup_socket("index.jl")),
         Mux.notfound(),
