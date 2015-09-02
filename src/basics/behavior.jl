@@ -131,11 +131,10 @@ end
 
 render(t::Selectable, state) =
     render(t.tile, state) <<
-        Elem("selectable-behavior",
+        Elem("selectable-behavior", multi = t.multi,
             attributes = @d(
                 :name=>t.name,
-                :selector=>t.selector,
-                :multi=>t.multi
+                :selector=>t.selector                
             )
         )
 
@@ -231,4 +230,3 @@ wire(a, b, chan, attribute) =
     arg(chan::Symbol, doc="The name of the channel.")
     arg(attr::Symbol, doc="The attribute/property to connect.")
 end
-
