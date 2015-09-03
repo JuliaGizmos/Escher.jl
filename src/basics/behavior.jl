@@ -131,9 +131,10 @@ end
 
 render(t::Selectable, state) =
     render(t.tile, state) <<
-        Elem("selectable-behavior", multi = t.multi,
+        Elem("selectable-behavior",
             attributes = @d(
                 :name=>t.name,
+		:multi=>boolattr( t.multi ),
                 :selector=>t.selector                
             )
         )
