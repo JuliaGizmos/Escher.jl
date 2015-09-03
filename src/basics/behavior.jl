@@ -134,8 +134,8 @@ render(t::Selectable, state) =
         Elem("selectable-behavior",
             attributes = @d(
                 :name=>t.name,
-                :selector=>t.selector,
-                :multi=>t.multi
+		:multi=>boolattr( t.multi ),
+                :selector=>t.selector                
             )
         )
 
@@ -231,4 +231,3 @@ wire(a, b, chan, attribute) =
     arg(chan::Symbol, doc="The name of the channel.")
     arg(attr::Symbol, doc="The attribute/property to connect.")
 end
-

@@ -56,7 +56,7 @@ wrapbehavior(w::IconButton) =
     clickable(w, name=w.name)
 
 
-abstract Selection <: Widget 
+abstract Selection <: Widget
 
 @api pages => (Pages <: Selection) begin #FIXME: Why is this a widget?
     doc("A set of pages. Only one selected page will be visible at any given time.")
@@ -67,7 +67,7 @@ end
 
 render(ps::Pages, state) =
     Elem("iron-pages",
-        map(t -> Elem("section", render(t, state)), ps.pages.tiles),
+        map(t -> Elem("div", render(t, state)), ps.pages.tiles),
         attributes = @d(:selected=>ps.selected-1))
 
 @api tabs => (Tabs <: Selection) begin
@@ -225,4 +225,3 @@ render(dm::DropdownMenu, state) = begin
     )
 end
 wrapbehavior(d::DropdownMenu) = selectable(d, name=d.name, selector=".dropdown-content")
-
