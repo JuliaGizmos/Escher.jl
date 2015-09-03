@@ -114,7 +114,7 @@ constant(x, tile) = addinterpreter(Const(x), tile)
 constant(x) = addinterpreter(Const(x))
 
 @apidoc constant => (WithInterpreter <: Behavior) begin
-    doc("""A constant interpreter. Ignores updated values and interpret them as 
+    doc("""A constant interpreter. Ignores updated values and interpret them as
            a constant.""")
     arg(x::Any, doc="The constant.")
     curry(tile::Tile, doc="The widget/behavior.")
@@ -173,7 +173,7 @@ subscribe(t::WithInterpreter, s::Input) =
     arg(
         input::Input,
         doc=md"""The input signal to update. See
-            [Reactive.jl documentation](http://julialang.org/Reactive.jl/#a-tutorial-introduction) 
+            [Reactive.jl documentation](http://julialang.org/Reactive.jl/#a-tutorial-introduction)
             for more on input signals."""
     )
     kwarg(
@@ -199,7 +199,7 @@ setup_transport(x) = makeid(x)
 @api sampler => (Sampler <: Interpreter) begin
     doc(md"""A means to make forms. Use `watch!` and `trigger!` to specify which
          widgets/behavior to watch and which widgets/behavior trigger the form.
-         """) 
+         """)
     arg(triggers::Dict=Dict(), doc="Internal store for trigger elements.")
     arg(watched::Dict=Dict(), doc="Internal store for watched elements.")
 end
@@ -208,9 +208,11 @@ interpret(s::Sampler, msg) = begin
     try
         d = Dict()
         d[:_trigger] = symbol(msg["_trigger"])
-
+        
         for (name, interp) in s.triggers
-           d[name] = interpret(interp, msg[string(name)])
+          if(haskey( msg, string(name )))
+            d[name] = interpret(interp, msg[string(name)])
+          end
         end
 
         for (name, interp) in s.watched
@@ -231,7 +233,7 @@ end
 watch!(sampler::Sampler) = t -> watch!(sampler, t)
 
 @apidoc watch! => (Tile) begin
-    doc("""Make a sampler watch a widget/behavior. Returns the input 
+    doc("""Make a sampler watch a widget/behavior. Returns the input
          widget/behavior.""")
     arg(sampler::Sampler, doc="The sampler to add the watch on.")
     curry(tile::Tile, doc="The widget/behavior.")
@@ -308,7 +310,7 @@ render(tile::Bubble, state) =
 
 # Don't allow a signal to propagate outward
 @api stopbubbling => (StopBubbling <: Tile) begin
-    doc(md"""Stop bubbling of behavior/widget events in the web page. 
+    doc(md"""Stop bubbling of behavior/widget events in the web page.
              This can be used to stop bubbling set up via `bubble`."""
     )
     arg(tile::Tile, doc="Tile to contain the updates inside.")
