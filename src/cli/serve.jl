@@ -167,10 +167,12 @@ uisocket(dir) = (req) -> begin
         current = main(window)
     catch err
         bt = backtrace()
-        current = Elem(:pre, sprint() do io
+        str = sprint() do io
             showerror(io, err)
             Base.show_backtrace(io, bt)
-        end)
+        end
+        current = Elem(:pre, str )
+        println( str )
     end
 
     swap!(tilestream, current)
@@ -193,8 +195,11 @@ uisocket(dir) = (req) -> begin
             break
         end
         fw = watch_file(file)
-        wait(fw)
-        close(fw)
+        # wait and close are part of watch_file
+        if( VERSION < v"0.4.0-dev" )
+          wait(fw)
+          close(fw)
+        end
         sleep(0.05)
 
         main = loadfile(file)
