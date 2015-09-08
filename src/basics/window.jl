@@ -16,7 +16,7 @@ Window(;
     dir="ltr") =
     Window(Input{Bool}(alive), Input{Any}(dimension), Input{Any}(route), "ltr", Input{Any}("basics"))
 
-resolve_asset(slug::String, prefix="/assets", joinfn=(x, y) -> x * "/" * y) = begin
+resolve_asset(slug::String, prefix="/escher/assets", joinfn=(x, y) -> x * "/" * y) = begin
     path = Pkg.dir("Escher", "assets", slug * ".html")
     if isfile(path)
         return joinfn(prefix, "$slug.html")
