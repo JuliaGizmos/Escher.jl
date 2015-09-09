@@ -223,7 +223,7 @@ function escher_serve(port=5555, dir="")
         Mux.defaults,
         route("escher/assets", Mux.files(Pkg.dir("Escher", "assets")), Mux.notfound()),
         route("assets", Mux.files(dir), Mux.notfound()),
-        route("pkg/:pkg", packagefiles("escher/assets"), Mux.notfound()),
+        route("pkg/:pkg", packagefiles("assets"), Mux.notfound()),
         route("/:file", req -> setup_socket(req[:params][:file])),
         route("/", req -> setup_socket("index.jl")),
         Mux.notfound(),
