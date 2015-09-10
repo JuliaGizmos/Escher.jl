@@ -45,7 +45,7 @@ function setup_socket(file)
         """)
     # Include the basics
     write(io, "<script>", Patchwork.js_runtime(), "</script>")
-    write(io, """<script src="pkg/Escher/assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>""")
+    write(io, """<script src="/pkg/Escher/assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>""")
     write(io, """<link rel="import" href="$(Escher.resolve_asset("basics"))">""")
 
     write(io, """</head> <body fullbleed unresolved>""")
