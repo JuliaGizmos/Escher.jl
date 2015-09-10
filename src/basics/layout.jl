@@ -308,8 +308,8 @@ is equivalent to `flow(vertical, args...)`")
     arg(tiles::TileList)
 end
 
-hbox(arg) = flow(horizontal, [arg])
-vbox(arg) = flow(vertical, [arg])
+hbox(arg) = flow(horizontal, collect(arg))
+vbox(arg) = flow(vertical, collect(arg))
 
 vskip(y) = size(0px, y, empty)
 hskip(x) = size(x, 0px, empty)
