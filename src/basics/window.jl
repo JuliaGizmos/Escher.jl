@@ -16,15 +16,6 @@ Window(;
     dir="ltr") =
     Window(Input{Bool}(alive), Input{Any}(dimension), Input{Any}(route), "ltr", Input{Any}("basics"))
 
-resolve_asset(slug::String, prefix="/escher/assets", joinfn=(x, y) -> x * "/" * y) = begin
-    path = Pkg.dir("Escher", "assets", slug * ".html")
-    if isfile(path)
-        return joinfn(prefix, "$slug.html")
-    else
-        error("Asset file $path doesn't exist")
-    end
-end
-
 resolve_asset(tup :: (@compat Tuple{String, String}), prefix ="/pkg", joinfn=(x, y) -> x * "/" * y) = begin
     pkg = tup[1]
     slug = tup[2]
@@ -35,3 +26,5 @@ resolve_asset(tup :: (@compat Tuple{String, String}), prefix ="/pkg", joinfn=(x,
         error("Asset file $path doesn't exist")
     end
 end
+
+resolve_asset(slug::String) = resolve_asset(("Escher", slug))
