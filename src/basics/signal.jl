@@ -283,7 +283,7 @@ makeid(sig) = begin
         return signal_to_id[sig]
     else
         id = haskey(signal_to_id, sig) ?
-            signal_to_id[sig] : string(rand(Uint128))
+            signal_to_id[sig] : string(rand(UInt128))
         id_to_signal[id] = sig
         return id
     end
