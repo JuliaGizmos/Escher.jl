@@ -7,7 +7,7 @@ blocktile(x::Tile) = x
 inlinetile(x::Tile) = x
 
 blocktile(md::Markdown.MD) = vbox(map(blocktile, md.content))
-inlinetile(x::String) = x
+inlinetile(x::AbstractString) = x
 
 blocktile{n}(md::Markdown.Header{n}) =
     class("md-heading", heading(n, map(inlinetile, md.text)))

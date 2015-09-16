@@ -16,7 +16,7 @@ export bubble,
 
    immutable MessageException <: Exception
        error::Exception
-       backtrace::String
+       backtrace::AbstractString
    end
 
    MessageException(x::Exception) =
@@ -79,10 +79,10 @@ interpret(dec::Id, x) = x
 # convert to a type
 immutable ToType{T} <: Interpreter end
 interpret{T}(::ToType{T}, x) = convert(T, x)
-interpret{T<:Integer}(::ToType{T}, x::String) =
+interpret{T<:Integer}(::ToType{T}, x::AbstractString) =
     try parse(T, x) catch ex ex end
-interpret{T<:Real}(::ToType{T}, x::Nothing) = zero(T)
-interpret(::ToType{@compat AbstractString}, x::Nothing) = ""
+interpret{T<:Real}(::ToType{T}, x::Void) = zero(T)
+interpret(::ToType{@compat AbstractString}, x::Void) = ""
 
 interpret(dec::Chained, x) =
     interpret(dec.interpreter1, interpret(dec.interpreter2, x))
@@ -208,7 +208,7 @@ interpret(s::Sampler, msg) = begin
     try
         d = Dict()
         d[:_trigger] = symbol(msg["_trigger"])
-        
+
         for (name, interp) in s.triggers
           if(haskey( msg, string(name )))
             d[name] = interpret(interp, msg[string(name)])
@@ -283,7 +283,7 @@ makeid(sig) = begin
         return signal_to_id[sig]
     else
         id = haskey(signal_to_id, sig) ?
-            signal_to_id[sig] : string(rand(Uint128))
+            signal_to_id[sig] : string(rand(UInt128))
         id_to_signal[id] = sig
         return id
     end

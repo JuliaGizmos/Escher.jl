@@ -63,7 +63,7 @@ export inset,
 
 @api width => (Width <: Tile) begin
     doc("Set the width of a tile")
-    typedarg(prefix::String="",
+    typedarg(prefix::AbstractString="",
         doc=md"""either `""`, `"min"` or `"max"`. See `minwidth` and `maxwidth`.""")
     arg(width::Length, doc="The width")
     curry(tile::Tile, doc="the tile to set the height of")
@@ -75,7 +75,7 @@ end
 
 @api height => (Height <: Tile) begin
     doc("Set the height of a tile")
-    typedarg(prefix::String="",
+    typedarg(prefix::AbstractString="",
         doc=md"""either `""`, `"min"` or `"max"`. See `minheight` and `maxheight`.""")
     arg(height::Length, doc="the height")
     curry(tile::Tile, doc="the tile to set the height of")
@@ -523,4 +523,3 @@ name(::AutoClip) = "auto"
 render(t::Clip, state) =
     render(Container(t.tile), state) &
         @d(:style => @d(:overflow => name(t.overflow)), :className => "scrollbar")
-

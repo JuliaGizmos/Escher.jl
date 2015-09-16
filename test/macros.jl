@@ -3,24 +3,24 @@ using Base.Test
 
 comparefields(x, y) =
     try
-        [getfield(x, f) == getfield(y, f) for f in union(fieldnames(x), fieldnames(y))] |> all
+       Bool[getfield(x, f) == getfield(y, f) for f in union(fieldnames(x), fieldnames(y))] |> all
     catch
         false
     end
 
 
 @api test1 => TestType1 begin
-    arg(a::FloatingPoint)
+    arg(a::AbstractFloat)
 end
 @test test1(3) == TestType1(3.0)
 
 @api testsub => (TestSubType <: Number) begin
-    arg(a::FloatingPoint)
+    arg(a::AbstractFloat)
 end
 @test testsub(3) == TestSubType(3.0)
 
 @api test2 => TestType2 begin
-    typedarg(a::FloatingPoint)
+    typedarg(a::AbstractFloat)
     arg(b::Int)
     curry(x::Int)
 end
@@ -30,11 +30,11 @@ end
 @test comparefields(test2(2.0, 3)(4), TestType2(2.0, 3, 4))
 
 @api test3 => TestType3 begin
-    typedarg(a::FloatingPoint)
+    typedarg(a::AbstractFloat)
     arg(b::Int)
     curry(x::Int)
     kwarg(p::Any="black")
-    typedkwarg(q::FloatingPoint=1.0)
+    typedkwarg(q::AbstractFloat=1.0)
 end
 
 @test_throws MethodError test3(2, 3, 4) # Because 2 should be float

@@ -32,4 +32,3 @@ end
 immutable PositionSwap
     swap::(Int, Int)
 end
-

@@ -64,9 +64,9 @@ end
 
 @doc """
 Convert a vector of field definition into a vector of field definition inside a type declaration
-    e.g. [:(arg(x::Number=42)), :(typedarg(y::String="a")), :(kwarg(z::Complex=1+im))]
+    e.g. [:(arg(x::Number=42)), :(typedarg(y::AbstractString="a")), :(kwarg(z::Complex=1+im))]
 will just become
-    [:(x::Number), :(y::String), :(z::Complex)]
+    [:(x::Number), :(y::AbstractString), :(z::Complex)]
 
 """ ->
 typebody(args::AbstractArray) = begin
@@ -294,7 +294,7 @@ const escher_meta = Dict()
         curry(tile::Tile)
         kwarg(color::Color=colorant"black")
     end
- 
+
  Should result in:
 
      immutable Bordered{T <: Side} <: Tile
@@ -304,7 +304,7 @@ const escher_meta = Dict()
      border(side, tiles; color::Color=colorant"black") = Bordered(side, tiles, color)
      border(side; kwargs...) = tiles -> border(tiles; kwargs...)
 
-""" -> 
+""" ->
 macro api(names, body)
 
     fn, typ = names.args

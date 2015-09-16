@@ -3,12 +3,12 @@ export codemirror
 
 @api codemirror => (CodeMirror <: Widget) begin
     doc("Create a code viewer/editor")
-    arg(code::String="", doc="The code to display.")
+    arg(code::AbstractString="", doc="The code to display.")
     kwarg(name::Symbol=:_code, doc="The name for the widget")
     kwarg(readonly::Bool=false, doc="If set to true, editing will be disabled.")
-    kwarg(language::String="julia", doc="The language used for syntax highlighting.")
+    kwarg(language::AbstractString="julia", doc="The language used for syntax highlighting.")
     kwarg(
-        theme::String="elegant",
+        theme::AbstractString="elegant",
         doc=md"""The theme. Valid values are `"ambiance"`,`"ambiance-mobile"`,
                  `"elegant"`, `"monokai"`, `"solarized"` and `"twilight"`."""
     )
