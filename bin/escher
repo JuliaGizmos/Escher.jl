@@ -22,16 +22,16 @@ parse_commandline() = begin
             default = 5555
         "--dir", "-d"
             help = "Path to serve from, defaults to `.' or when compiling, the output directory."
-            arg_type = String
+            arg_type = AbstractString
             default = ""
         "--base", "-b"
             help = "If the compiled files are being served from a subdirectory"
-            arg_type = String
+            arg_type = AbstractString
             default = ""
         "files"
             help = "Files to compile. Ignored in serve mode"
             nargs = '*'
-            arg_type = String
+            arg_type = AbstractString
     end
     parse_args(s)
 end

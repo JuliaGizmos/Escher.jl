@@ -13,8 +13,8 @@ render(l::List, state) =
 @api image => (Image <: Tile) begin
     doc(md"""Show an image from a `url`. To read an image and display it, use
              [`Images.imread`](https://github.com/timholy/Images.jl#readme).""")
-    arg(url::String, doc="The url of the image.")
-    kwarg(alt::String="", doc="Text to display if image does not load.")
+    arg(url::AbstractString, doc="The url of the image.")
+    kwarg(alt::AbstractString="", doc="Text to display if image does not load.")
 end
 
 render(i::Image, state) =
@@ -22,7 +22,7 @@ render(i::Image, state) =
 
 @api link => (Hyperlink <: Tile) begin
     doc("A hyperlink.")
-    arg(url::String, doc="The destination of the link.")
+    arg(url::AbstractString, doc="The destination of the link.")
     curry(
         tiles::TileList,
         doc="""A tile or a vector of tiles. These tiles link to the url."""
@@ -35,7 +35,7 @@ render(a::Hyperlink, state) =
 @api abbr => (Abbr <: Tile) begin
     doc(md"""An abbreviation. When you hover over an abbreviation, the `title` is
           shown in a tooltip.""")
-    arg(title::String, doc="The title to show.")
+    arg(title::AbstractString, doc="The title to show.")
     curry(
         tiles::TileList,
         doc="A tile or a vector of tiles. Hovering over these tiles triggers the tooltip."

@@ -117,15 +117,15 @@ render{T <: FontWeight}(t::WithFontWeight{T}, state) =
     curry(tiles::TileList, doc="A tile or a vector of tiles.")
 end
 
-fontcolor(c::String) = fontcolor(parse(Colorant, c))
-fontcolor(c::String, tiles) = fontcolor(parse(Colorant, c), tiles)
+fontcolor(c::AbstractString) = fontcolor(parse(Colorant, c))
+fontcolor(c::AbstractString, tiles) = fontcolor(parse(Colorant, c), tiles)
 
 render(t::FontColor, state) =
     wrapmany(t.tiles, :span, state) & style(@d(:color => render_color(t.color)))
 
 @api fontfamily => (FontFamily <: Tile) begin
     doc("Set the font family.")
-    arg(family::String, doc="The font family")
+    arg(family::AbstractString, doc="The font family")
     curry(tile::TileList, doc="A tile or a vector of tiles")
 end
 render(t::FontFamily, state) =
@@ -290,10 +290,10 @@ end
 @api code => (Code <: Tile) begin
     doc("Stylize text as code.")
     arg(code::Any, doc="The code.")
-    kwarg(language::String="julia", doc="The language for syntax highlighting.")
+    kwarg(language::AbstractString="julia", doc="The language for syntax highlighting.")
 end
 
-## String will go inside a span, is this OK?
+## AbstractString will go inside a span, is this OK?
 render(x::Code, state) = Elem(:code, render(x.code, state))
 
 # colsize

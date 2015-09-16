@@ -14,12 +14,12 @@ render_slide(x, state) =
     doc("A slide. Content of the slide is centered vertically and horizontally.")
     curry(tile::Tile, doc="Content of the slide.")
     kwarg(
-        transitions::String="slide-from-right cross-fade-all",
+        transitions::AbstractString="slide-from-right cross-fade-all",
         doc=md"""A space-separated list of transitions to use for the current
                 slide. Valid transitions are `"cross-fade"`,
                 `"hero-transition"`,`"list-cascade"`, `"scale-up"`,
                 `"slide-down"`, `"slide-from-bottom"`,`"slide-from-right"`,
-                `"slide-up"` and `"tile-cascade"`.""" 
+                `"slide-up"` and `"tile-cascade"`."""
         )
 end
 
@@ -44,4 +44,3 @@ render(x::SlideShow, state) =
         map(x -> render(wrapslide(x), state), x.tiles.tiles),
         selected=x.selected-1
     )
-

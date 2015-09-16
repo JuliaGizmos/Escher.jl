@@ -38,7 +38,7 @@ default_interpreter(w::Widget) =
     kwarg(
         disabled::Bool=false,
         doc="If set to true, the button is disabled and will not be clickable."
-    ) 
+    )
     kwarg(
         noink::Bool=false,
         doc="If set to true, disables the ripple effect when clicked."
@@ -107,7 +107,7 @@ render(s::Slider, state) =
     )
 
 
-## Checkbox 
+## Checkbox
 @api checkbox => (Checkbox <: Widget) begin
     doc("A checkbox.")
     arg(value::Bool=false, doc="State of the checkbox.")
@@ -164,10 +164,10 @@ render(c::ToggleButton, state) =
 
 @api textinput => (TextInput <: Widget) begin
     doc("A text input box.")
-    arg(value::String="", doc="The current content.")
+    arg(value::AbstractString="", doc="The current content.")
     kwarg(name::Symbol=:_textinput, doc="Name to identify the widget.")
-    kwarg(label::String="", doc="The label.")
-    kwarg(error::String="", doc="Error to display if invalid input is entered.")
+    kwarg(label::AbstractString="", doc="The label.")
+    kwarg(error::AbstractString="", doc="Error to display if invalid input is entered.")
     kwarg(
         floatinglabel::Bool=true,
         doc="If set to true, the label floats above the input field when the
@@ -189,7 +189,7 @@ render(c::ToggleButton, state) =
         doc="If set to true, a character count is displayed below the input field."
     )
     kwarg(
-        pattern::String="",
+        pattern::AbstractString="",
         doc=md"""Pattern of allowed inputs. The pattern must match the entire value,
               not just some subset. The regular expression language is the same
               as [JavaScript's]
@@ -206,7 +206,7 @@ end
 
 wrapbehavior(t::TextInput, event="input") =
     hasstate(t, name=t.name, attr="value", trigger=event) |>
-        addinterpreter(ToType{String}())
+        addinterpreter(ToType{AbstractString}())
 
 render(t::TextInput, state) = begin
     if t.multiline
@@ -257,7 +257,7 @@ end
     doc(md"""A radio button. Usually many radio buttons are grouped in a
     `radio group`.""")
     arg(
-        name::String,
+        name::AbstractString,
         doc=md"A name. The output of a `radiogroup` is the name of the selected radio button."
     )
     curry(label::Tile, doc="The label.")
@@ -291,7 +291,7 @@ render(r::RadioButton, state) =
     can be selected.""")
     arg(radios::AbstractArray, doc="A vector of radio buttons.")
     kwarg(name::Symbol=:_radiogroup, doc="Name to identify the widget.")
-    kwarg(selected::String="", doc=md"Name of the currently selected `radiobutton`")
+    kwarg(selected::AbstractString="", doc=md"Name of the currently selected `radiobutton`")
 end
 
 wrapradio(x::RadioButton) = x
@@ -310,7 +310,7 @@ render(r::RadioGroup, state) =
 
 wrapbehavior(r::RadioGroup) =
     hasstate(r, name=r.name, attr="selected", trigger="paper-radio-group-changed") |>
-        addinterpreter(ToType{String}())
+        addinterpreter(ToType{AbstractString}())
 
 
 @api selector => (Selector <: Widget) begin
@@ -392,8 +392,8 @@ default_interpreter(::DateSelection) = DateInterpreter()
 end
 render(d::DatePicker, state) =
     Elem(
-        "paper-date-picker-two", 
-        value=string(d.date), 
+        "paper-date-picker-two",
+        value=string(d.date),
         attributes=@d(:min=>string(first(d.range)), :max=>string(last(d.range)))
     )
 wrapbehavior(p::DatePicker) = dateselection(p, name=p.name)
