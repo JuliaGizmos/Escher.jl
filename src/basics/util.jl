@@ -1,4 +1,4 @@
-using Color
+using Colors
 
 # Dict macro
 macro d(xs...)
@@ -9,8 +9,8 @@ macro d(xs...)
   end
 end
 
-convert(::Type{ColorValue}, s::String) =
-    color(s)
+convert(::Type{Color}, s::AbstractString) =
+    parse(Colorant, s)
 
 render_color(c) = string("#" * hex(c))
 
@@ -55,7 +55,7 @@ wrapmany(t::TileList, wrap, state) =
 
 @api class => (Class <: Tile) begin
     doc("Add a HTML class.")
-    arg(class::String, doc="Space separated classes.")
+    arg(class::AbstractString, doc="Space separated classes.")
     curry(content::TileList, doc="A tile or a vector of tiles.")
     kwarg(
         forcewrap::Bool=false,
@@ -66,7 +66,7 @@ wrapmany(t::TileList, wrap, state) =
     kwarg(wrap::Symbol=:div, doc="The tag to use for the container.")
 end
 
-maybestring(s::String, state) = s
+maybestring(s::AbstractString, state) = s
 maybestring(s::TileList, state) =
     length(s.tiles) == 1 ? maybestring(s.tiles[1], state) : render(s.tiles, state)
 maybestring(s, state) = render(s, state)
@@ -80,7 +80,7 @@ render(c::Class, state) =
                c.class)
 
 @doc """
-given a sentinal, vector of parts, prefix, suffix and a value, 
+given a sentinal, vector of parts, prefix, suffix and a value,
 
 if the vector of parts is referentially equal to the sentinal, then returns
     [prefix * suffix => value]
@@ -101,4 +101,3 @@ teeprint(x, fn=println) = begin
     fn(x)
     x
 end
-

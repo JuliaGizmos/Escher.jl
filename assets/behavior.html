@@ -170,8 +170,7 @@ Polymer({
 
     this.setId()
     var handler = function (ev) {
-      var val = self.multi ?
-        (elem.selectedValues || []) :
+      var val = self.multi ? (elem.selectedValues || []) :
         (elem.selected || 0)
 
       self.update(elem, self.name, val)

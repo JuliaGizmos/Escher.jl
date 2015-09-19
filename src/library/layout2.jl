@@ -14,12 +14,12 @@ export tabs,
 @api icon => (Icon <: Tile) begin
     doc("An Icon.")
     typedarg(
-        icon::String="",
+        icon::AbstractString="",
         doc=md"""The name of the icon. Valid icons can be found in the
         [Polymer iron-icon documentation](https://www.polymer-project.org/0.5/components/iron-icons/demo.html)"""
     )
     kwarg(
-        url::String="",
+        url::AbstractString="",
         doc="Optionally you can specify a url to the png/svg of the icon. icon field will be ignored if url is non-empty."
     )
 end
@@ -34,13 +34,13 @@ end
 @api iconbutton => (IconButton <: Widget) begin
     doc("A button with an inset icon.")
     typedarg(
-        icon::String="",
+        icon::AbstractString="",
         doc=md"""The name of the icon. Valid icons can be found in the
         [Polymer iron-icon documentation](https://www.polymer-project.org/0.5/components/iron-icons/demo.html)"""
     )
     kwarg(name::Symbol=:_iconbutton, doc="A name to identify the widget.")
     kwarg(
-        url::String="",
+        url::AbstractString="",
         doc="Optionally you can specify a url to the png/svg of the icon. icon field will be ignored if url is non-empty."
     )
 end
@@ -56,7 +56,7 @@ wrapbehavior(w::IconButton) =
     clickable(w, name=w.name)
 
 
-abstract Selection <: Widget 
+abstract Selection <: Widget
 
 @api pages => (Pages <: Selection) begin #FIXME: Why is this a widget?
     doc("A set of pages. Only one selected page will be visible at any given time.")
@@ -67,7 +67,7 @@ end
 
 render(ps::Pages, state) =
     Elem("iron-pages",
-        map(t -> Elem("section", render(t, state)), ps.pages.tiles),
+        map(t -> Elem("div", render(t, state)), ps.pages.tiles),
         attributes = @d(:selected=>ps.selected-1))
 
 @api tabs => (Tabs <: Selection) begin
@@ -182,7 +182,7 @@ render(t::Toolbar, state) =
 
 @api dropdownmenu => (DropdownMenu <: Selection) begin
     doc("A dropdown menu.")
-    arg(label::String="", doc="The label.")
+    arg(label::AbstractString="", doc="The label.")
     arg(menu::Tile, doc="The menu (any Selection widget).")
     kwarg(
         halign::Side{Horizontal}=left,
@@ -225,4 +225,3 @@ render(dm::DropdownMenu, state) = begin
     )
 end
 wrapbehavior(d::DropdownMenu) = selectable(d, name=d.name, selector=".dropdown-content")
-

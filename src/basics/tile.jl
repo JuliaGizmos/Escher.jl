@@ -20,7 +20,7 @@ end
 render(x::Elem, state) = x
 render(x::Leaf, state) = x.element
 
-convert(::Type{Tile}, x::String) = Leaf(Elem(:span, x))
+convert(::Type{Tile}, x::AbstractString) = Leaf(Elem(:span, x))
 convert(::Type{Tile}, x::Char) = Leaf(Elem(:span, string(x)))
 convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
 
@@ -37,9 +37,9 @@ render_fallback(m::MIME"image/svg+xml", x) = Elem(:div, innerHTML=stringmime(m, 
 render_fallback(m::MIME"image/png", x) =
     Elem(:img, src="data:image/png;base64," * stringmime(m, x))
 
-render(x::FloatingPoint, state) = render(@sprintf "%0.3f" x, state)
+render(x::AbstractFloat, state) = render(@sprintf "%0.3f" x, state)
 render(x::Symbol, state) = render(string(x), state)
-render(x::String, state) = Elem(:span, x)
+render(x::AbstractString, state) = Elem(:span, x)
 
 render{T}(x::T, state) =
     try

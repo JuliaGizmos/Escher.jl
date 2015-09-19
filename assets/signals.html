@@ -2,15 +2,19 @@
 
 EscherMixins.ReactiveSignal = {
   properties: {
-    name: String,
-    selector: {
+    name: {
       type: String,
-      value: "::parent"
+      value: null,
+      observer: "_nameChanged"
     },
     bubbles: {
       type: Boolean,
-      value: true
+      value: false
     },
+    selector: {
+      type: String,
+      value: "::parent"
+    }
   },
 
   // This should be overriden by children
@@ -29,7 +33,11 @@ EscherMixins.ReactiveSignal = {
   },
 
   setId: function (name) {
-    return this.setAttribute("id", "signal-" + (name || this.name))
+    this.setAttribute("id", "signal-" + (name || this.name))
+  },
+
+  _nameChanged: function (name) {
+    this.setId(name)
   },
 
   getNamedSignal: function (elem, name) {
@@ -37,14 +45,18 @@ EscherMixins.ReactiveSignal = {
   },
 
   update: function (sourceElement, name, value) {
-    console.log("update", sourceElement, name, value)
+    var bubbles = sourceElement.bubbles // Hack Alert! This should ideally be set on this Behavior!
+    //console.log("update", sourceElement, name, value, bubbles)
+    if (typeof bubbles === "undefined") {
+      bubbles = this.bubbles
+    }
     this.value = value // Save for the sampler
     Polymer.Base.fire.call(sourceElement, "signal-updated", {
       name: name,
       source: sourceElement,
       value: value
     },
-    { bubbles: this.bubbles }
+    { bubbles: bubbles }
     )
   }
 }
@@ -68,6 +80,7 @@ Polymer({
       value: []
     }
   },
+
   domInit: function () {
     var self = this, elem = this.findElem()
 
@@ -83,7 +96,6 @@ Polymer({
 </script>
 
 </dom-module>
-
 
 
 <dom-module

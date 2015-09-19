@@ -16,22 +16,17 @@ export hasstate,
     curry(tile::Tile, doc="Tile to watch.")
     kwarg(name::Symbol=:_state, doc="A name to identify the behavior.")
     kwarg(
-        attr::String="value",
+        attr::AbstractString="value",
         doc=md"""The attribute/property to watch. Note that this is the property
                  of the DOM node and not of the `Tile`."""
     )
     kwarg(
-        selector::String="::parent",
+        selector::AbstractString="::parent",
         doc="A CSS selector for the element to watch."
         )
     kwarg(
-        trigger::String="change",
+        trigger::AbstractString="change",
         doc="The event that triggers a re-read of the attribute/property."
-    )
-    kwarg(
-        source::String="",
-        doc="""If set to "target", the attribute is read from the element firing
-               the event."""
     )
 end
 
@@ -40,17 +35,18 @@ default_interpreter(::WithState) = identity
 render(t::WithState, state) =
     render(t.tile, state) <<
         Elem(
-            "watch-state",
-            name=t.name,
-            attr=t.attr, trigger=t.trigger,
-            selector=t.selector,
-            source=t.source,
+            "watch-state", attributes=@d(
+                :name=>t.name,
+                :attr=>t.attr,
+                :trigger=>t.trigger,
+                :selector=>t.selector,
+            )
         )
 
 @api keypress => (Keypress <: Behavior) begin
     doc("A keypress listener.")
     arg(
-        keys::String,
+        keys::AbstractString,
         doc=md"""A space-separated list of keys. The grammar of valid keypress
                  specifiers is [here](https://www.polymer-project.org/0.5/components/core-a11y-keys/index.html)."""
     )
@@ -63,7 +59,7 @@ render(k::Keypress, state) =
         Elem("keypress-behavior", attributes = @d(:keys=>k.keys, :name=>k.name))
 
 immutable Key
-    key::String
+    key::AbstractString
     alt::Bool
     ctrl::Bool
     meta::Bool
@@ -119,8 +115,10 @@ interpret(c::ClickInterpreter, x) =
 render(c::Clickable, state) =
     render(c.tile, state) <<
         Elem("clickable-behavior";
-            name=c.name,
-            buttons=string(map(button_number, c.buttons)),
+            attributes=@d(
+                :name=>c.name,
+                :buttons=>string(map(button_number, c.buttons)),
+            )
         )
 
 @api selectable => (Selectable <: Behavior) begin
@@ -128,12 +126,18 @@ render(c::Clickable, state) =
     curry(tile::Tile, doc="A selection widget.")
     kwarg(name::Symbol=:_clicks, doc="The name to identify the behavior.")
     kwarg(multi::Bool=false, doc="True when watching widgets that allow multiple selections")
-    kwarg(selector::String="::parent", doc="CSS selector of the selectable widget.")
+    kwarg(selector::AbstractString="::parent", doc="CSS selector of the selectable widget.")
 end
 
 render(t::Selectable, state) =
     render(t.tile, state) <<
-        Elem("selectable-behavior", name=t.name, selector=t.selector, multi=t.multi)
+        Elem("selectable-behavior",
+            attributes = @d(
+                :name=>t.name,
+		:multi=>boolattr( t.multi ),
+                :selector=>t.selector
+            )
+        )
 
 inc(x) = x+1
 inc(x::AbstractArray) = map(inc, x)
@@ -227,4 +231,3 @@ wire(a, b, chan, attribute) =
     arg(chan::Symbol, doc="The name of the channel.")
     arg(attr::Symbol, doc="The attribute/property to connect.")
 end
-

@@ -1,7 +1,8 @@
 
 import Base: >>>
 
-export stoppropagation,
+export bubble,
+       stopbubbling,
        addinterpreter,
        constant,
        pairwith,
@@ -15,7 +16,7 @@ export stoppropagation,
 
    immutable MessageException <: Exception
        error::Exception
-       backtrace::String
+       backtrace::AbstractString
    end
 
    MessageException(x::Exception) =
@@ -78,10 +79,10 @@ interpret(dec::Id, x) = x
 # convert to a type
 immutable ToType{T} <: Interpreter end
 interpret{T}(::ToType{T}, x) = convert(T, x)
-interpret{T<:Integer}(::ToType{T}, x::String) =
+interpret{T<:Integer}(::ToType{T}, x::AbstractString) =
     try parse(T, x) catch ex ex end
-interpret{T<:Real}(::ToType{T}, x::Nothing) = zero(T)
-interpret(::ToType{@compat AbstractString}, x::Nothing) = ""
+interpret{T<:Real}(::ToType{T}, x::Void) = zero(T)
+interpret(::ToType{@compat AbstractString}, x::Void) = ""
 
 interpret(dec::Chained, x) =
     interpret(dec.interpreter1, interpret(dec.interpreter2, x))
@@ -113,7 +114,7 @@ constant(x, tile) = addinterpreter(Const(x), tile)
 constant(x) = addinterpreter(Const(x))
 
 @apidoc constant => (WithInterpreter <: Behavior) begin
-    doc("""A constant interpreter. Ignores updated values and interpret them as 
+    doc("""A constant interpreter. Ignores updated values and interpret them as
            a constant.""")
     arg(x::Any, doc="The constant.")
     curry(tile::Tile, doc="The widget/behavior.")
@@ -149,24 +150,20 @@ render(d::WithInterpreter, state) = render(d.tile, state)
 # Subscribe to a signal and register an interpreter
 #
 
-immutable Subscription <: Tile
-    tile::Tile
-    name::Symbol # Name of the signal update on the front-end
-    receiver::@compat Tuple{Interpreter, Input}
+@api subscribe => (Subscription <: Tile) begin
+    arg(tile::Behavior)
+    arg(name::Symbol)
+    arg(receiver::@compat Tuple{Interpreter, Input})
 end
 
-subscribe(t::Tile, name, s; absorb=true) =
-    Subscription(t, name, s) |>
-       (x -> absorb ? stoppropagation(x, name) : x)
+subscribe(t::Behavior, s::Input) =
+    subscribe(t, name(t), (default_interpreter(t), s))
 
-subscribe(t::Behavior, s::Input; absorb=true) =
-    subscribe(t, name(t), (default_interpreter(t), s), absorb=absorb)
-
-subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input}); absorb=true) =
+subscribe(t::Behavior, s::(@compat Tuple{Interpreter, Input})) =
     subscribe(t, name(t), s, absorb=absorb)
 
-subscribe(t::WithInterpreter, s::Input; absorb=true) =
-    subscribe(t.tile, name(t), (t.interpreter, s), absorb=absorb)
+subscribe(t::WithInterpreter, s::Input) =
+    subscribe(t.tile, name(t), (t.interpreter, s))
 
 @apidoc subscribe => (Subscription <: Tile) begin
     doc(md"""Subscribe to updates from a widget/behavior. `>>>` is an infix
@@ -176,7 +173,7 @@ subscribe(t::WithInterpreter, s::Input; absorb=true) =
     arg(
         input::Input,
         doc=md"""The input signal to update. See
-            [Reactive.jl documentation](http://julialang.org/Reactive.jl/#a-tutorial-introduction) 
+            [Reactive.jl documentation](http://julialang.org/Reactive.jl/#a-tutorial-introduction)
             for more on input signals."""
     )
     kwarg(
@@ -202,7 +199,7 @@ setup_transport(x) = makeid(x)
 @api sampler => (Sampler <: Interpreter) begin
     doc(md"""A means to make forms. Use `watch!` and `trigger!` to specify which
          widgets/behavior to watch and which widgets/behavior trigger the form.
-         """) 
+         """)
     arg(triggers::Dict=Dict(), doc="Internal store for trigger elements.")
     arg(watched::Dict=Dict(), doc="Internal store for watched elements.")
 end
@@ -213,7 +210,9 @@ interpret(s::Sampler, msg) = begin
         d[:_trigger] = symbol(msg["_trigger"])
 
         for (name, interp) in s.triggers
-           d[name] = interpret(interp, msg[string(name)])
+          if(haskey( msg, string(name )))
+            d[name] = interpret(interp, msg[string(name)])
+          end
         end
 
         for (name, interp) in s.watched
@@ -228,13 +227,13 @@ end
 
 watch!(sampler::Sampler, tile) = begin
     sampler.watched[name(tile)] = default_interpreter(tile)
-    wrapbehavior(tile)
+    bubble(wrapbehavior(tile))
 end
 
 watch!(sampler::Sampler) = t -> watch!(sampler, t)
 
 @apidoc watch! => (Tile) begin
-    doc("""Make a sampler watch a widget/behavior. Returns the input 
+    doc("""Make a sampler watch a widget/behavior. Returns the input
          widget/behavior.""")
     arg(sampler::Sampler, doc="The sampler to add the watch on.")
     curry(tile::Tile, doc="The widget/behavior.")
@@ -242,7 +241,7 @@ end
 
 trigger!(sampler::Sampler, tile) = begin
     sampler.triggers[name(tile)] = default_interpreter(tile)
-    wrapbehavior(tile)
+    bubble(wrapbehavior(tile))
 end
 
 trigger!(sampler::Sampler) = t -> trigger!(sampler, t)
@@ -284,7 +283,7 @@ makeid(sig) = begin
         return signal_to_id[sig]
     else
         id = haskey(signal_to_id, sig) ?
-            signal_to_id[sig] : string(rand(Uint128))
+            signal_to_id[sig] : string(rand(UInt128))
         id_to_signal[id] = sig
         return id
     end
@@ -292,17 +291,33 @@ end
 
 fromid(id) = id_to_signal[id]
 
+# TODO: bubble can be applied to Widget - which won't work
+# Thing to do would be to not subtype Widget as Behavior
+@api bubble => (Bubble <: Behavior) begin
+    doc(md"""Make updates bubble from the behavior. Used internally by sampler.""")
+    arg(tile::Behavior, doc="Behavior to bubble")
+    kwarg(bubbles::Bool=true, doc="Enable/disable bubbling")
+end
+
+name(b::Bubble) = b.tile
+default_interpreter(b::Bubble) = default_interpreter(t.tile)
+
+# This actually sets the property on the widget and not the behavior
+# Unfortunate that there is no easy way to do this.
+render(tile::Bubble, state) =
+    render(tile.tile, state) & @d(:bubbles => boolattr(tile.bubbles))
+
+
 # Don't allow a signal to propagate outward
-@api stoppropagation => (StopPropagation <: Tile) begin
-    doc(md"""Stop bubbling of behavior/widget state in the web page. 
-             `Subscribing` to a behavior by default adds a `stoppropagation` 
-             to the tile."""
+@api stopbubbling => (StopBubbling <: Tile) begin
+    doc(md"""Stop bubbling of behavior/widget events in the web page.
+             This can be used to stop bubbling set up via `bubble`."""
     )
     arg(tile::Tile, doc="Tile to contain the updates inside.")
     arg(name::Symbol, doc="Name of the widget/behavior to stop.")
 end
 
-render(tile::StopPropagation, state) =
+render(tile::StopBubbling, state) =
     render(tile.tile, state) <<
         Elem("stop-propagation", names=[tile.name])
 

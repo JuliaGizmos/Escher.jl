@@ -63,7 +63,7 @@ export inset,
 
 @api width => (Width <: Tile) begin
     doc("Set the width of a tile")
-    typedarg(prefix::String="",
+    typedarg(prefix::AbstractString="",
         doc=md"""either `""`, `"min"` or `"max"`. See `minwidth` and `maxwidth`.""")
     arg(width::Length, doc="The width")
     curry(tile::Tile, doc="the tile to set the height of")
@@ -75,7 +75,7 @@ end
 
 @api height => (Height <: Tile) begin
     doc("Set the height of a tile")
-    typedarg(prefix::String="",
+    typedarg(prefix::AbstractString="",
         doc=md"""either `""`, `"min"` or `"max"`. See `minheight` and `maxheight`.""")
     arg(height::Length, doc="the height")
     curry(tile::Tile, doc="the tile to set the height of")
@@ -291,7 +291,12 @@ render(f::Flow, state) =
     addclasses(render(f.tiles, :div, state), classes(f))
 
 
-hbox(args...) = flow(horizontal, args...)
+hbox(arg::Union(AbstractArray, Tuple)) = flow(horizontal, arg)
+vbox(arg::Union(AbstractArray, Tuple)) = flow(vertical, arg)
+
+hbox(args...) = hbox(args)
+vbox(args...) = vbox(args)
+
 
 @apidoc hbox => (Flow <: Tile) begin
     doc(md"Arrange tiles horizontally. `hbox(args...)`
@@ -299,21 +304,14 @@ is equivalent to `flow(horizontal, args...)`")
     arg(tiles::TileList)
 end
 
-
-vbox(args...) = flow(vertical, args...)
-
 @apidoc vbox => (Flow <: Tile) begin
-    doc(md"Arrange tiles vertically. `hbox(args...)`
+    doc("Arrange tiles vertically. `vbox(args...)`
 is equivalent to `flow(vertical, args...)`")
     arg(tiles::TileList)
 end
 
-hbox(arg) = flow(horizontal, [arg])
-vbox(arg) = flow(vertical, [arg])
-
 vskip(y) = size(0px, y, empty)
 hskip(x) = size(x, 0px, empty)
-
 
 @api ordering => (FlowOrder <: FlexContainer) begin
     arg(ordering::AbstractArray)
@@ -523,4 +521,3 @@ name(::AutoClip) = "auto"
 render(t::Clip, state) =
     render(Container(t.tile), state) &
         @d(:style => @d(:overflow => name(t.overflow)), :className => "scrollbar")
-

@@ -1,4 +1,4 @@
-using Color
+using Colors
 
 import Escher: @d
 
@@ -149,6 +149,6 @@ end
 
 showdocs(fns) =
    vbox(intersperse([vskip(2em), 
-        border([bottom], solid, 1px, color("#ddd"), empty),
+        border([bottom], solid, 1px, colorant"#ddd", empty),
         vskip(2em)],
         map(showdoc, fns)))

@@ -1,4 +1,4 @@
-using Color
+using Colors
 
 include("helpers/page.jl")
 include("helpers/doc.jl")
