@@ -165,6 +165,7 @@ function main(window)
 
 - Create *universe*
 - Make a *pie*
+- Interpolate $\KaTeX$
 \"\"\"
 end
 ```
