@@ -2,6 +2,7 @@
 #
 # Webapp
 using Compat
+using Requires
 using Mux
 using JSON
 

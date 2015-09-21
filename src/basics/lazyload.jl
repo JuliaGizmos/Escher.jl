@@ -38,15 +38,15 @@ export drawing
 end
 
 function compose_setup()
-    drawing(w::Compose.Measure, h::Compose.Measure, p) =
+    Escher.drawing(w::Compose.Measure, h::Compose.Measure, p) =
         drawing(Compose.Patchable(w, h), p)
 
-    drawing(w::Compose.Measure, h::Compose.Measure) = p -> drawing(w, h, p)
+    Escher.drawing(w::Compose.Measure, h::Compose.Measure) = p -> drawing(w, h, p)
 
-    drawing(p) =
+    Escher.drawing(p) =
         drawing(Compose.default_graphic_width, Compose.default_graphic_height, p)
 
-    convert(::Type{Tile}, p::Compose.Context) =
+    Base.convert(::Type{Tile}, p::Compose.Context) =
         drawing(p)
 
     compose_render(img::Compose.Patchable, pic) = begin
@@ -58,7 +58,7 @@ function compose_setup()
         Elem(:img, src="""data:image/png;base64,$(base64(takebuf_array(img.out)))""")
     end
 
-    render(d::ComposeGraphic, state) = begin
+    Escher.render(d::ComposeGraphic, state) = begin
         Elem(:div, compose_render(d.img, d.graphic), className="graphic-wrap")
     end
 end

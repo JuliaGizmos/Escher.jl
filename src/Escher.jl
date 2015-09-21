@@ -1,5 +1,3 @@
-using Requires
-
 module Escher
 
 if VERSION < v"0.4.0-dev"
