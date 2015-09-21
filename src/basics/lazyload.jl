@@ -31,13 +31,13 @@ end
 
 export drawing
 
-@require Compose begin
+# A declarative version of draw?
+@api drawing => (ComposeGraphic <: Tile) begin
+    arg(img::Any)
+    arg(graphic::Any) # Either a plot or a compose node
+end
 
-    # A declarative version of draw?
-    @api drawing => (ComposeGraphic <: Tile) begin
-        arg(img::Any)
-        curry(graphic::Any) # Either a plot or a compose node
-    end
+function compose_setup()
     drawing(w::Compose.Measure, h::Compose.Measure, p) =
         drawing(Compose.Patchable(w, h), p)
 
@@ -61,12 +61,16 @@ export drawing
     render(d::ComposeGraphic, state) = begin
         Elem(:div, compose_render(d.img, d.graphic), className="graphic-wrap")
     end
+end
 
+@require Compose begin
+    compose_setup()
 end
 
 @require Gadfly begin
     import Gadfly: Compose
 
+    compose_setup()
     convert(::Type{Tile}, p::Gadfly.Plot) =
         drawing(p)
 end
