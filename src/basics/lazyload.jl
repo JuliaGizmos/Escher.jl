@@ -91,3 +91,8 @@ end
     convert(::Type{Tile}, s::SymPy.Sym) =
         tex(SymPy.latex(s))
 end
+
+@require Images begin
+    convert(::Type{Tile}, img::Images.Image) =
+        Escher.image("data:image/png;base64," * stringmime(MIME"image/png"(), img))
+end
