@@ -45,4 +45,6 @@ include("library/layout2.jl")
 include("library/slideshow.jl")
 include("library/codemirror.jl")
 
+include("deprecate.jl")
+
 end
