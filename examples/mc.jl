@@ -1,18 +1,14 @@
 using Gadfly
 using Distributions
 
-
-N = Input(10000)
-btn = Input{Escher.MouseButton}(leftbutton)
-it = Input([0])
-val = Input([1.0])
-running = Input(false)
-result = lift(st -> run_simulate() , btn; typ=Any, init=nothing)
-
 f(u) = exp(-u^2/2)/√(2pi)
 
-
-f(u) = exp(-u^2/2)/√(2pi)
+const curve_plot =
+    plot(f, -5, +5,
+        Theme(line_width=2Gadfly.mm,
+              major_label_font_size=40Gadfly.px,
+              minor_label_font_size=25Gadfly.px)
+    )
 
 const u1=Uniform(-5.0,+5.0)
 const u2=Uniform(0.0, 0.5)
@@ -23,58 +19,59 @@ function simulate_pt()
     y<f(x)
 end
 
-#The main numerical method
-#external interface to visualisation is:
-#start, interim, finished
-#Thus, the numerics has very limited coupling with the visualisation
-function simulate(num)
-     initiate()
+function simulate(num, running, current_approx)
+     push!(running, true)
      hits=0
      for (i in 1:num)
         hits = hits + simulate_pt()
         if (i % 10000) == 0
-            interim(i, hits/i*(0.5*10) )
+            push!(current_approx, (i, hits/i*(0.5*10) ))
         end
     end
     estimate = hits/num*(0.5*10)
-    finished(estimate)
-end
-
-function run_simulate()
-    println("Starting Simulations for N=$(value(N))")
-    @async simulate(value(N))
-end
-
-function interim(k,v) 
-    push!(it, push!(value(it), k))
-    push!(val, push!(value(val), v))
-
-end
-
-function finished(v)
     push!(running, false)
 end
 
-function initiate()
-    push!(running, true)
+function run_simulate(N, running, current_approx)
+    println("Starting Simulations for N=$N")
+    @async simulate(N, running, current_approx)
 end
 
 function main(window)
     push!(window.assets, "tex")
     push!(window.assets, "widgets")
 
-    lift( it, val, running) do  i, v, r
-        vbox(h1("Interactive Simulations"),
-            hbox(vbox(
-                     md"""We want to estimate the following integral using a
-                     *Monte Carlo* Simulation""",
-                     hbox(tex("\\int_{-5}^{5} \\frac{exp(-u^2/2)}{\\sqrt{2pi}}du" , block=true) ),
-                     ),
-                plot(f, -5, +5, Theme(line_width=2Gadfly.mm, major_label_font_size=40Gadfly.px, minor_label_font_size=25Gadfly.px)) |> size(60em, 60em),
-             ),
-             hbox("Number of runs", slider(10^3:10^3:10^6) >>> N, hskip(5em), hbox(button("Start", raised=true, disabled=r) >>> btn)) |> packacross(center),            
-             hbox("Current value: ", hskip(1em), @sprintf("%2.4f", v[end]) |> emph, hskip(1em)," at iteration :", hskip(1em), string(i[end])),
-             plot(x=i, y=v)) |> pad(2em) 
-    end
-end
+    N = Input(10000)
+    btn = Input{Any}(leftbutton)
 
+    current_approx = Input((0, 1.0)) # current approximation
+    buffered_approx = foldl((Any[0],Any[1.0]), current_approx) do prev, current
+        idx, val = current
+        push!(prev[1], idx), push!(prev[2], val)
+    end
+
+    running = Input(false)
+    result = lift(sampleon(btn, N); typ=Any, init=nothing) do n
+        run_simulate(n, running, current_approx)
+    end
+
+    vbox(
+        h1("Interactive Simulations"),
+        hbox(
+            vbox(
+                 md"""We want to estimate the following integral using a
+                 *Monte Carlo* Simulation""",
+                 tex("\\int_{-5}^{5} \\frac{exp(-u^2/2)}{\\sqrt{2pi}}du" , block=true),
+            ),
+            curve_plot
+         ) |> packacross(center),
+         lift(buffered_approx, running) do approx, r
+             xs, ys = approx
+             vbox(
+                 hbox("Number of runs", slider(10^3:10^3:5*10^6) >>> N, hskip(2em), hbox(button("Start", raised=true, disabled=r) >>> btn)) |> packacross(center),
+                 hbox("Current value: ", hskip(1em), @sprintf("%2.4f", ys[end]) |> emph, hskip(1em)," at iteration :", hskip(1em), string(xs[end])),
+                 plot(x=xs, y=ys, Geom.line) |> pad(2em)
+             )
+         end
+    ) |> pad(2em)
+end
