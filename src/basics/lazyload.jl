@@ -1,4 +1,6 @@
 using Requires
+using Compat
+import Base.convert
 
 write_patchwork_prelude(io::IO) =
     write(io, "<script>", Patchwork.js_runtime(), "</script>")
@@ -32,22 +34,21 @@ end
 export drawing
 
 # A declarative version of draw?
-@api drawing => (ComposeGraphic <: Tile) begin
-    arg(img::Any)
-    arg(graphic::Any) # Either a plot or a compose node
+if !isdefined(:drawing)
+    Escher.@api drawing => (ComposeGraphic <: Tile) begin
+        arg(img::Any)
+        arg(graphic::Any) # Either a plot or a compose node
+    end
 end
 
-function compose_setup()
+@require Compose begin
     Escher.drawing(w::Compose.Measure, h::Compose.Measure, p) =
-        drawing(Compose.Patchable(w, h), p)
+        Escher.drawing(Compose.Patchable(w, h), p)
 
-    Escher.drawing(w::Compose.Measure, h::Compose.Measure) = p -> drawing(w, h, p)
+    Escher.drawing(w::Compose.Measure, h::Compose.Measure) = p -> Escher.drawing(w, h, p)
 
     Escher.drawing(p) =
-        drawing(Compose.default_graphic_width, Compose.default_graphic_height, p)
-
-    Base.convert(::Type{Tile}, p::Compose.Context) =
-        drawing(p)
+        Escher.drawing(Compose.default_graphic_width, Compose.default_graphic_height, p)
 
     compose_render(img::Compose.Patchable, pic) = begin
         Compose.draw(img, pic)
@@ -58,21 +59,19 @@ function compose_setup()
         Elem(:img, src="""data:image/png;base64,$(base64(takebuf_array(img.out)))""")
     end
 
-    Escher.render(d::ComposeGraphic, state) = begin
+    Escher.render(d::Escher.ComposeGraphic, state) = begin
         Elem(:div, compose_render(d.img, d.graphic), className="graphic-wrap")
     end
-end
 
-@require Compose begin
-    compose_setup()
+    convert(::Type{Tile}, p::Compose.Context) =
+        Escher.drawing(p)
 end
 
 @require Gadfly begin
     import Gadfly: Compose
 
-    compose_setup()
     convert(::Type{Tile}, p::Gadfly.Plot) =
-        drawing(p)
+        Escher.drawing(p)
 end
 
 @require DataFrames begin
