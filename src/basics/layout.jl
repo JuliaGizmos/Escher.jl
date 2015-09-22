@@ -291,8 +291,8 @@ render(f::Flow, state) =
     addclasses(render(f.tiles, :div, state), classes(f))
 
 
-hbox(arg::Union(AbstractArray, Tuple)) = flow(horizontal, arg)
-vbox(arg::Union(AbstractArray, Tuple)) = flow(vertical, arg)
+hbox(arg::(@compat Union{AbstractArray, Tuple})) = flow(horizontal, arg)
+vbox(arg::(@compat Union{AbstractArray, Tuple})) = flow(vertical, arg)
 
 hbox(args...) = hbox(args)
 vbox(args...) = vbox(args)
@@ -375,7 +375,7 @@ render(t::Shrink, state) =
     render(t.tile, state) & style(@d(:flexShrink => t.factor))
 
 @api flexbasis => (FlexBasis <: Tile) begin
-    arg(basis::Union(Length, Symbol))
+    arg(basis::(@compat Union{Length, Symbol}))
     curry(tile::Tile)
 end
 

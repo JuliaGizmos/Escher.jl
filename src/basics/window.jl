@@ -27,4 +27,4 @@ resolve_asset(tup :: (@compat Tuple{AbstractString, AbstractString}), prefix ="/
     end
 end
 
-resolve_asset(slug::String) = resolve_asset(("Escher", slug))
+resolve_asset(slug::AbstractString) = resolve_asset(("Escher", slug))
