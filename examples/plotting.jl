@@ -1,6 +1,8 @@
 using Gadfly
 using Distributions
 
+Escher.external_setup()
+
 plot_beta(α, β) =
     plot(x -> pdf(Beta(α, β), x), 0, 1)
 
