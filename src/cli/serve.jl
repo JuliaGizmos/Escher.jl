@@ -11,6 +11,14 @@ using Patchwork
 
 import Mux: @d
 
+@async while true
+    try
+        Reactive.run()
+    catch err
+        showerror(STDERR, err)
+    end
+end
+
 function loadfile(filename)
     if isfile(filename)
         try
@@ -151,7 +159,7 @@ uisocket(dir) = (req) -> begin
     h = @compat parse(Int, d["h"])
 
     sock = req[:socket]
-    tilestream = Input{Signal}(Input{Tile}(empty))
+    tilestream = Input(Signal, Input(Tile, empty))
 
     # TODO: Initialize window with session,
     # window dimensions and what not
@@ -181,17 +189,6 @@ uisocket(dir) = (req) -> begin
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
     @async while isopen(sock)
-        data = read(sock)
-
-        msg = JSON.parse(bytestring(data))
-        if !haskey(commands, msg["command"])
-            warn("Unknown command received ", msg["command"])
-        else
-            commands[msg["command"]](window, msg)
-        end
-    end
-
-    while isopen(sock)
         if !isfile(file)
             break
         end
@@ -208,6 +205,17 @@ uisocket(dir) = (req) -> begin
 
         # Replace the current main signal
         swap!(tilestream, next)
+    end
+
+    while isopen(sock)
+        data = read(sock)
+
+        msg = JSON.parse(bytestring(data))
+        if !haskey(commands, msg["command"])
+            warn("Unknown command received ", msg["command"])
+        else
+            commands[msg["command"]](window, msg)
+        end
     end
 
 end
