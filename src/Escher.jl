@@ -55,4 +55,7 @@ else
     external_setup() = nothing
 end
 
+serve(port=5555) =
+    include(joinpath(dirname(@__FILE__), "cli", "serve.jl"))(port)
+
 end
