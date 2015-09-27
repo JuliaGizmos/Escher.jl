@@ -11,14 +11,6 @@ using Patchwork
 
 import Mux: @d
 
-@async while true
-    try
-        Reactive.run()
-    catch err
-        showerror(STDERR, err)
-    end
-end
-
 function loadfile(filename)
     if isfile(filename)
         try
@@ -124,7 +116,7 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
 
     write(sock, patch_cmd(id, Patchwork.diff(render(Escher.empty, state), init)))
 
-    foldl(init, keepwhen(window.alive, Escher.empty, sig); typ=Any) do prev, next
+    foldp(init, sig; typ=Any) do prev, next
 
         st = Dict()
         st["embedded_signals"] = Dict()
@@ -142,7 +134,7 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
         end
 
         rendered_next
-    end
+    end |> Reactive.preserve
 
     for (key, sig) in state["embedded_signals"]
         start_updates(sig, window, sock, key)
@@ -184,7 +176,9 @@ uisocket(dir) = (req) -> begin
         println( str )
     end
 
+    println("SWAPPING WITH", current)
     swap!(tilestream, current)
+    sleep(1)
 
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
@@ -244,5 +238,18 @@ function escher_serve(port=5555, dir="")
         Mux.notfound(),
     )
 
-    @sync serve(static, comm, port)
+    serve(static, comm, port)
+
+    while true
+        try
+            Reactive.run()
+        catch err
+            if isa(err, InterruptException)
+                "Server stopped"
+                break
+            else
+                showerror(STDERR, err)
+            end
+        end
+    end
 end
