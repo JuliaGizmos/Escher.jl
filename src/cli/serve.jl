@@ -183,6 +183,17 @@ uisocket(dir) = (req) -> begin
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
     @async while isopen(sock)
+        data = read(sock)
+
+        msg = JSON.parse(bytestring(data))
+        if !haskey(commands, msg["command"])
+            warn("Unknown command received ", msg["command"])
+        else
+            commands[msg["command"]](window, msg)
+        end
+    end
+
+    while isopen(sock)
         if !isfile(file)
             break
         end
@@ -201,16 +212,6 @@ uisocket(dir) = (req) -> begin
         swap!(tilestream, next)
     end
 
-    while isopen(sock)
-        data = read(sock)
-
-        msg = JSON.parse(bytestring(data))
-        if !haskey(commands, msg["command"])
-            warn("Unknown command received ", msg["command"])
-        else
-            commands[msg["command"]](window, msg)
-        end
-    end
 
 end
 
