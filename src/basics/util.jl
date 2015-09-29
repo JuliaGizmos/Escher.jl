@@ -1,5 +1,9 @@
 using Colors
 
+export intersperse,
+       class,
+       memoize
+
 # Dict macro
 macro d(xs...)
   if VERSION < v"0.4-"
@@ -14,7 +18,6 @@ convert(::Type{Color}, s::AbstractString) =
 
 render_color(c) = string("#" * hex(c))
 
-export intersperse
 
 # Utility functions for Elem
 
@@ -100,4 +103,42 @@ style(x) = @d(:style => x)
 teeprint(x, fn=println) = begin
     fn(x)
     x
+end
+
+
+@doc """
+memoize anything's rendered output and state
+"""
+
+@api memoize => (Memoized<:Tile) begin
+    arg(tile::Any)
+    arg(store::WeakKeyDict=WeakKeyDict())
+end
+
+deepmerge!(a::Associative, b::Associative) = begin
+    for (k, v) in b
+        @show k, v
+        if isa(v, Associative) && haskey(a, k) && isa(a[k], Associative)
+            @show k, "AAA"
+            a[k] = deepmerge!(a[k], v)
+        else
+            a[k] = b[k]
+        end
+    end
+    a
+end
+
+# Todo: allow specifying hash function,
+# allow mirroring to JLD optionally
+render(m::Memoized, state) = begin
+    if haskey(m.store, m.tile)
+        deepmerge!(state, st) # This.
+        m.store[m.tile]
+    else
+        st = Dict("embedded_signals"=>Dict())
+        elem = render(convert(Tile, m.tile), st)
+        deepmerge!(state, st)
+        m.store[m.tile] = (elem, st)
+        elem
+    end
 end

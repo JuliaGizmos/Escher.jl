@@ -115,3 +115,6 @@ body {
     align-items: baseline;
 }
 
+code-mirror {
+    font-size:14px;
+}
