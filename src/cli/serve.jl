@@ -116,7 +116,7 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
 
     write(sock, patch_cmd(id, Patchwork.diff(render(Escher.empty, state), init)))
 
-    foldp(init, sig; typ=Any) do prev, next
+    foldp(init, filterwhen(window.alive, empty, sig); typ=Any) do prev, next
 
         st = Dict()
         st["embedded_signals"] = Dict()
@@ -176,10 +176,7 @@ uisocket(dir) = (req) -> begin
         println( str )
     end
 
-    println("SWAPPING WITH", current)
     swap!(tilestream, current)
-    sleep(1)
-
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
     @async while isopen(sock)
