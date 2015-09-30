@@ -151,7 +151,7 @@ uisocket(dir) = (req) -> begin
     h = @compat parse(Int, d["h"])
 
     sock = req[:socket]
-    tilestream = Input{Signal}(Input{Tile}(empty))
+    tilestream = Input(Signal, Input(Tile, empty))
 
     # TODO: Initialize window with session,
     # window dimensions and what not

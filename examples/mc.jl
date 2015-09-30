@@ -44,7 +44,7 @@ function main(window)
     push!(window.assets, "widgets")
 
     N = Input(10000)
-    btn = Input{Any}(leftbutton)
+    btn = Input(leftbutton)
 
     current_approx = Input((0, 1.0)) # current approximation
     buffered_approx = foldl((Any[0],Any[1.0]), current_approx) do prev, current
