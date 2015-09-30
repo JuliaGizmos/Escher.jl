@@ -134,7 +134,7 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
         end
 
         rendered_next
-    end
+    end |> Reactive.preserve
 
     for (key, sig) in state["embedded_signals"]
         start_updates(sig, window, sock, key)
@@ -159,7 +159,7 @@ uisocket(dir) = (req) -> begin
     window = Window(dimension=(w*px, h*px))
 
     lift(asset -> write(sock, JSON.json(import_cmd(asset))),
-         window.assets)
+         window.assets) |> Reactive.preserve
 
     main = loadfile(file)
 
@@ -180,7 +180,7 @@ uisocket(dir) = (req) -> begin
 
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
-    @async while isopen(sock)
+    reader = @async while isopen(sock)
         data = read(sock)
 
         msg = JSON.parse(bytestring(data))
@@ -210,6 +210,8 @@ uisocket(dir) = (req) -> begin
         swap!(tilestream, next)
     end
 
+    wait(reader)
+
 end
 
 # Return files from the requested package, in the supplied directory
@@ -236,5 +238,13 @@ function escher_serve(port=5555, dir="")
         Mux.notfound(),
     )
 
-    @sync serve(static, comm, port)
+    serve(static, comm, port)
+
+    while true
+        try
+            Reactive.run()
+        catch err
+            showerror(STDERR, err)
+        end
+    end
 end
