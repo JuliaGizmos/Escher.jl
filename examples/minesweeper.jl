@@ -55,7 +55,7 @@ colors = ["#fff", colormap("reds", 7)]
 box(content, color) =
     inset(Escher.middle,
         fillcolor(color, size(4em, 4em, empty)),
-        Escher.fontsize(2em, content)) |> paper(1) |> pad(0.2em)
+        Escher.fontsize(2em, content)) |> paper(1) |> Escher.pad(0.2em)
 
 number(x) = box(x == -1 ? "" : string(x) |> fontweight(800), colors[x+2])
 mine = box(icon("report"), "#e58")
@@ -67,9 +67,9 @@ block(board, i, j) =
      constant((i, j), clickable(number(board.uncovered[i, j]))) >>> moves_signal
 
 gameover = vbox(
-        title(2, "Game Over!") |> pad(1em),
+        title(2, "Game Over!") |> Escher.pad(1em),
         addinterpreter(_ -> newboard(10, 10), button("Start again")) >>> initial_board_signal
-    ) |> pad(1em) |> fillcolor("white")
+    ) |> Escher.pad(1em) |> fillcolor("white")
 
 function showboard{lost}(board::Board{lost})
     m, n = size(board.mines)

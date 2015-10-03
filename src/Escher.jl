@@ -27,7 +27,6 @@ include("basics/tile.jl")
 include("basics/util.jl")
 include("basics/length.jl")
 include("basics/signal.jl")
-include("basics/lazyload.jl")
 
 include("basics/layout.jl")
 include("basics/content.jl")
@@ -42,5 +41,21 @@ include("library/widgets.jl")
 include("library/layout2.jl")
 include("library/slideshow.jl")
 include("library/codemirror.jl")
+
+include("deprecate.jl")
+
+# We need to set up convert methods for other packages (e.g. Gadfly, SymPy, Images)
+# This will work on 0.3 automatically, when using 0.4 with precompilation,
+# an explicit call to conditional_setup is needed after loading the other packages.
+include("basics/lazyload.jl")
+
+if VERSION >= v"0.4.0-"
+    external_setup() = include(joinpath(dirname(@__FILE__), "basics", "lazyload.jl"))
+else
+    external_setup() = nothing
+end
+
+serve(port=5555) =
+    include(joinpath(dirname(@__FILE__), "cli", "serve.jl"))(port)
 
 end

@@ -1,4 +1,6 @@
 using Requires
+using Compat
+import Base.convert
 
 write_patchwork_prelude(io::IO) =
     write(io, "<script>", Patchwork.js_runtime(), "</script>")
@@ -31,23 +33,22 @@ end
 
 export drawing
 
-@require Compose begin
-
-    # A declarative version of draw?
-    @api drawing => (ComposeGraphic <: Tile) begin
+# A declarative version of draw?
+if !isdefined(:drawing)
+    Escher.@api drawing => (ComposeGraphic <: Tile) begin
         arg(img::Any)
-        curry(graphic::Any) # Either a plot or a compose node
+        arg(graphic::Any) # Either a plot or a compose node
     end
-    drawing(w::Compose.Measure, h::Compose.Measure, p) =
-        drawing(Compose.Patchable(w, h), p)
+end
 
-    drawing(w::Compose.Measure, h::Compose.Measure) = p -> drawing(w, h, p)
+@require Compose begin
+    Escher.drawing(w::Compose.Measure, h::Compose.Measure, p) =
+        Escher.drawing(Compose.Patchable(w, h), p)
 
-    drawing(p) =
-        drawing(Compose.default_graphic_width, Compose.default_graphic_height, p)
+    Escher.drawing(w::Compose.Measure, h::Compose.Measure) = p -> Escher.drawing(w, h, p)
 
-    convert(::Type{Tile}, p::Compose.Context) =
-        drawing(p)
+    Escher.drawing(p) =
+        Escher.drawing(Compose.default_graphic_width, Compose.default_graphic_height, p)
 
     compose_render(img::Compose.Patchable, pic) = begin
         Compose.draw(img, pic)
@@ -58,17 +59,19 @@ export drawing
         Elem(:img, src="""data:image/png;base64,$(base64(takebuf_array(img.out)))""")
     end
 
-    render(d::ComposeGraphic, state) = begin
+    Escher.render(d::Escher.ComposeGraphic, state) = begin
         Elem(:div, compose_render(d.img, d.graphic), className="graphic-wrap")
     end
 
+    convert(::Type{Tile}, p::Compose.Context) =
+        Escher.drawing(p)
 end
 
 @require Gadfly begin
     import Gadfly: Compose
 
     convert(::Type{Tile}, p::Gadfly.Plot) =
-        drawing(p)
+        Escher.drawing(p)
 end
 
 @require DataFrames begin
@@ -86,4 +89,9 @@ end
 @require SymPy begin
     convert(::Type{Tile}, s::SymPy.Sym) =
         tex(SymPy.latex(s))
+end
+
+@require Images begin
+    convert(::Type{Tile}, img::Images.Image) =
+        Escher.image("data:image/png;base64," * stringmime(MIME"image/png"(), img))
 end

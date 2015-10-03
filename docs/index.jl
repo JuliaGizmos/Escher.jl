@@ -5,6 +5,8 @@ using Gadfly
 
 import Escher: @d
 
+Escher.external_setup()
+
 # Home page.
 
 pkgname(name="Escher") =
@@ -54,12 +56,12 @@ md_example = md"""**Things to do:**
 
 - Create *universe*
 - Make a *pie*
-- Interpolate $\KaTeX$
 """
 
 part1 = md"""
 
 $(vskip(1em))
+
 $(
 
 vbox(
@@ -127,7 +129,7 @@ julia> escher_serve()
 This might be what you need if you installed Escher using a dmg file on OSX.
 # An Overview
 
-Escher's APi consitently employs some patterns. Understanding these rules gives you a great foundation to understanding Escher's comprehensive API.
+Escher's API consitently employs some patterns. Understanding these rules gives you a great foundation to understanding Escher's comprehensive API.
 
 ## Pattern 1: UIs are immutable values
 
@@ -180,9 +182,7 @@ The `tex` function creates a TeX tile.
 function main(window)
     push!(window.assets, "tex")
 
-    tex(\"\"\"f(x) = \int_{-\infty}^\infty
-        \hat f(\xi)\,e^{2 \pi i \xi x}
-        \,d\xi\"\"\")
+    tex("cos(x)")
 end
 ```
 *Output:*

@@ -2,6 +2,7 @@
 #
 # Webapp
 using Compat
+using Requires
 using Mux
 using JSON
 
@@ -45,7 +46,7 @@ function setup_socket(file)
         """)
     # Include the basics
     write(io, "<script>", Patchwork.js_runtime(), "</script>")
-    write(io, """<script src="/assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>""")
+    write(io, """<script src="/pkg/Escher/bower_components/webcomponentsjs/webcomponents.min.js"></script>""")
     write(io, """<link rel="import" href="$(Escher.resolve_asset("basics"))">""")
 
     write(io, """</head> <body fullbleed unresolved>""")
@@ -212,8 +213,8 @@ uisocket(dir) = (req) -> begin
 end
 
 # Return files from the requested package, in the supplied directory
-packagefiles(dir, dirs = true) =
-  branch(req -> Mux.validpath(Pkg.dir(req[:params][:pkg], dir ), joinpath(req[:path]...), dirs=dirs),
+packagefiles(dir, dirs=true) =
+  branch(req -> Mux.validpath(Pkg.dir(req[:params][:pkg], dir), joinpath(req[:path]...), dirs=dirs),
          req -> Mux.fresp(joinpath(Pkg.dir(req[:params][:pkg], dir), req[:path]...)))
 
 
@@ -221,8 +222,8 @@ function escher_serve(port=5555, dir="")
     # App
     @app static = (
         Mux.defaults,
-        route("assets", Mux.files(Pkg.dir("Escher", "assets")), Mux.notfound()),
-        route("pkg/:pkg", packagefiles( "assets"), Mux.notfound()),
+        route("pkg/:pkg", packagefiles("assets"), Mux.notfound()),
+        route("assets", Mux.files("assets"), Mux.notfound()),
         route("/:file", req -> setup_socket(req[:params][:file])),
         route("/", req -> setup_socket("index.jl")),
         Mux.notfound(),

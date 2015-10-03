@@ -1,5 +1,7 @@
 import Compose: compose, context, polygon
 
+Escher.external_setup()
+
 function sierpinski(n)
     if n == 0
         Compose.compose(context(), polygon([(1,1), (0,1), (1/2, 0)]))
@@ -15,14 +17,14 @@ end
 function main(window)
     push!(window.assets, "widgets")
 
-    iterᵗ = Input(1)
+    iterᵗ=Input(0)
 
     vbox(title(2, "Sierpinski's Triangle"),
         vskip(1em),
-        hbox("Iterations: ", slider(1:6) >>> iterᵗ),
+        hbox("Iterations: ", slider(0:6) >>> iterᵗ),
         vskip(1em),
         consume(iterᵗ) do iter
             sierpinski(iter)
         end
-    ) |> pad(2em)
+    ) |> Escher.pad(2em)
 end

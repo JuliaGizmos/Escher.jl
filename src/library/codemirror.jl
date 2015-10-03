@@ -25,8 +25,8 @@ render(c::CodeMirror, state) =
         attributes = @d(
             :value=>c.code,
             :mode=>c.language,
-            :readOnly=>c.readonly,
+            "read-only"=>boolattr(c.readonly),
             :theme=>c.theme,
-            :lineNumbers=>c.linenumbers,
+            "line-numbers"=>boolattr(c.linenumbers),
         )
     )

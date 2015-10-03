@@ -64,7 +64,7 @@ classes(::Large) = "font-large"
 classes(::XLarge) = "font-x-large"
 classes(::XXLarge) = "font-xx-large"
 
-@api fontsize => (WithFontSize{T <: Union(FontSize, Length)} <: Tile) begin
+@api fontsize => (WithFontSize{T <: (@compat Union{FontSize, Length})} <: Tile) begin
     doc("Set the font size of text in one or more tiles")
     arg(size::T, doc="The font size")
     curry(tiles::TileList, doc="A tile or a list of tiles")
@@ -88,7 +88,7 @@ classes(::Bolder) = "font-bolder"
 classes(::Lighter) = "font-lighter"
 
 const allowed_font_weights = 100:100:900
-@api fontweight => (WithFontWeight{T <: Union(Int, FontWeight)} <: Tile) begin
+@api fontweight => (WithFontWeight{T <: (@compat Union{Int, FontWeight})} <: Tile) begin
     doc("Set the font weight of text in one or more tiles.")
     arg(
         weight::T,

@@ -10,6 +10,9 @@
 #----------------------------------------------------------------------
 
 using Compose
+using Colors
+
+Escher.external_setup()
 
 #----------------------------------------------------------------------
 
@@ -21,16 +24,16 @@ end
 Boid() = Boid(rand(2),rand(2)/1000)
 function draw(b::Boid)
     (context(),
-        (context(),circle(b.pos[1]+b.vel[1],b.pos[2]+b.vel[2],0.005),fill("red")),
-        (context(),circle(b.pos[1],b.pos[2],0.01),fill("blue"))
+        (context(),circle(b.pos[1]+b.vel[1],b.pos[2]+b.vel[2],0.005),fill(colorant"red")),
+        (context(),circle(b.pos[1],b.pos[2],0.01),fill(colorant"blue"))
     )
 end
 
 #----------------------------------------------------------------------
 
 function main(window)
-    # Run at 30 FPS
-    eventloop = every(1/30)
+    # Run at 60 FPS
+    eventloop = fpswhen(window.alive, 60)
 
     # Create population of boids
     boids = [Boid() for i in 1:50]
