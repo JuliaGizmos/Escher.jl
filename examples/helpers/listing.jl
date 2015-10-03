@@ -1,6 +1,7 @@
 include("repl.jl")
 
 listing(code, output=showoutput(code)) = begin
+    output = output == nothing ? showoutput(code) : output
     input = Input(code)
     cell = hbox(
         code_io(code, input) |> width(30em),

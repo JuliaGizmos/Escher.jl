@@ -2,6 +2,8 @@ include("helpers/listing.jl")
 
 hello_str = "\"Hello, World\""
 
+isinstalled(pkg) = try Pkg.installed(pkg) != nothing catch e false end
+
 md_str = """
 md\"\"\"
 ## This is a heading
@@ -74,12 +76,15 @@ function main(window)
         listing("""
         tex("(a+b)^2=a^2+b^2+2ab")"""),
         
-        md"[SymPy.jl](https://github.com/jverzani/SymPy.jl) can be used to generate mathematical expressions. Escher automatically typesets them to LaTex.",
+        md"[SymPy.jl](https://github.com/jverzani/SymPy.jl) can be used to generate mathematical expressions. Escher automatically typesets them to LaTeX.",
         vskip(1em),
         listing("""
         using SymPy
+        Escher.external_setup() # sets up rendering of SymPy symbols
+
         x = Sym("x")
-        SymPy.diff(sin(x^2), x, 5)"""),
+        SymPy.diff(sin(x^2), x, 5)""",
+        isinstalled("SymPy") ? nothing : "SymPy.jl is not installed."),
 
         h2("Images"),
         md"External images can be included using the `image` function.",
@@ -95,9 +100,10 @@ function main(window)
         vskip(1em),
         listing("""
         using Images
+        Escher.external_setup() # sets up rendering of Image objects
         grayim(rand(100,100))
-        """),
-
+        """,
+        isinstalled("Images") ? nothing : "Images.jl is not installed."),
 
     ) |> pad(2em)
 end
