@@ -33,7 +33,7 @@ end
 
 function main(window)
     # Run at 60 FPS
-    eventloop = fpswhen(window.alive, 60)
+    eventloop = every(1/30)
 
     # Create population of boids
     boids = [Boid() for i in 1:50]
