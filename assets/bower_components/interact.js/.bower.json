@@ -1,0 +1,58 @@
+{
+  "name": "interact",
+  "version": "1.2.6",
+  "main": "interact.js",
+  "description": "Drag and drop, resizing and multi-touch gestures with inertia and snapping for modern browsers (and also IE8+)",
+  "homepage": "http://interactjs.io",
+  "authors": [
+    {
+      "name": "Taye Adeyemi",
+      "email": "dev@taye.me",
+      "url": "http://taye.me"
+    }
+  ],
+  "keywords": [
+    "interact.js",
+    "draggable",
+    "droppable",
+    "drag",
+    "drop",
+    "drag and drop",
+    "resize",
+    "touch",
+    "multi-touch",
+    "gesture",
+    "snap",
+    "inertia",
+    "grid",
+    "autoscroll",
+    "SVG"
+  ],
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*"
+  },
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "license": "MIT",
+  "ignore": [
+    ".*",
+    "test",
+    "demo",
+    "img",
+    "docs"
+  ],
+  "_release": "1.2.6",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.2.6",
+    "commit": "9bc2445db99c34a8be8e19ddbd086f73ea4ed483"
+  },
+  "_source": "git://github.com/taye/interact.js.git",
+  "_target": "~1.2.6",
+  "_originalSource": "interact.js",
+  "_direct": true
+}
