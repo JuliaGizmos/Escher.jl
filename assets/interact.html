@@ -1,0 +1,254 @@
+<script src="bower_components/interact.js/interact.js"></script>
+
+<dom-module
+  id="escher-draggable">
+
+<template></template>
+
+<script>
+  Polymer({
+    is: "escher-draggable",
+    properties: {
+      disabled: {
+        type: Boolean,
+        observer: "_disabledChanged"
+      },
+
+      eventType: {
+        type: String,
+        value: 'move'
+      },
+
+      reflect: {
+        type: Boolean,
+        value: true,
+        observer: "_reflectChanged"
+      },
+
+      axis: {
+        type: String,
+        observer: "_axisChanged"
+      }
+    },
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+    domInit: function () {
+      var self=this, elem=this.findElem(), interactable;
+
+      this.dx=0
+      this.dy=0
+
+      console.log("making interactable", elem)
+      this.interactable = interact(elem).draggable({
+        enabled: !this.disabled,
+        onstart: function (event) {
+          self.dx = 0
+          self.dy = 0
+          Polymer.Base.fire.call(elem, "drag-start")
+        },
+        onmove: function (event) {
+        console.log(self.reflect)
+          if (self.reflect) {
+            self._reflect(elem, event)
+          }
+          this.dx += event.dx
+          this.dy += event.dy
+          Polymer.Base.fire.call(elem, "drag-move", {
+            displacement: [event.dx, event.dy],
+            velocity: [event.velocityX, event.velocityY]
+          })
+          if (self.eventType == 'move') {
+            self.update(elem, self.name, {
+              displacement: [event.dx, event.dy],
+              velocity: [event.velocityX, event.velocityY]
+            })
+          }
+        },
+        onend: function (event) {
+          Polymer.Base.fire.call(elem, "drag-end", [self.dx, self.dy])
+          if (self.eventType == 'end') {
+            self.update(elem, self.name, {
+              displacement: [self.dx, self.dy],
+              velocity: [event.velocityX, event.velocityY]
+            })
+          }
+        }
+      })
+    },
+
+    _reflect: function (elem, event) {
+      elem.style.transform +=
+        'translate(' + event.dx + 'px, ' + event.dy + 'px)'
+    },
+
+    _reflectChanged: function (s) {
+     this.reflect = false
+   },
+
+    _disabledChanged: function (state) {
+      this.interactable && this.interactable.draggable(!state)
+    },
+
+    _axisChanged: function (axis) {
+      this.interactable && this.interactable.draggable({axis: axis})
+    }
+  })
+</script>
+</dom-module>
+
+<dom-module
+  id="escher-resizable">
+
+<template></template>
+
+<script>
+  Polymer({
+    is: "escher-resizable",
+
+    properties: {
+      disabled: {
+        type: Boolean,
+        observer: "_disabledChanged"
+      },
+
+      preserveAspectRatio: {
+        type: Boolean,
+        observer: "_preserveAspectRatioChanged"
+      },
+
+      reflect: {
+        type: Boolean,
+        value: true
+      },
+
+      eventType: {
+        type: String,
+        value: 'move'
+      },
+
+      edges: {
+        type: Array,
+        observer: "_edgesChanged"
+      }
+    },
+
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+    domInit: function () {
+      var self=this, elem=this.findElem();
+      this.offset = [0, 0]
+      this.size = [0, 0]
+
+      this.interactable = interact(elem).resizable({
+
+        preserveAspectRatio: this.preserveAspectRatio,
+        edges: this.edgeObj(this.edges || ["left", "right", "top", "bottom"])
+
+      }).on('resizestart', function (event) {
+        this.offset = [0, 0]
+        this.size = [0, 0]
+      }).on('resizemove', function (event) {
+        if (self.reflect) {
+          self._reflect(elem, event)
+        }
+
+        self.offset[0] += event.deltaRect.left
+        self.offset[1] += event.deltaRect.right
+        self.size = [event.rect.width, event.rect.height]
+
+        Polymer.Base.fire.call(elem, "resize-move", {
+          offset: [event.deltaRect.left, event.deltaRect.right],
+          size: [event.rect.width, event.rect.height],
+          velocity: [event.velocityX, event.velocityY]
+        })
+        console.log("mobing", self.eventType)
+        if (self.eventType == 'move') {
+          self.update(elem, self.name, {
+            offset: [event.deltaRect.left, event.deltaRect.right],
+            size: [event.rect.width, event.rect.height],
+            velocity: [event.velocityX, event.velocityY]
+          })
+        }
+      }).on('resizeend', function (event) {
+        Polymer.Base.fire.call(elem, "resize-end", {
+          offset: this.offset,
+          size: this.size
+        })
+        if (self.eventType == 'end') {
+          self.update(elem, self.name, {
+            offset: [event.deltaRect.left, event.deltaRect.right],
+            size: [event.rect.width, event.rect.height],
+            velocity: [event.velocityX, event.velocityY]
+          })
+        }
+      })
+    },
+
+    _reflect: function (elem, event) {
+
+        // update the element's style
+        elem.style.width  = event.rect.width + 'px';
+        elem.style.height = event.rect.height + 'px';
+
+        // translate when resizing from top or left edges
+        var dx = event.deltaRect.left,
+            dy = event.deltaRect.top;
+
+        if (dx !== 0 || dy !== 0) {
+          elem.style.transform += 'translate(' + dx + 'px,' + dy + 'px)'
+        }
+    },
+
+
+    edgeObj: function (array) {
+      var obj = { left: false, right: false, bottom: false, top: false }
+      for (var i=0, l=array.length; i<l; i++) {
+        obj[array[i]] = true
+      }
+      return obj
+    },
+
+    _disabledChanged: function (state) {
+      this.interactable && this.interactable.resizable(!state)
+    },
+
+    _edgesChanged: function (array) {
+      this.interactable && this.interactable.resizable({edges: this.edgeObj(this.edges)})
+    },
+
+    _preserveAspectRatioChanged: function (flag) {
+      this.interactable && this.interactable.resizable({preserveAspectRatio: flag})
+    }
+  })
+</script>
+</dom-module>
+
+<dom-module
+  id="escher-multitouch">
+
+  <template></template>
+
+<script>
+  Polymer({
+    is: "escher-multitouch",
+
+    properties: {
+      disabled: {
+        type: Boolean,
+        observer: "_disabledChanged"
+      },
+    },
+
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+    domInit: function () {
+      var self=this, elem=this.findElem()
+
+      this.interactable = interact(elem).gesturable({
+        onmove: function (event) {
+          console.log(event)
+        }
+      })
+    }
+  })
+</script>
+
+</dom-module>
