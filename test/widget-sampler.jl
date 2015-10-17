@@ -55,6 +55,7 @@ function main(window)
             radio("x", "X"),
             radio("y", "Y"),
         ], selected=x) >>> rb_inp,
+        rb_inp
         )
     end
 
