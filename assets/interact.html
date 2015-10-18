@@ -80,16 +80,15 @@
         'translate(' + event.dx + 'px, ' + event.dy + 'px)'
     },
 
-    _reflectChanged: function (s) {
-     this.reflect = false
-   },
-
     _disabledChanged: function (state) {
       this.interactable && this.interactable.draggable(!state)
     },
 
     _axisChanged: function (axis) {
       this.interactable && this.interactable.draggable({axis: axis})
+    },
+
+    _reflectChanged: function (s) {
     }
   })
 </script>

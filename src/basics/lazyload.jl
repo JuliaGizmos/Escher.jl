@@ -42,6 +42,7 @@ if !isdefined(:drawing)
 end
 
 @require Compose begin
+    using Patchwork
     Escher.drawing(w::Compose.Measure, h::Compose.Measure, p) =
         Escher.drawing(Compose.Patchable(w, h), p)
 

@@ -83,27 +83,56 @@ using Compose
 
 immutable EscherWrapper <: Compose.FormPrimitive
     tile::Tile
+    render_state::Any
 end
 typealias EscherTile Compose.Form{EscherWrapper}
-escher_wrap(t) = EscherTile([EscherWrapper(t)])
+escher_wrap(t) = EscherTile([EscherWrapper(t, nothing)])
 
-Compose.draw(img::Compose.Patchable, prim::EscherWrapper) =
-    Escher.render(prim.tile, Dict(:img => img))
-
-Base.convert(::Compose.FormPrimitive, t::Union{Compose.Form, Compose.FormPrimitive, Compose.Context}) =
-    EscherWrapper(t)
-
-
-immutable ComposeWrapper <: Tile
-    compose_object::Union{Compose.Form, Compose.Context}
-end
-
-Base.convert(::Type{Tile}, t::Union{Compose.Form, Compose.Context}) =
-    ComposeWrapper(t)
-
-Escher.render(x::ComposeWrapper, state) =
-    draw(state[:img], x.compose_object)
-Compose.absolute_units(x::EscherWrapper, ::Compose.Transform, ::Compose.UnitBox, ::Compose.AbsoluteBoundingBox) = x
+Compose.absolute_units(x::EscherWrapper, t::Compose.Transform, u::Compose.UnitBox, b::Compose.AbsoluteBoundingBox) = EscherWrapper(x.tile, (t, u, b))
 Compose.compose(x::Compose.Context, y::Escher.Tile) = compose(context(), escher_wrap(y))
 
-main(w) = compose(context(), draggable(circle()))
+Compose.draw(img::Compose.Patchable, prim::EscherWrapper) =
+    Escher.render(prim.tile, Dict(:img => img, :unit_args => prim.render_state))
+
+immutable ComposeWrapper <: Tile
+    compose_object::Compose.Form
+end
+
+Base.convert(::Type{Tile}, t::Compose.Form) =
+    ComposeWrapper(t)
+
+immutable BroadcastContainer
+    array::AbstractArray
+end
+
+Patchwork.(:<<)(l::BroadcastContainer, x) = [a<<x for a in l.array]
+Patchwork.(:&)(l::BroadcastContainer, x) = [a&x for a in l.array]
+
+Escher.render(x::ComposeWrapper, state) = begin
+    if Compose.isscalar(x.compose_object)
+        draw(state[:img], Compose.absolute_units(x.compose_object.primitives[1], state[:unit_args]...))
+    else
+        BroadcastContainer([draw(state[:img], Compose.absolute_units(x, state[:unit_args]...)) for x in x.compose_object.primitives])
+    end
+end
+
+Escher.external_setup()
+
+function sierpinski(n)
+    if n == 0
+        Compose.compose(context(), polygon([(1,1), (0,1), (1/2, 0)]) |> draggable)
+    else
+        t = sierpinski(n - 1)
+        Compose.compose(context(),
+                (context(1/4,   0, 1/2, 1/2), t),
+                (context(  0, 1/2, 1/2, 1/2), t),
+                (context(1/2, 1/2, 1/2, 1/2), t))
+    end
+end
+
+x = Input{Any}(nothing)
+function main(w)
+    push!(w.assets, "interact")
+    sierpinski(2)
+    compose(context(), circle([0.5,0.3,0.4],[0.5,0.3,0.4], [0.05,0.02,0.01]) |> draggable)
+end

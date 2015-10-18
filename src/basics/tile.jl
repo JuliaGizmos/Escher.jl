@@ -45,9 +45,13 @@ render{T}(x::T, state) =
     try
         render(convert(Tile, x), state)
     catch err
-        # If something other than the conversion failed, rethrow...
-        !isa(err, MethodError) && rethrow()
-        render_fallback(bestmime(x), x)
+        if !(isa(err, MethodError) &&
+             err.f === convert &&
+             err.args[1] === Tile)
+             rethrow(err)
+        end
+        @show x, T
+        @show render_fallback(bestmime(x), x)
     end
 
 @doc """
