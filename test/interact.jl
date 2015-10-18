@@ -105,8 +105,10 @@ immutable BroadcastContainer
     array::AbstractArray
 end
 
-Patchwork.(:<<)(l::BroadcastContainer, x) = [a<<x for a in l.array]
-Patchwork.(:&)(l::BroadcastContainer, x) = [a&x for a in l.array]
+Patchwork.(:<<)(l::BroadcastContainer, x) = BroadcastContainer([a<<x for a in l.array])
+Patchwork.(:&)(l::BroadcastContainer, x) = BroadcastContainer([a&x for a in l.array])
+Compose.addto(p::Compose.Patchable, g, x::BroadcastContainer) =
+    Compose.addto(p, g, x.array)
 
 Escher.render(x::ComposeWrapper, state) = begin
     if Compose.isscalar(x.compose_object)
@@ -134,5 +136,7 @@ x = Input{Any}(nothing)
 function main(w)
     push!(w.assets, "interact")
     sierpinski(2)
-    compose(context(), circle([0.5,0.3,0.4],[0.5,0.3,0.4], [0.05,0.02,0.01]) |> draggable)
+    vbox(
+    compose(context(), draggable(circle([0.5,0.3,0.4],[0.5,0.3,0.4], [0.05,0.02,0.01])) >>> x)
+    , x)
 end
