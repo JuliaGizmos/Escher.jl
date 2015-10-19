@@ -247,6 +247,7 @@ render(t::TextInput, state) = begin
                  "auto-validate" => boolattr(true),
                  "disabled" => boolattr(t.disabled),
                  "char-counter" => boolattr(t.charcounter),
+                 "no-label-float" => boolattr(!t.floatinglabel),
                  )
              )
 end
