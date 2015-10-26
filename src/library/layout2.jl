@@ -7,7 +7,8 @@ export tabs,
        menuitem,
        icon,
        iconbutton,
-       toolbar
+       toolbar,
+       drawer
 # Higher-order layouts: e.g. tabs, pages
 
 # Icons and icon button
@@ -225,3 +226,46 @@ render(dm::DropdownMenu, state) = begin
     )
 end
 wrapbehavior(d::DropdownMenu) = selectable(d, name=d.name, selector=".dropdown-content")
+
+@api drawer => (Drawer <: Tile) begin
+    doc("A side drawer panel that steps out of the way in a narrow layout.")
+    arg(
+        drawer::Tile,
+        doc="side drawer"
+    )
+    curry(tile::Tile, doc="contents (main panel)")
+    kwarg(
+        menuButton::Bool=true,
+        doc="Include a menu button to toggle. If false, you may want to set a custom button by adding an element with a custom attribute paper-drawer-toggle"
+    )
+    kwarg(
+        rightDrawer::Bool=false,
+        doc="If true, position the drawer to the right."
+    )
+    #=kwarg(
+        drawerWidth::Length=256px,
+        doc="Width of drawer"
+    )
+    kwarg(
+        responsiveWidth::Length=640px,
+        doc="Max-width when the panel changes to narrow layout."
+    )=#
+
+end
+
+render(d::Drawer, state) = begin
+    Elem("paper-drawer-panel", #id="paperDrawerPanel",
+        [
+            Elem("div",attributes = @d(:drawer=>""), render(d.drawer,state)),
+            Elem("div",attributes = @d(:main=>""), 
+                if d.menuButton
+                    #drawerToggleButton = Elem("iron-icon",attributes = @d("paper-drawer-toggle"=>"",:icon=>"menu",:raised=>""))
+                    drawerToggleButton = Elem("paper-button",attributes = @d("paper-drawer-toggle"=>""),"≡")
+                    [ drawerToggleButton, render(d.tile,state) ]
+                else
+                    render(d.tile,state)
+                end
+            )
+        ]
+        ) & (d.rightDrawer ? @d("right-drawer" => "") : Dict() )
+end
