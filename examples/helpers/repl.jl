@@ -1,5 +1,3 @@
-using Markdown
-
 # Function that executes code and
 # returns the result
 execute_code(code) = begin

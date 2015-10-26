@@ -1,4 +1,5 @@
 include("helpers/listing.jl")
+include("helpers/page.jl")
 
 using Colors
 
@@ -14,10 +15,12 @@ heightlabel(len) =
 
 xᵗ = Input(220)
 
+
 function main(window)
     push!(window.assets, "widgets")
     push!(window.assets, "codemirror")
     push!(window.assets, "tex")
+    push!(window.assets, "layout2")
 
     vbox(
         h2("User Guide") |> fontweight(200),
@@ -118,25 +121,25 @@ function main(window)
 
         """,
         listing("""
-                olive = pad(0.8em,fillcolor("#b76",container(1em,1em)))|>fillcolor("#884")
-                #bread = pad([left,right],.5em,fillcolor("#bba",container(12em,3em))) |> fillcolor("#886")
-                bread = fillcolor("#bba",container(12em,2em)) 
-                lettuce = fillcolor("#ab6",container(14em,0.6em))
-                tomato = fillcolor("#d66",container(8em,1.2em))
-                cheese = fillcolor("#eea",container(12em,0.6em))
-                ham = fillcolor("#c98",container(11em,1.2em)) 
+            olive = pad(0.8em,fillcolor("#b76",container(1em,1em)))|>fillcolor("#884")
+            #bread = pad([left,right],.5em,fillcolor("#bba",container(12em,3em))) |> fillcolor("#886")
+            bread = fillcolor("#bba",container(12em,2em)) 
+            lettuce = fillcolor("#ab6",container(14em,0.6em))
+            tomato = fillcolor("#d66",container(8em,1.2em))
+            cheese = fillcolor("#eea",container(12em,0.6em))
+            ham = fillcolor("#c98",container(11em,1.2em)) 
 
-                sandwich = vbox(
-                  olive,
-                  bread |> shrink,
-                  lettuce |> flex,
-                  tomato |> flex,
-                  cheese |> flex,
-                  ham |> grow,
-                  bread |> shrink
-                ) |> packacross(center)
+            sandwich = vbox(
+              olive,
+              bread |> shrink,
+              lettuce |> flex,
+              tomato |> flex,
+              cheese |> flex,
+              ham |> grow,
+              bread |> shrink
+            ) |> packacross(center)
 
-                sandwich |> height(10.2em)"""),
+            sandwich |> height(10.2em)"""),
         md"""
         The following sandwich is made of flexboxes. The ham slice grows, the bread slices and olive are all fixed sizes, and the other toppings are flex boxes. Note how each kind of box changes according to size.
         """,
@@ -162,33 +165,33 @@ function main(window)
 
         # todo: make this into a dropdown box example? Maybe? Or a static table?
         listing("""
-                cbox(c) = minwidth(6em,empty) |> fillcolor(c)
-                y = empty|>fillcolor(LCHab(75,25,170)) |>
-                  minwidth(5em) |> minheight( 0.75em) |>
-                  pad( 0.5em) |> fillcolor(LCHab(93.75,0,0))
-                #y = cbox(LCHab(75,25,170))
-                n = cbox(LCHab(93.75,0,15))
-                textfield(w,str) = minwidth(w,(str)) |>
-                  fillcolor(LCHab(87.5,0,0)) |>
-                  textalign(centertext)
-                vbox(
-                  textfield(6em,emph("method")) |> fillcolor("white"),
-                  hbox(minwidth(6em,emph("packing")),
-                    textfield(6em,"packlines"),
-                    textfield(6em,"packitems"),
-                    textfield(6em,"packacross")),
-                  hbox(textfield(6em,"axisstart"),y,y,y),
-                  hbox(textfield(6em,"axisend"),y,y,y),
-                  hbox(textfield(6em,"center"),y,y,y),
-                  hbox(textfield(6em,"baseline"),n,n,y),
-                  hbox(textfield(6em,"stretch"),y,n,y),
-                  hbox(textfield(6em,"spacebetween"),y,y,n),
-                  hbox(textfield(6em,"spacearound"),y,y,n),
-                ) |>
-                  packitems(center) |>
-                  packacross(stretch) |>
-                  minheight(20em)
-                """),
+            cbox(c) = minwidth(6em,empty) |> fillcolor(c)
+            y = empty|>fillcolor(LCHab(75,25,170)) |>
+              minwidth(5em) |> minheight( 0.75em) |>
+              pad( 0.5em) |> fillcolor(LCHab(93.75,0,0))
+            #y = cbox(LCHab(75,25,170))
+            n = cbox(LCHab(93.75,0,15))
+            textfield(w,str) = minwidth(w,(str)) |>
+              fillcolor(LCHab(87.5,0,0)) |>
+              textalign(centertext)
+            vbox(
+              textfield(6em,emph("method")) |> fillcolor("white"),
+              hbox(minwidth(6em,emph("packing")),
+                textfield(6em,"packlines"),
+                textfield(6em,"packitems"),
+                textfield(6em,"packacross")),
+              hbox(textfield(6em,"axisstart"),y,y,y),
+              hbox(textfield(6em,"axisend"),y,y,y),
+              hbox(textfield(6em,"center"),y,y,y),
+              hbox(textfield(6em,"baseline"),n,n,y),
+              hbox(textfield(6em,"stretch"),y,n,y),
+              hbox(textfield(6em,"spacebetween"),y,y,n),
+              hbox(textfield(6em,"spacearound"),y,y,n),
+            ) |>
+              packitems(center) |>
+              packacross(stretch) |>
+              minheight(20em)
+            """),
         # Sandwich example, probably want to delete as it offers little for its weight.
         #= listing("""
             sandwich = vbox(
@@ -227,6 +230,7 @@ function main(window)
         vskip(1em),
         h1("Absolute positioning"),
         vskip(1em)
-        ) # |> docpage
+        #) |> docpage 
+        ) |> drawer(drawerMenu,drawerScrollable=true,rightDrawer=true)
 end
 

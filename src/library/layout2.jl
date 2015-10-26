@@ -242,6 +242,14 @@ wrapbehavior(d::DropdownMenu) = selectable(d, name=d.name, selector=".dropdown-c
         rightDrawer::Bool=false,
         doc="If true, position the drawer to the right."
     )
+    kwarg(
+        drawerScrollable::Bool=false,
+        doc="Makes the drawer scrollable"
+    )
+    kwarg(
+        mainScrollable::Bool=true,
+        doc="Makes the main panel scrollable"
+    )
     #=kwarg(
         drawerWidth::Length=256px,
         doc="Width of drawer"
@@ -256,12 +264,16 @@ end
 render(d::Drawer, state) = begin
     Elem("paper-drawer-panel", #id="paperDrawerPanel",
         [
-            Elem("div",attributes = @d(:drawer=>""), render(d.drawer,state)),
-            Elem("div",attributes = @d(:main=>""), 
+            Elem("div",
+                attributes = @d(:drawer=>""),
+                style= d.drawerScrollable? @d(:overflow=>:auto) : Dict(),
+                render(d.drawer,state)),
+            Elem("div",
+                attributes = @d(:main=>""),
+                style = d.mainScrollable? @d(:overflow=>:auto) : Dict(),
                 if d.menuButton
-                    #drawerToggleButton = Elem("iron-icon",attributes = @d("paper-drawer-toggle"=>"",:icon=>"menu",:raised=>""))
                     drawerToggleButton = Elem("paper-button",attributes = @d("paper-drawer-toggle"=>""),"≡")
-                    [ drawerToggleButton, render(d.tile,state) ]
+                    [ drawerToggleButton, Elem(:div,render(d.tile,state)) ]
                 else
                     render(d.tile,state)
                 end
