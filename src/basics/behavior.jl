@@ -13,7 +13,7 @@ export hasstate,
 
 @api hasstate => (WithState <: Behavior) begin
     doc("Watch for changes to an attribute/property.")
-    curry(tile::Tile, doc="Tile to watch.")
+    arg(tile::Tile, doc="Tile to watch.")
     kwarg(
         attr::AbstractString="value",
         doc=md"""The attribute/property to watch. Note that this is the property

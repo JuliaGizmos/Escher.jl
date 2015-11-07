@@ -146,10 +146,16 @@ end
 
 default_intent(b::Bubble) = default_intent(b.tile)
 
-render(tile::Bubble, state) =
+render(tile::Bubble, state) = begin
     withlastchild(render(tile.tile, state)) do elem
-        elem & @d(:bubbles => boolattr(tile.bubbles), name=>tile.name, bubbleIndex=tile.index)
+        elem & @d(:attributes => @d(
+            :bubbles => boolattr(tile.bubbles),
+            :name=>tile.name,
+            :index=>tile.index,
+            :id=>"signal-"*string(tile.name)),
+        )
     end
+end
 
 @api stopbubbling => (StopBubbling <: Behavior) begin
     doc(md"""Stop bubbling of named events to parents.
@@ -198,7 +204,7 @@ end
 
 watch!(sampler::Sampler, name::Symbol, tile) = begin
     sampler.watches[name] = default_intent(tile)
-    bubble(name, convert(Behavior, tile))
+    wrapbehavior(tile)
 end
 
 watch!(sampler::Sampler, tile::Bubble) = begin
@@ -218,7 +224,7 @@ end
 
 trigger!(sampler::Sampler, name::Symbol, tile) = begin
     sampler.triggers[name] = default_intent(tile)
-    bubble(name, convert(Behavior, tile))
+    bubble(name, wrapbehavior(tile))
 end
 
 trigger!(sampler::Sampler, tile::Bubble) = begin
@@ -249,6 +255,16 @@ end
 aggregate!(agg::Aggregator, tile) = begin
     push!(agg.intents, default_intent(tile))
     bubble(agg.name, tile, index=length(agg.intents))
+end
+
+@api capture => (Capture{T <: Intent} <: Behavior) begin
+    arg(spec::T)
+    curry(tile::Tile)
+end
+
+render(c::Capture{Sampler}, state) = begin
+    render(c.tile, state) <<
+        Elem("signal-sampler", signals=collect(keys(c.spec.watches)), triggers=collect(keys(c.spec.triggers)))
 end
 
 immutable UpdateAggregate{T}

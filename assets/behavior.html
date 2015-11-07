@@ -127,6 +127,7 @@ Polymer({
 
       this.value = {}
       elem.addEventListener("signal-updated", function (ev) {
+          console.log("Something happened", ev.detail)
         if (self.triggers.indexOf(ev.detail.name) >= 0) { // TODO: use a set
 
           ev.stopPropagation() // FIXME: Should this be configurable?
@@ -149,6 +150,48 @@ Polymer({
 
 </dom-module>
 
+<dom-module
+  id="signal-aggregator" >
+
+  <template><content></content></template>
+
+<script>
+Polymer({
+
+    is: "signal-aggregator",
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+    properties: {
+    },
+    domInit: function () {
+      var self = this,
+      elem = this.findElem()
+
+      this.setId()
+
+      this.value = {}
+      elem.addEventListener("signal-updated", function (ev) {
+        if (self.triggers.indexOf(ev.detail.aggregation_index) >= 0) { // TODO: use a set
+
+          ev.stopPropagation() // FIXME: Should this be configurable?
+
+          var result = {}
+          for(var i=0, l=self.signals.length; i < l; i++) {
+            var name = self.signals[i];
+            result[name] = Polymer.dom(elem).querySelector("#signal-" + name).getValue()
+          }
+          result[ev.detail.name] = ev.detail.value
+          result._trigger = ev.detail.name
+          self.update(elem, result)
+        } else if (self.signals.indexOf(ev.detail.name) >= 0) {
+          ev.stopPropagation()
+        }
+      })
+    }
+})
+</script>
+
+</dom-module>
 
 <dom-module
   id="selectable-behavior" >

@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/usr/bin/julia
 #!/home/shashi/code/julia/master/julia
 
 using ArgParse
