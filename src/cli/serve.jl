@@ -83,7 +83,7 @@ swap!(tilestream, next) =
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
         id = msg["data"]["signalId"]
-        interp, sig = Escher.fromid(id)
+        sig, interp = Escher.fromid(id)
         push!(sig, Escher.interpret(interp, msg["data"]["value"]))
     end),
     ("window-size", (window, msg) -> begin

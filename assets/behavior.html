@@ -3,7 +3,7 @@
 <dom-module
   id="watch-state" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 
@@ -38,7 +38,7 @@ Polymer({
     this.setId()
 
     elem.addEventListener(this.trigger, function (ev) {
-      self.update(elem, self.name, self.getValue())
+      self.update(elem, self.getValue())
     })
   }
 })
@@ -50,7 +50,7 @@ Polymer({
 <dom-module
   id="clickable-behavior">
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 
@@ -74,7 +74,7 @@ Polymer({
     if (this.buttons.indexOf(2) >= 0) {
       elem.addEventListener("contextmenu", function (ev) {
         ev.preventDefault()
-        self.update(elem, self.name, 2)
+        self.update(elem, 2)
         return false
       })
     }
@@ -82,10 +82,10 @@ Polymer({
       elem.addEventListener("click", function (ev) {
         if (ev.button == 0 && self.buttons.indexOf(1) >= 0) {
           // Left click
-          self.update(elem, self.name, 1)
+          self.update(elem, 1)
         } else if(ev.button == 1 && self.buttons.indexOf(3) >= 0) {
           // Right click
-          self.update(elem, self.name, 3)
+          self.update(elem, 3)
         }
       })
     }
@@ -101,7 +101,7 @@ Polymer({
 <dom-module
   id="signal-sampler" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 Polymer({
@@ -138,7 +138,7 @@ Polymer({
           }
           result[ev.detail.name] = ev.detail.value
           result._trigger = ev.detail.name
-          self.update(elem, self.name, result)
+          self.update(elem, result)
         } else if (self.signals.indexOf(ev.detail.name) >= 0) {
           ev.stopPropagation()
         }
@@ -153,7 +153,7 @@ Polymer({
 <dom-module
   id="selectable-behavior" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 Polymer({
@@ -173,7 +173,7 @@ Polymer({
       var val = self.multi ? (elem.selectedValues || []) :
         (elem.selected || 0)
 
-      self.update(elem, self.name, val)
+      self.update(elem, val)
     }
 
     elem.addEventListener("iron-select", handler)
@@ -190,6 +190,8 @@ Polymer({
 
   <template>
     <iron-a11y-keys id="keys" keys="{{keys}}"></iron-a11y-keys>
+
+    <content></content>
   </template>
 
 <script>
@@ -216,7 +218,7 @@ Polymer({
 
     this.$.keys.addEventListener("keys-pressed", function (ev) {
         var key = this.keyboardEventToKey(ev.detail.keyboardEvent)
-        self.update(elem, self.name, key)
+        self.update(elem, key)
     })
   }
 })
@@ -227,7 +229,7 @@ Polymer({
 <dom-module
   id="date-selection" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 
@@ -249,7 +251,7 @@ Polymer({
         "month": d.getMonth() + 1,
         "day": d.getDate()
       }
-      self.update(elem, self.name, val)
+      self.update(elem, val)
     })
 
   }

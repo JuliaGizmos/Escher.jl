@@ -13,7 +13,7 @@ function main(window)
     cbx = consume(cbox_inp) do x
         hbox(
             checkbox(x, "Label", disabled=false) >>> cbox_inp, hskip(1em),
-            addinterpreter(!, checkbox(!x, "Label", disabled=false)) >>> cbox_inp,
+            intent(!, checkbox(!x, "Label", disabled=false)) >>> cbox_inp,
         )
     end
 
@@ -22,7 +22,7 @@ function main(window)
     tb = consume(tb_inp) do x
         hbox(
             togglebutton(x, disabled=false) >>> tb_inp, hskip(1em),
-            addinterpreter(!, togglebutton(!x, disabled=false)) >>> tb_inp,
+            intent(!, togglebutton(!x, disabled=false)) >>> tb_inp,
         )
     end
 
@@ -32,7 +32,7 @@ function main(window)
     sl = consume(sl_inp) do x
         hbox(
             slider(1:10, value=x) >>> sl_inp,
-            addinterpreter(foo, slider(1:100, value=x^2)) >>> sl_inp,
+            intent(foo, slider(1:100, value=x^2)) >>> sl_inp,
         )
     end
 

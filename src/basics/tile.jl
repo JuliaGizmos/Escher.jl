@@ -91,3 +91,18 @@ render(t::TileList, state) =
 
 render(t::TileList, wrap, state) =
     Elem(wrap, Elem[render(x, state) for x in t.tiles])
+
+"""
+SignalWrap lets you pretend that a signal of tiles is also a tile
+"""
+immutable SignalWrap <: Tile
+    signal::Signal
+end
+
+convert(::Type{Tile}, x::Signal) = SignalWrap(x)
+
+render(tile::SignalWrap, state) = begin
+    id = "signal-" * makeid(tile.signal)
+    state["embedded_signals"][id] = tile.signal
+    Elem("signal-container", signalId=id)
+end
