@@ -236,18 +236,5 @@ function escher_serve(port=5555, dir="")
         Mux.notfound(),
     )
 
-    serve(static, comm, port)
-
-    while true
-        try
-            Reactive.run()
-        catch err
-            if isa(err, InterruptException)
-                "Server stopped"
-                break
-            else
-                showerror(STDERR, err)
-            end
-        end
-    end
+    @sync serve(static, comm, port)
 end
