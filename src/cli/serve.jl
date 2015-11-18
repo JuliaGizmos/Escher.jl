@@ -78,7 +78,7 @@ swap!(tilestream, next::Signal) =
     push!(tilestream, next)
 
 swap!(tilestream, next) =
-    push!(tilestream, Input(next))
+    push!(tilestream, Signal(next))
 
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
@@ -151,7 +151,7 @@ uisocket(dir) = (req) -> begin
     h = @compat parse(Int, d["h"])
 
     sock = req[:socket]
-    tilestream = Input(Signal, Input(Tile, empty))
+    tilestream = Signal(Signal, Signal(Tile, empty))
 
     # TODO: Initialize window with session,
     # window dimensions and what not

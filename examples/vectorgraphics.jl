@@ -17,7 +17,7 @@ end
 function main(window)
     push!(window.assets, "widgets")
 
-    iterᵗ=Input(0)
+    iterᵗ=Signal(0)
 
     vbox(title(2, "Sierpinski's Triangle"),
         vskip(1em),

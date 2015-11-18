@@ -4,14 +4,14 @@ function main(window)
     push!(window.assets, "layout2")
     push!(window.assets, "animation")
 
-    inp = Input(1)
+    inp = Signal(1)
     t, p = wire(tabs(["a","b","c"]), pages(["X","Y","Z"]), :tabs, :selected)
 
     m = menu(["m1", submenu("m2", ["m2.1", "m2.2"]), menuitem("m3", disabled=true),
       "m4"])
     
-    mnu_sig = Input(0)
-    submnu_sig = Input(0)
+    mnu_sig = Signal(0)
+    submnu_sig = Signal(0)
     slideshow([
         vbox(
             icon("face"),

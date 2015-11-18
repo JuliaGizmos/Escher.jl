@@ -37,7 +37,7 @@ The purpose of an intent is to turn widget messages into types in the business l
 
 For example, a simple intent is the pair with intent, if you have a list of buttons and would like to know which button was clicked as well as the mouse button that was pressed, you can attach the `pairwith` intent to the buttons:
 
-    clicks = Input(Tuple, (0, leftbutton))
+    clicks = Signal(Tuple, (0, leftbutton))
     vbox([pairwith(idx, btn) >>> clicks for (idx, btn) in enumerate(buttons)])
 
 Here the `clicks` signal will update to a tuple containing the index of the button clicked and the mouse button clicked whenever any of the buttons is clicked by the user.
@@ -345,7 +345,7 @@ render(sig::Subscription, state) =
         child << Elem("signal-transport", signalId=makeid((sig.receiver, sig.intent)))
     end
 
-(>>>)(t::Tile, s::Union{Input, Collector}) = subscribe(s, t)
+(>>>)(t::Tile, s::Union{Signal, Collector}) = subscribe(s, t)
 
 import Base.Random: UUID, uuid4
 

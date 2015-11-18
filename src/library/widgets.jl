@@ -16,7 +16,7 @@ export wrapbehavior,
 # by calling `wrapbehavior` on it.
 abstract Widget <: Behavior
 
-subscribe(x::Input, w::Widget) =
+subscribe(x::Signal, w::Widget) =
     subscribe(x, wrapbehavior(w))
 
 # Ambiguity

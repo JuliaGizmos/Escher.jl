@@ -1,7 +1,7 @@
 
 function main(window)
     push!(window.assets, "codemirror")
-    inp = Input(Dict())
+    inp = Signal(Dict())
 
     s = sampler() # A thing that lets you watch widgets/behaviors upon updates to other behaviors
 

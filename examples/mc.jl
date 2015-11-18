@@ -43,16 +43,16 @@ function main(window)
     push!(window.assets, "tex")
     push!(window.assets, "widgets")
 
-    N = Input(10000)
-    btn = Input(Any, leftbutton)
+    N = Signal(10000)
+    btn = Signal(Any, leftbutton)
 
-    current_approx = Input((0, 1.0)) # current approximation
+    current_approx = Signal((0, 1.0)) # current approximation
     buffered_approx = foldl((Any[0],Any[1.0]), current_approx) do prev, current
         idx, val = current
         push!(prev[1], idx), push!(prev[2], val)
     end
 
-    running = Input(false)
+    running = Signal(false)
     result = lift(sampleon(btn, N); typ=Any, init=nothing) do n
         run_simulate(n, running, current_approx)
     end

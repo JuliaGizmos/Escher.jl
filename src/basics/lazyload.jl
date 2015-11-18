@@ -22,7 +22,7 @@ end
     using IJulia.CommManager
     import Base.Random: UUID, uuid4
 
-    setup_transport(sig::Input) = begin
+    setup_transport(sig::Signal) = begin
         id = makeid(sig)
         comm = Comm(:EscherSignal, data=@d(:signalId => id))
         comm.on_msg = (msg) ->

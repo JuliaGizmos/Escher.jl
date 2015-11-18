@@ -1,7 +1,7 @@
 function main(window)
     push!(window.assets, "widgets")
 
-    inp = Input(Dict())
+    inp = Signal(Dict())
 
     s = sampler()
     form = vbox(

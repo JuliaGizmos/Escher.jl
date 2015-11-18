@@ -9,8 +9,8 @@ plot_beta(α, β) =
 main(window) = begin
     push!(window.assets, "widgets")
 
-    αᵗ = Input(1.0)
-    βᵗ = Input(1.0)
+    αᵗ = Signal(1.0)
+    βᵗ = Signal(1.0)
 
     vbox(md"## Static Plot",
         drawing(4Gadfly.inch, 2Gadfly.inch, plot(sin, 0, 25)),

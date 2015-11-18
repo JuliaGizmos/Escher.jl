@@ -2,14 +2,14 @@ function main(window)
     push!(window.assets, "widgets")
 
     # Button
-    btn_inp = Input(Escher.MouseButton, leftbutton)
+    btn_inp = Signal(Escher.MouseButton, leftbutton)
     bt = hbox(
         button("Click") >>> btn_inp,
         hskip(1em), "Clicks: ", hskip(1em), foldl((x, _) -> x + 1, 0, btn_inp)
     ) |> packacross(center)
 
     # Checkbox
-    cbox_inp = Input(false)
+    cbox_inp = Signal(false)
     cbx = consume(cbox_inp) do x
         hbox(
             checkbox(x, "Label", disabled=false) >>> cbox_inp, hskip(1em),
@@ -18,7 +18,7 @@ function main(window)
     end
 
     # Toggle button
-    tb_inp = Input(false)
+    tb_inp = Signal(false)
     tb = consume(tb_inp) do x
         hbox(
             togglebutton(x, disabled=false) >>> tb_inp, hskip(1em),
@@ -27,7 +27,7 @@ function main(window)
     end
 
     # Slider
-    sl_inp = Input(1)
+    sl_inp = Signal(1)
     foo(x) = round(sqrt(x))
     sl = consume(sl_inp) do x
         hbox(
@@ -36,7 +36,7 @@ function main(window)
         )
     end
 
-    tx_input = Input("")
+    tx_input = Signal("")
     tx = consume(tx_input) do x
         vbox(
             textinput(x, pattern="[a-Z]+", minlength=2, charcounter=true, maxlength=20, error="Letters only!", label="Label") >>> tx_input,
@@ -44,7 +44,7 @@ function main(window)
         )
     end
 
-    rb_inp = Input("x")
+    rb_inp = Signal("x")
     rb = consume(rb_inp) do x
         vbox(
         radiogroup([
