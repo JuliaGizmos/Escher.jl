@@ -9,7 +9,7 @@ function main(window)
 
     modeᵗ = Signal(false)
 
-    lift(texᵗ, modeᵗ) do t, mode
+    map(texᵗ, modeᵗ) do t, mode
         vbox(h1("LaTeX"),
              hbox("LaTeX support is via ", hskip(1em), tex("\\KaTeX")),
              textinput() >>> texᵗ,

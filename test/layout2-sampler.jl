@@ -19,7 +19,7 @@ function main(window)
             dropdownmenu("Dropdown Label", m) >>> mnu_sig,
             t |> fillcolor("#f1f1f1"), p,
             m >>> mnu_sig,
-            hbox("Menu selection: ", lift(string, mnu_sig)),
+            hbox("Menu selection: ", map(string, mnu_sig)),
             hbox("Submenu selection: ", submnu_sig),
         ) |> packacross(center),
         "Second slide",

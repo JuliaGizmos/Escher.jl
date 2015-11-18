@@ -21,7 +21,7 @@ main(window) = begin
         hbox("Beta: "  |>
             width(4em), slider(1:100) >>> βᵗ) |>
             packacross(center),
-        lift(αᵗ, βᵗ) do α, β
+        map(αᵗ, βᵗ) do α, β
             plot_beta(α,β) |> drawing(4Gadfly.inch, 3Gadfly.inch)
         end
     ) |> pad(2em)

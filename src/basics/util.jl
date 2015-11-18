@@ -39,7 +39,7 @@ intersperse(0, [1, 2, 3], true)
 """ ->
 intersperse(x, xs, enclose=false) = begin
     if length(xs) > 1
-        res = foldl((acc, nxt) -> vcat(acc, x, nxt),
+        res = foldp((acc, nxt) -> vcat(acc, x, nxt),
                     Any[xs[1]], xs[2:end])
     else
         res = xs

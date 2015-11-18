@@ -5,7 +5,7 @@ include("helpers/page.jl")
 xᵗ = Signal(0)
 x2ᵗ = Signal(0)
 
-intro = lift(xᵗ, x2ᵗ) do x, x2
+intro = map(xᵗ, x2ᵗ) do x, x2
     md"""
 $(h2("User Guide") |> fontweight(200))
 $(vskip(1em))
@@ -145,5 +145,5 @@ end
 
 function main(window)
     push!(window.assets, "widgets")
-    lift(docpage, intro)
+    map(docpage, intro)
 end

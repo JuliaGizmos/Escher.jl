@@ -158,7 +158,7 @@ uisocket(dir) = (req) -> begin
 
     window = Window(dimension=(w*px, h*px))
 
-    lift(asset -> write(sock, JSON.json(import_cmd(asset))),
+    map(asset -> write(sock, JSON.json(import_cmd(asset))),
          window.assets)
 
     main = loadfile(file)

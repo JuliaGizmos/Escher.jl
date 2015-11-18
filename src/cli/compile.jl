@@ -22,7 +22,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
 
     opath = output_path(file, output_dir)
     w = Window()
-    assets = foldl(push!, Any[], w.assets) # Accumulate assets
+    assets = foldp(push!, Any[], w.assets) # Accumulate assets
     uifn = include(joinpath(pwd(), file))
     ui = uifn(w)
 

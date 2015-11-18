@@ -42,8 +42,8 @@ end
 moves_signal = Signal((0, 0))
 initial_board_signal = Signal(Board, newboard(10, 10))
 board_signal = flatten(
-    lift(initial_board_signal) do b
-        foldl(next, b, moves_signal; typ=Board)
+    map(initial_board_signal) do b
+        foldp(next, b, moves_signal; typ=Board)
     end
 )
 

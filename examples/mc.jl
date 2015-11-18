@@ -47,13 +47,13 @@ function main(window)
     btn = Signal(Any, leftbutton)
 
     current_approx = Signal((0, 1.0)) # current approximation
-    buffered_approx = foldl((Any[0],Any[1.0]), current_approx) do prev, current
+    buffered_approx = foldp((Any[0],Any[1.0]), current_approx) do prev, current
         idx, val = current
         push!(prev[1], idx), push!(prev[2], val)
     end
 
     running = Signal(false)
-    result = lift(sampleon(btn, N); typ=Any, init=nothing) do n
+    result = map(sampleon(btn, N); typ=Any, init=nothing) do n
         run_simulate(n, running, current_approx)
     end
 
@@ -67,7 +67,7 @@ function main(window)
             ),
             curve_plot
          ) |> packacross(center),
-         lift(buffered_approx, running) do approx, r
+         map(buffered_approx, running) do approx, r
              xs, ys = approx
              vbox(
                  hbox("Number of runs", slider(10^3:10^3:5*10^6) >>> N, hskip(2em), hbox(button("Start", raised=true, disabled=r) >>> btn)) |> packacross(center),

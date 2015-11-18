@@ -41,7 +41,7 @@ end
 nᵗ = Signal(5) # The angle at any given time
 connected_slider = subscribe(slider(0:7, value=5), nᵗ)
 
-reactive_eg = lift(nᵗ) do n
+reactive_eg = map(nᵗ) do n
     vbox(
         connected_slider,
         sierpinski(n)
@@ -485,7 +485,7 @@ function main(window)
     iterations = Signal(5) # The number of iterations to show
     connected_slider = subscribe(slider(0:7, value=5), iterations)
 
-    lift(iterations) do n
+    map(iterations) do n
         vbox(
             connected_slider,
             sierpinski(n)
@@ -546,8 +546,8 @@ end
 movesᵗ = Signal((0, 0))
 initial_boardᵗ = Signal(Board, newboard(10, 10))
 boardᵗ = flatten(
-    lift(initial_boardᵗ) do b
-        foldl(next, b, movesᵗ; typ=Board)
+    map(initial_boardᵗ) do b
+        foldp(next, b, movesᵗ; typ=Board)
     end
 )
 
@@ -584,7 +584,7 @@ end
 function main(window)
     push!(window.assets, "widgets")
 
-    lift(boardᵗ) do board
+    map(boardᵗ) do board
         vbox(
            vskip(2em),
            title(3, "minesweeper"),
@@ -640,7 +640,7 @@ function main(window)
     push!(window.assets, "codemirror")
     push!(window.assets, "layout2")
 
-    lift(reactive_eg) do example
+    map(reactive_eg) do example
         vbox(
             pkgname(),
             vskip(1em),

@@ -5,7 +5,7 @@ function main(window)
     btn_inp = Signal(Escher.MouseButton, leftbutton)
     bt = hbox(
         button("Click") >>> btn_inp,
-        hskip(1em), "Clicks: ", hskip(1em), foldl((x, _) -> x + 1, 0, btn_inp)
+        hskip(1em), "Clicks: ", hskip(1em), foldp((x, _) -> x + 1, 0, btn_inp)
     ) |> packacross(center)
 
     # Checkbox

@@ -12,7 +12,7 @@ function main(window)
         trigger!(s, :submit, button("Submit"))
     ) |> maxwidth(400px)
 
-    lift(inp) do dict
+    map(inp) do dict
         vbox(
             Escher.capture(s, form) >>> inp,
             vskip(2em),

@@ -71,7 +71,7 @@ render(t::Empty, state) = Elem(:div)
 #      writemime(io, m, Elem(:div, Escher.render(x, Dict()), className="escherRoot"))
 #
 #  writemime{T <: Tile}(io::IO, m::MIME"text/html", x::Signal{T}) =
-#      writemime(io, m, lift(Escher.render, Patchwork.Elem, x))
+#      writemime(io, m, map(Escher.render, Patchwork.Elem, x))
 
 # Note a TileList is NOT a Tile
 immutable TileList
