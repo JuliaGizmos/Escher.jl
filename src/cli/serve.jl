@@ -116,7 +116,7 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
 
     write(sock, patch_cmd(id, Patchwork.diff(render(Escher.empty, state), init)))
 
-    foldl(init, keepwhen(window.alive, Escher.empty, sig); typ=Any) do prev, next
+    foldp(init, filterwhen(window.alive, empty, sig); typ=Any) do prev, next
 
         st = Dict()
         st["embedded_signals"] = Dict()
@@ -134,7 +134,7 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
         end
 
         rendered_next
-    end
+    end |> Reactive.preserve
 
     for (key, sig) in state["embedded_signals"]
         start_updates(sig, window, sock, key)
@@ -151,7 +151,7 @@ uisocket(dir) = (req) -> begin
     h = @compat parse(Int, d["h"])
 
     sock = req[:socket]
-    tilestream = Input{Signal}(Input{Tile}(empty))
+    tilestream = Input(Signal, Input(Tile, empty))
 
     # TODO: Initialize window with session,
     # window dimensions and what not
@@ -177,7 +177,6 @@ uisocket(dir) = (req) -> begin
     end
 
     swap!(tilestream, current)
-
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
     @async while isopen(sock)
@@ -210,6 +209,7 @@ uisocket(dir) = (req) -> begin
         swap!(tilestream, next)
     end
 
+
 end
 
 # Return files from the requested package, in the supplied directory
@@ -236,5 +236,18 @@ function escher_serve(port=5555, dir="")
         Mux.notfound(),
     )
 
-    @sync serve(static, comm, port)
+    serve(static, comm, port)
+
+    while true
+        try
+            Reactive.run()
+        catch err
+            if isa(err, InterruptException)
+                "Server stopped"
+                break
+            else
+                showerror(STDERR, err)
+            end
+        end
+    end
 end

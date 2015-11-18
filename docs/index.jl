@@ -544,7 +544,7 @@ function next(board, move)
 end
 
 movesᵗ = Input((0, 0))
-initial_boardᵗ = Input{Board}(newboard(10, 10))
+initial_boardᵗ = Input(Board, newboard(10, 10))
 boardᵗ = flatten(
     lift(initial_boardᵗ) do b
         foldl(next, b, movesᵗ; typ=Board)

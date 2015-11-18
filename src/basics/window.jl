@@ -14,7 +14,7 @@ Window(;
     dimension=(0px, 0px),
     route="",
     dir="ltr") =
-    Window(Input{Bool}(alive), Input{Any}(dimension), Input{Any}(route), "ltr", Input{Any}("basics"))
+    Window(Input(Bool, alive), Input(Any, dimension), Input(Any, route), "ltr", Input(Any, "basics"))
 
 resolve_asset(tup :: (@compat Tuple{AbstractString, AbstractString}), prefix ="/pkg", joinfn=(x, y) -> x * "/" * y) = begin
     pkg = tup[1]

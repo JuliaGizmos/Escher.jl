@@ -40,7 +40,7 @@ function next(board, move)
 end
 
 moves_signal = Input((0, 0))
-initial_board_signal = Input{Board}(newboard(10, 10))
+initial_board_signal = Input(Board, newboard(10, 10))
 board_signal = flatten(
     lift(initial_board_signal) do b
         foldl(next, b, moves_signal; typ=Board)

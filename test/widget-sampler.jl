@@ -2,7 +2,7 @@ function main(window)
     push!(window.assets, "widgets")
 
     # Button
-    btn_inp = Input{Escher.MouseButton}(leftbutton)
+    btn_inp = Input(Escher.MouseButton, leftbutton)
     bt = hbox(
         button("Click") >>> btn_inp,
         hskip(1em), "Clicks: ", hskip(1em), foldl((x, _) -> x + 1, 0, btn_inp)
