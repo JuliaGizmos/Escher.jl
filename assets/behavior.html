@@ -127,10 +127,8 @@ Polymer({
 
       this.value = {}
       elem.addEventListener("signal-updated", function (ev) {
-          console.log("Something happened", ev.detail)
         if (self.triggers.indexOf(ev.detail.name) >= 0) { // TODO: use a set
-
-          ev.stopPropagation() // FIXME: Should this be configurable?
+          ev.stopPropagation()
 
           var result = {}
           for(var i=0, l=self.signals.length; i < l; i++) {
@@ -151,41 +149,77 @@ Polymer({
 </dom-module>
 
 <dom-module
-  id="signal-aggregator" >
+  id="signal-collector" >
 
   <template><content></content></template>
 
 <script>
 Polymer({
 
-    is: "signal-aggregator",
+    is: "signal-collector",
     behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
 
     properties: {
+      collectorName: String
     },
     domInit: function () {
       var self = this,
       elem = this.findElem()
 
       this.setId()
+      this.value = elem.value
+      elem.collectorNames = elem.collectorNames || []
+      elem.collectorNames.push(this.collectorName)
 
-      this.value = {}
-      elem.addEventListener("signal-updated", function (ev) {
-        if (self.triggers.indexOf(ev.detail.aggregation_index) >= 0) { // TODO: use a set
+      elem.addEventListener("signal-update-collector-" + this.collectorName, function (ev) {
+        self.update(elem, {
+          index: ev.detail.index,
+          value: ev.detail.value
+        })
+        ev.stopPropagation()
+      })
+    }
+})
+</script>
 
-          ev.stopPropagation() // FIXME: Should this be configurable?
+</dom-module>
 
-          var result = {}
-          for(var i=0, l=self.signals.length; i < l; i++) {
-            var name = self.signals[i];
-            result[name] = Polymer.dom(elem).querySelector("#signal-" + name).getValue()
-          }
-          result[ev.detail.name] = ev.detail.value
-          result._trigger = ev.detail.name
-          self.update(elem, result)
-        } else if (self.signals.indexOf(ev.detail.name) >= 0) {
-          ev.stopPropagation()
+<dom-module
+  id="signal-collect" >
+
+  <template><content></content></template>
+
+<script>
+Polymer({
+
+    is: "signal-collect",
+    behaviors: [EscherMixins.LifeCycle],
+
+    properties: {
+      collectorName: String,
+      index: Number
+    },
+    domInit: function () {
+      var self = this,
+          elem = Polymer.dom(this).parentNode
+
+      this.value = elem.value
+
+      console.log("collect")
+
+      var p = Polymer.dom(this).parentNode
+      // FIXME: Why doesn't bubbling work here??
+      while (p.node !== document) {
+        if (p.collectorNames && p.collectorNames.indexOf(this.collectorName) >= 0) {
+          break
         }
+        p = Polymer.dom(p).parentNode
+      }
+
+      elem.addEventListener("signal-updated", function (ev) {
+        ev.detail.index = self.index
+        console.log(p, self.collectorName, ev.detail)
+        Polymer.Base.fire.call(p, "signal-update-collector-" + self.collectorName, ev.detail, {bubbles:false})
       })
     }
 })

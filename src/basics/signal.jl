@@ -10,8 +10,7 @@ export bubble,
        sampler,
        output,
        trigger!,
-       aggregator,
-       aggregate!,
+       collector,
        watch!,
        subscribe
 
@@ -182,29 +181,26 @@ render(tile::StopBubbling, state) =
 end
 
 interpret(s::Sampler, msg) = begin
-    try
-        d = Dict()
-        d[:_trigger] = symbol(msg["_trigger"])
+    d = Dict()
+    d[:_trigger] = symbol(msg["_trigger"])
 
-        for (name, interp) in s.triggers
-          if(haskey( msg, string(name)))
-            d[name] = interpret(interp, msg[string(name)])
-          end
-        end
-
-        for (name, interp) in s.watches
-           d[name] = interpret(interp, msg[string(name)])
-        end
-
-        return d
-    catch ex
-        ex
+    for (name, interp) in s.triggers
+      if(haskey( msg, string(name)))
+        d[name] = interpret(interp, msg[string(name)])
+      end
     end
+
+    for (name, interp) in s.watches
+        @show name, interp
+       d[name] = interpret(interp, msg[string(name)])
+    end
+
+    return d
 end
 
 watch!(sampler::Sampler, name::Symbol, tile) = begin
     sampler.watches[name] = default_intent(tile)
-    wrapbehavior(tile)
+    bubble(name, wrapbehavior(tile))
 end
 
 watch!(sampler::Sampler, tile::Bubble) = begin
@@ -243,37 +239,53 @@ trigger!(sampler::Sampler, name::Symbol) = t -> trigger!(sampler, name, t)
 end
 
 
-@api aggregator => (Aggregator <: Intent) begin
+@api collector => (Collector <: Intent) begin
     doc(md"""Collect stream of values from many behaviors into one steam.
     The `aggregator` returns an intent which can then be applied to a tile that encapsulates
     all the aggregated behaviors
     """)
-    arg(name::Symbol=:_aggregate, doc="name for bubbling aggregated updates. Set this when multiple aggregators are in the same subtree")
-    arg(intents::Vector=Intent[], doc="Internal storage of all the names of updates and Intents")
+    arg(name::Symbol=:_collector, doc="A name for the collector. Events bubbling from collected tiles are matched to a collector using this name.")
+    arg(intents::Vector=Intent[], doc="Internal storage of Intents of collected behaviors")
 end
 
-aggregate!(agg::Aggregator, tile) = begin
+watch!(agg::Collector, tile) = begin
     push!(agg.intents, default_intent(tile))
     bubble(agg.name, tile, index=length(agg.intents))
 end
 
-@api capture => (Capture{T <: Intent} <: Behavior) begin
-    arg(spec::T)
-    curry(tile::Tile)
+immutable OuterListener{T <: Union{Sampler, Collector}} <: Behavior
+    spec::T
+    tile::Tile
 end
 
-render(c::Capture{Sampler}, state) = begin
+intent(c::Union{Sampler, Collector}, tile) = OuterListener(c, tile)
+
+render(c::OuterListener{Sampler}, state) = begin
     render(c.tile, state) <<
         Elem("signal-sampler", signals=collect(keys(c.spec.watches)), triggers=collect(keys(c.spec.triggers)))
 end
 
-immutable UpdateAggregate{T}
-    idx::Int
-    value::T
+render(c::OuterListener{Collector}, state) = begin
+    render(c.tile, state) <<
+        Elem("signal-collector", collectorName=c.spec.name)
 end
 
-interpret(a::Aggregator, x::UpdateAggregate) = begin
-    interpret(a.intents[x.idx], x.value)
+immutable Collect <: Behavior
+    collector::Collector
+    index::Int
+    tile::Behavior
+end
+default_intent(c::Collect) = default_intent(c.tile)
+
+render(c::Collect, state) = begin
+    withlastchild(render(c.tile, state)) do child
+        child << Elem("signal-collect", collectorName=c.collector.name, index=c.index)
+    end
+end
+
+# Interpret a message from a collectee
+interpret(a::Collector, x) = begin
+    interpret(a.intents[x["index"]], x["value"])
 end
 
 
@@ -284,16 +296,25 @@ end
 # Subscribe to the stream of values from a behavior
 # """
 @api subscribe => (Subscription <: Tile) begin
-    arg(tile::Behavior)
+    arg(tile::Tile)
     arg(intent::Intent)
-    arg(receiver::Input)
+    arg(receiver::Signal)
 end
 
-subscribe(t::Behavior, s::Input) =
+subscribe(t::Behavior, s::Signal) =
     subscribe(t, default_intent(t), s)
 
-subscribe(t::WithIntent, s::Input) =
+subscribe(t::WithIntent, s::Signal) =
     subscribe(t.tile, t.intent, s)
+
+subscribe(t::OuterListener, s::Signal) =
+    subscribe(t, t.spec, s)
+
+subscribe(c::Collector, tile::Behavior) = begin
+    push!(c.intents, default_intent(tile))
+    Collect(c, length(c.intents), tile)
+end
+
 
 @apidoc subscribe => (Subscription <: Behavior) begin
     doc(md"""Subscribe to updates from a widget/behavior. `>>>` is an infix
@@ -301,7 +322,7 @@ subscribe(t::WithIntent, s::Input) =
     )
     arg(tile::Tile, doc="The widget/behavior.")
     arg(
-        input::Input,
+        input::Signal,
         doc=md"""The input signal to update. See
             [Reactive.jl documentation](http://julialang.org/Reactive.jl/#a-tutorial-introduction)
             for more on input signals."""
