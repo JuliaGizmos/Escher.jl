@@ -299,19 +299,19 @@ end
 # Subscribe to the stream of values from a behavior
 # """
 @api subscribe => (Subscription <: Tile) begin
-    arg(tile::Tile)
-    arg(intent::Intent)
     arg(receiver::Signal)
+    arg(intent::Intent)
+    arg(tile::Tile)
 end
 
-subscribe(t::Behavior, s::Signal) =
-    subscribe(t, default_intent(t), s)
+subscribe(s::Signal, t::Behavior) =
+    subscribe(s, default_intent(t), t)
 
-subscribe(t::WithIntent, s::Signal) =
-    subscribe(t.tile, t.intent, s)
+subscribe(s::Signal, t::WithIntent) =
+    subscribe(s, t.intent, t.tile)
 
-subscribe(t::OuterListener, s::Signal) =
-    subscribe(t, t.spec, s)
+subscribe(s::Signal, t::OuterListener) =
+    subscribe(s, t.spec, t)
 
 subscribe(c::Collector, tile::Behavior) = begin
     push!(c.intents, default_intent(tile))
@@ -323,13 +323,13 @@ end
     doc(md"""Subscribe to updates from a widget/behavior. `>>>` is an infix
              alias to subscribe"""
     )
-    arg(tile::Tile, doc="The widget/behavior.")
     arg(
         input::Signal,
         doc=md"""The input signal to update. See
             [Reactive.jl documentation](http://julialang.org/Reactive.jl/#a-tutorial-introduction)
             for more on input signals."""
     )
+    arg(tile::Tile, doc="The widget/behavior.")
     kwarg(
         absorb::Bool=true,
         doc="If set to true, the update event will not bubble out from the widget."
@@ -345,7 +345,7 @@ render(sig::Subscription, state) =
         child << Elem("signal-transport", signalId=makeid((sig.receiver, sig.intent)))
     end
 
-(>>>)(b::Behavior, s::Input) = subscribe(b, s)
+(>>>)(t::Tile, s::Union{Input, Collector}) = subscribe(s, t)
 
 import Base.Random: UUID, uuid4
 

@@ -16,8 +16,12 @@ export wrapbehavior,
 # by calling `wrapbehavior` on it.
 abstract Widget <: Behavior
 
-subscribe(w::Widget, x::Input) =
-    subscribe(wrapbehavior(w), x)
+subscribe(x::Input, w::Widget) =
+    subscribe(x, wrapbehavior(w))
+
+# Ambiguity
+intent(c::Union{Sampler, Collector}, tile::Widget) =
+    OuterListener(c, tile)
 
 intent(i::Intent, w::Widget) =
     intent(i, wrapbehavior(w))
