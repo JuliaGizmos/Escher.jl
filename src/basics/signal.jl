@@ -260,7 +260,8 @@ immutable OuterListener{T <: Union{Sampler, Collector}} <: Behavior
     tile::Tile
 end
 
-intent(c::Union{Sampler, Collector}, tile) = OuterListener(c, tile)
+intent(c::Union{Sampler, Collector}, tile::Tile) =
+    WithIntent(c, OuterListener(c, tile))
 
 render(c::OuterListener{Sampler}, state) = begin
     render(c.tile, state) <<

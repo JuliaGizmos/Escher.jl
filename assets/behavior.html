@@ -205,21 +205,19 @@ Polymer({
 
       this.value = elem.value
 
-      console.log("collect")
-
-      var p = Polymer.dom(this).parentNode
+      var p = this
       // FIXME: Why doesn't bubbling work here??
-      while (p.node !== document) {
+      while (p !== document) {
         if (p.collectorNames && p.collectorNames.indexOf(this.collectorName) >= 0) {
           break
         }
         p = Polymer.dom(p).parentNode
       }
 
+      console.log(p)
+
       elem.addEventListener("signal-updated", function (ev) {
-        ev.detail.index = self.index
-        console.log(p, self.collectorName, ev.detail)
-        Polymer.Base.fire.call(p, "signal-update-collector-" + self.collectorName, ev.detail, {bubbles:false})
+        Polymer.Base.fire.call(p, "signal-update-collector-" + self.collectorName, {value: ev.detail.value, index: self.index}, {bubbles:false})
       })
     }
 })
@@ -289,10 +287,6 @@ Polymer({
     this.setId()
 
     this.$.keys.target = elem
-    elem.addEventListener("keydown", function (ev) {
-      console.log("keydown", ev)
-    })
-
     this.$.keys.addEventListener("keys-pressed", function (ev) {
         var key = this.keyboardEventToKey(ev.detail.keyboardEvent)
         self.update(elem, key)
