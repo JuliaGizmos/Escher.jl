@@ -113,6 +113,7 @@ immutable Const{T} <: Intent
     value::T
 end
 
+constant(x) = Const(x)
 interpret(x::Const, _) = x.value
 
 """
@@ -122,6 +123,7 @@ immutable PairWith{T} <: Intent
     value::T
 end
 
+pairwith(x) = PairWith(x)
 interpret(x::PairWith, _) = x.value => _
 
 """
