@@ -129,15 +129,15 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
                 rethrow(ex)
             end
         end
-        for (key, sig) in st["embedded_signals"]
-            start_updates(sig, window, sock, key)
+        for (key, embedded) in st["embedded_signals"]
+            start_updates(embedded, window, sock, key)
         end
 
         rendered_next
-    end |> Reactive.preserve
+    end |> preserve
 
-    for (key, sig) in state["embedded_signals"]
-        start_updates(sig, window, sock, key)
+    for (key, embedded) in state["embedded_signals"]
+        start_updates(embedded, window, sock, key)
     end
 end
 
@@ -158,7 +158,7 @@ uisocket(dir) = (req) -> begin
 
     window = Window(dimension=(w*px, h*px))
 
-    map(asset -> write(sock, JSON.json(import_cmd(asset))),
+    foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
          window.assets)
 
     main = loadfile(file)
@@ -176,10 +176,11 @@ uisocket(dir) = (req) -> begin
         println( str )
     end
 
-    swap!(tilestream, current)
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
-    @async while isopen(sock)
+    swap!(tilestream, current)
+
+    t = @async while isopen(sock)
         data = read(sock)
 
         msg = JSON.parse(bytestring(data))
@@ -208,7 +209,7 @@ uisocket(dir) = (req) -> begin
         # Replace the current main signal
         swap!(tilestream, next)
     end
-
+    wait(t)
 
 end
 
