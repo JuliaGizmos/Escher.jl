@@ -64,11 +64,11 @@ block(board::Board{true}, i, j) =
         number(board.uncovered[i, j])
 
 block(board, i, j) =
-     constant((i, j), clickable(number(board.uncovered[i, j]))) >>> moves_signal
+     intent(constant((i, j)), clickable(number(board.uncovered[i, j]))) >>> moves_signal
 
 gameover = vbox(
         title(2, "Game Over!") |> Escher.pad(1em),
-        addinterpreter(_ -> newboard(10, 10), button("Start again")) >>> initial_board_signal
+        intent(_ -> newboard(10, 10), button("Start again")) >>> initial_board_signal
     ) |> Escher.pad(1em) |> fillcolor("white")
 
 function showboard{lost}(board::Board{lost})
