@@ -25,8 +25,8 @@ end
 
 ### Update ###
 
-next(board::Board{true}, move) = board
-function next(board, move)
+update(board::Board{true}, move) = board
+function update(board, move)
     i, j = move
     if board.mines[i, j]
         return Board{true}(board.uncovered, board.mines) # Game over
@@ -43,7 +43,7 @@ moves_signal = Signal((0, 0))
 initial_board_signal = Signal(Board, newboard(10, 10))
 board_signal = flatten(
     map(initial_board_signal) do b
-        foldp(next, b, moves_signal; typ=Board)
+        foldp(update, b, moves_signal; typ=Board)
     end
 )
 
