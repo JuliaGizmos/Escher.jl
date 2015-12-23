@@ -1,4 +1,4 @@
-#!/usr/bin/julia
+#!/usr/bin/env julia
 #!/home/shashi/code/julia/master/julia
 
 using ArgParse
@@ -7,9 +7,9 @@ using Escher
 include(Pkg.dir("Escher", "src", "cli", "serve.jl"))
 include(Pkg.dir("Escher", "src", "cli", "compile.jl"))
 
-parse_commandline() = begin
-    s = ArgParseSettings()
-    @add_arg_table s begin
+main() = begin
+    arg_settings = ArgParseSettings()
+    @add_arg_table arg_settings begin
         "--serve"
             help = "Serve escher UI files"
             action = :store_true
@@ -33,16 +33,15 @@ parse_commandline() = begin
             nargs = '*'
             arg_type = AbstractString
     end
-    parse_args(s)
-end
 
-main() = begin
-    parsed_args = parse_commandline()
+    parsed_args = parse_args(arg_settings)
     if parsed_args["serve"]
         escher_serve(parsed_args["port"], parsed_args["dir"])
-    else parsed_args["make"]
+    elseif parsed_args["make"]
         dir = parsed_args["dir"] == "" ? "build" : parsed_args["dir"]
         Any[escher_make(f, dir; base=parsed_args["base"]) for f in parsed_args["files"]]
+    else # default to help
+       ArgParse.show_help(arg_settings)
     end
 end
 
