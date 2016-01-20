@@ -34,6 +34,7 @@ include("basics/typography.jl")
 include("basics/embellishment.jl")
 include("basics/behavior.jl")
 include("basics/window.jl")
+include("basics/component.jl")
 
 include("library/markdown.jl")
 include("library/tex.jl")
