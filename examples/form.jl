@@ -14,7 +14,7 @@ function main(window)
 
     map(inp) do dict
         vbox(
-            Escher.capture(s, form) >>> inp,
+            intent(s, form) >>> inp,
             vskip(2em),
             string(dict)
         ) |> pad(2em)
