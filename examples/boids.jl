@@ -12,8 +12,6 @@
 using Compose
 using Colors
 
-Escher.external_setup()
-
 #----------------------------------------------------------------------
 
 immutable Boid

@@ -1,8 +1,6 @@
 using Gadfly
 using Distributions
 
-Escher.external_setup()
-
 f(u) = exp(-u^2/2)/√(2pi)
 
 const curve_plot =

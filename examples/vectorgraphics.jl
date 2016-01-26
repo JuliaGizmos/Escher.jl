@@ -1,7 +1,5 @@
 import Compose: compose, context, polygon
 
-Escher.external_setup()
-
 function sierpinski(n)
     if n == 0
         Compose.compose(context(), polygon([(1,1), (0,1), (1/2, 0)]))
@@ -23,7 +21,7 @@ function main(window)
         vskip(1em),
         hbox("Iterations: ", slider(0:6) >>> iterᵗ),
         vskip(1em),
-        consume(iterᵗ) do iter
+        map(iterᵗ) do iter
             sierpinski(iter)
         end
     ) |> Escher.pad(2em)

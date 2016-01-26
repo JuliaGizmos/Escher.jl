@@ -5,8 +5,6 @@ using Gadfly
 
 import Escher: @d
 
-Escher.external_setup()
-
 # Home page.
 
 pkgname(name="Escher") =

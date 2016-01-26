@@ -84,6 +84,6 @@ function main(window)
        vskip(2em),
        title(3, "minesweeper"),
        vskip(2em),
-       consume(showboard, board_signal, typ=Tile),
+       map(showboard, board_signal, typ=Tile),
     ) |> packacross(center)
 end
