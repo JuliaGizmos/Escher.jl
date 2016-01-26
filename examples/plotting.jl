@@ -22,5 +22,5 @@ main(window) = begin
         map(αᵗ, βᵗ) do α, β
             plot_beta(α,β) |> drawing(4Gadfly.inch, 3Gadfly.inch)
         end
-    ) |> pad(2em)
+    ) |> Escher.pad(2em)
 end

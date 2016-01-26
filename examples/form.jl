@@ -3,7 +3,7 @@ function main(window)
 
     inp = Signal(Dict())
 
-    s = sampler()
+    s = Escher.sampler()
     form = vbox(
         h1("Submit your rating"),
         watch!(s, :name, textinput("", label="Your name")),
