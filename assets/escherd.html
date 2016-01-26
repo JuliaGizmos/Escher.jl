@@ -135,6 +135,10 @@ function teelog(x) {
   }
 
   Sneaky.prototype = Polymer.dom()
+  Sneaky.prototype.setAttributeNS = function (ns, name, value) {
+    this.node.setAttributeNS(ns, name, value);
+    this.lightNode._distributeParent();
+  }
 
   Object.defineProperties(Sneaky.prototype, {
 
