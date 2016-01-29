@@ -60,11 +60,7 @@ serve(port=5555) =
     include(joinpath(dirname(@__FILE__), "cli", "serve.jl"))(port)
 
 
-using Requires
 # 3rd party package interop
 include("basics/lazyload.jl")
-function __init__()
-    Requires.@init
-end
 
 end
