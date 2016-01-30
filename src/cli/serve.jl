@@ -158,10 +158,6 @@ uisocket(dir) = (req) -> begin
 
     window = Window(dimension=(w*px, h*px))
 
-    if issubtype(typeof(window.assets), Signal)	  
-	warn("Request appeared as a bogus socket!")
-    end
-
     for asset in window.assets
 	write(sock, JSON.json(import_cmd(asset))) 
     end
