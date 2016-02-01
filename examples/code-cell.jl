@@ -5,14 +5,11 @@ function main(window)
 
     s = sampler() # A thing that lets you watch widgets/behaviors upon updates to other behaviors
 
-    editor = watch!(s, codemirror("some code", name=:code))
-    code_cell = trigger!(s, keypress("ctrl+enter shift+enter", editor))
+    editor = watch!(s, :code, codemirror("some code"))
+    code_cell = trigger!(s, :submit, keypress("ctrl+enter shift+enter", editor))
 
-    plugsampler(s,
-       vbox(
-           "My code cell",
-           code_cell,
-           inp,
-       )
-    ) >>> inp
+    vbox(
+        intent(s, code_cell) >>> inp,
+        inp
+    )
 end

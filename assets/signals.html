@@ -59,6 +59,17 @@ EscherMixins.ReactiveSignal = {
     },
     { bubbles: this.bubbles || false }
     )
+    if (this.bubbles && !this.parentNode) {
+      Polymer.dom(this).parentNode.fire("signal-updated", {
+        name: this.name,
+        index: this.index,
+        source: sourceElement,
+
+        value: value
+      },
+      { bubbles: this.bubbles || false }
+      )
+    }
   }
 }
 

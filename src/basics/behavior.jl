@@ -10,6 +10,7 @@ export hasstate,
        rightbutton,
        scrollbutton
 
+wrapbehavior(x::Behavior) = x
 
 @api hasstate => (WithState <: Behavior) begin
     doc("Watch for changes to an attribute/property.")
