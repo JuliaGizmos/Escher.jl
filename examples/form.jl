@@ -17,6 +17,6 @@ function main(window)
             intent(s, form) >>> inp,
             vskip(2em),
             string(dict)
-        ) |> pad(2em)
+        ) |> Escher.pad(2em)
     end
 end
