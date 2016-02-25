@@ -43,6 +43,7 @@ include("library/layout2.jl")
 include("library/slideshow.jl")
 include("library/codemirror.jl")
 include("library/jsonmirror.jl")
+include("library/naked.jl")
 
 include("deprecate.jl")
 

@@ -7,3 +7,4 @@ all:
 	vulcanize --config exclude-basics.json widgets.html -o build/widgets.html
 	vulcanize --config exclude-basics.json interact.html -o build/interact.html
 	vulcanize --config exclude-basics.json latex.html -o build/latex.html
+	vulcanize --config exclude-basics.json naked.html -o build/naked.html
