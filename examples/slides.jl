@@ -1,5 +1,5 @@
-using Markdown
-using Color
+#using Markdown
+using Colors
 using SymPy
 using Compose
 using Gadfly
