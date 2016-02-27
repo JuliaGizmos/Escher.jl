@@ -158,9 +158,8 @@ uisocket(dir) = (req) -> begin
 
     window = Window(dimension=(w*px, h*px))
 
-    for asset in window.assets
-	write(sock, JSON.json(import_cmd(asset))) 
-    end
+foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
+         window.assets)
     main = loadfile(file)
     
     current = Escher.empty
