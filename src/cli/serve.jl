@@ -158,7 +158,7 @@ uisocket(dir) = (req) -> begin
 
     window = Window(dimension=(w*px, h*px))
 
-    foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
+    Reactive.foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
          window.assets)
 
     main = loadfile(file)
