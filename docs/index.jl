@@ -81,9 +81,9 @@ $(vskip(3em))
 $(title(2, "What's inside") |> Escher.fontsize(1.75em))
 
 $(
-vbox(md"**A web server for 2015.** Escher's built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.",
+vbox(md"**A web server for 2016.** Escher's built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.",
 
-md"**A rich functional library of UI components.** the built-in library functions support Markdown, Signal widgets, TeX-style Layouts, Styling, TeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs. The API comprehensively covers features from HTML and CSS, and also provides advanced features. Its user merely needs to know how to write code in Julia."
+md"**A rich functional library of UI components.** the built-in library functions support Markdown, Signal widgets, TeX-style Layouts, Styling, TeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org), [Vega](http://johnmyleswhite.github.io/Vega.jl/), [VegaLite](https://github.com/fredo-dedup/VegaLite.jl)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs. The API comprehensively covers features from HTML and CSS, and also provides advanced features. Its user merely needs to know how to write code in Julia."
 ) |> pad([left, right], 2em)
 )
 
