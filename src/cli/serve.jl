@@ -11,11 +11,13 @@ using Patchwork
 
 import Mux: @d
 
+include("serverutil.jl")
+
 function loadfile(filename)
     if isfile(filename)
         try
             ui = include(filename)
-            if typeof(ui) == Function
+            if isa(ui, Function)
                 return ui
             else
                 warn("$filename did not return a function")
@@ -60,43 +62,8 @@ function setup_socket(file)
     takebuf_string(io)
 end
 
-mount_cmd(node, id="root") =
-   @d( "command" => "mount",
-    "id" => id,
-    "data" => Patchwork.jsonfmt(node)) |> JSON.json
-
-import_cmd(asset) =
-    @d( "command" => "import",
-      "data" => Escher.resolve_asset(asset) )
-
-patch_cmd(id, diff) =
-   @d( "command" => "patch",
-    "id" => id,
-    "data" => Patchwork.jsonfmt(diff) ) |> JSON.json
-
-swap!(tilestream, next::Signal) =
-    push!(tilestream, next)
-
-swap!(tilestream, next) =
-    push!(tilestream, Signal(next))
-
-const commands = Dict([
-    ("signal-update", (window, msg) -> begin
-        id = msg["data"]["signalId"]
-        sig, interp = Escher.fromid(id)
-        push!(sig, Escher.interpret(interp, msg["data"]["value"]))
-    end),
-    ("window-size", (window, msg) -> begin
-        dim = (msg["data"][1] * Escher.px, msg["data"][2] * Escher.px)
-        push!(window.dimension, dim)
-    end),
-    ("window-route", (window, msg) -> begin
-        push!(window.route, msg["data"])
-    end),
-    ("window-kill", (window, msg) -> begin
-        push!(window.alive, false)
-    end),
-])
+send_command(window::Window{WebSocket}, msg) =
+    JSON.print(window.output, msg)
 
 query_dict(qstr) = begin
     parts = split(qstr, '&')
@@ -107,40 +74,6 @@ query_dict(qstr) = begin
     end
     dict
 end
-
-start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
-
-    state = Dict()
-    state["embedded_signals"] = Dict()
-    init = render(value(sig), state)
-
-    write(sock, patch_cmd(id, Patchwork.diff(render(Escher.empty, state), init)))
-
-    foldp(init, filterwhen(window.alive, empty, sig); typ=Any) do prev, next
-
-        st = Dict()
-        st["embedded_signals"] = Dict()
-        rendered_next = render(next, st)
-
-        try
-            write(sock, patch_cmd(id, Patchwork.diff(prev, rendered_next)))
-        catch ex
-            if isopen(sock)
-                rethrow(ex)
-            end
-        end
-        for (key, embedded) in st["embedded_signals"]
-            start_updates(embedded, window, sock, key)
-        end
-
-        rendered_next
-    end |> preserve
-
-    for (key, embedded) in state["embedded_signals"]
-        start_updates(embedded, window, sock, key)
-    end
-end
-
 
 uisocket(dir) = (req) -> begin
     file = joinpath(abspath(dir), (req[:params][:file]))
@@ -156,9 +89,9 @@ uisocket(dir) = (req) -> begin
     # TODO: Initialize window with session,
     # window dimensions and what not
 
-    window = Window(dimension=(w*px, h*px))
+    window = Window(sock, dimension=(w*px, h*px))
 
-    Reactive.foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
+    Reactive.foreach(asset -> send_command(window, import_cmd(asset)),
          window.assets)
 
     main = loadfile(file)
@@ -176,7 +109,7 @@ uisocket(dir) = (req) -> begin
         println( str )
     end
 
-    start_updates(flatten(tilestream, typ=Any), window, sock, "root")
+    start_updates(flatten(tilestream, typ=Any), window, "root")
 
     swap!(tilestream, current)
 
@@ -184,11 +117,7 @@ uisocket(dir) = (req) -> begin
         data = read(sock)
 
         msg = JSON.parse(bytestring(data))
-        if !haskey(commands, msg["command"])
-            warn("Unknown command received ", msg["command"])
-        else
-            commands[msg["command"]](window, msg)
-        end
+        handle_command(window, msg)
     end
 
     while isopen(sock)
@@ -214,11 +143,6 @@ uisocket(dir) = (req) -> begin
 end
 
 # Return files from the requested package, in the supplied directory
-packagefiles(dir, dirs=true) =
-  branch(req -> Mux.validpath(Pkg.dir(req[:params][:pkg], dir), joinpath(req[:path]...), dirs=dirs),
-         req -> Mux.fresp(joinpath(Pkg.dir(req[:params][:pkg], dir), req[:path]...)))
-
-
 function escher_serve(port=5555, dir="")
     # App
     @app static = (

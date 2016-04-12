@@ -39,19 +39,31 @@ function teelog(x) {
 
         Escher = {}
         Escher.init = function (suffix) {
-            if (typeof(window.Blink) === "undefined") {
+          function global_handle_message(cmd) {
+              console.log(cmd)
+                  var f = commands[cmd.command]
+              if (!f) {
+                  console.log("Invalid command", cmd.command, "invoked")
+              } else {
+                  f.call(Escher, cmd)
+              }
+           }
+            if (typeof(window.Blink) !== "undefined") {
+                Escher.send = function (data) {
+                    Blink.msg("escher", data)
+                }
+                Escher.recv = function (data) {
+                  console.log(data)
+                  global_handle_message(data)
+                }
+            } else {
                 var url = socket_url(suffix) + "?w=" + w + "&h=" + h,
                     ws = new WebSocket(url)
 
-                ws.onmessage = function (msg) {
-                    var cmd = JSON.parse(msg.data),
-                        f = commands[cmd.command]
-                    if (!f) {
-                        console.log("Invalid command", cmd.command, "invoked")
-                    } else {
-                        f.call(Escher, cmd)
-                    }
-                }
+                      ws.onmessage = function (msg) {
+                        var cmd = JSON.parse(msg.data)
+                        global_handle_message(cmd)
+                      }
 
                 ws.onerror = function (e) {
                     console.log("Error in web socket connection", e)
@@ -60,10 +72,6 @@ function teelog(x) {
                     ws.send(JSON.stringify(data))
                 }
 
-            } else {
-                Escher.send = function (data) {
-                    Blink.msg("escher", data)
-                }
             }
             window.addEventListener("resize", function (ev) {
                 // TODO: Throttle
@@ -127,6 +135,9 @@ function teelog(x) {
     Escher.subtrees = {ready: {}, destroyed: {}}
     window.Escher = Escher
 
+    if (typeof(window.Blink) !== "undefined") {
+      Escher.init()
+    }
 
   function Sneaky (node) {
     var lightNode = Polymer.dom(node)
@@ -268,6 +279,7 @@ function teelog(x) {
         }
     }
   })
+
 </script>
 
 </dom-module>

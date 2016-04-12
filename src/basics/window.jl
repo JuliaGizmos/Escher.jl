@@ -1,20 +1,21 @@
 export Window,
        include_asset
 
-immutable Window
+immutable Window{T}
     alive::Signal
     dimension::Signal
     route::Signal
     dir::AbstractString
     assets::Signal
+    output::T
 end
 
-Window(;
+Window(output;
     alive=true,
     dimension=(0px, 0px),
     route="",
     dir="ltr") =
-    Window(Signal(Bool, alive), Signal(Any, dimension), Signal(Any, route), "ltr", Signal(Any, "basics"))
+    Window(Signal(Bool, alive), Signal(Any, dimension), Signal(Any, route), "ltr", Signal(Any, "basics"), output)
 
 resolve_asset(tup :: (@compat Tuple{AbstractString, AbstractString}), prefix ="/pkg", joinfn=(x, y) -> x * "/" * y) = begin
     pkg = tup[1]
