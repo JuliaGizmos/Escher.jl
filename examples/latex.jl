@@ -1,4 +1,3 @@
-import Escher: @api
 function main(window)
     push!(window.assets, "tex")
     push!(window.assets, "widgets")
