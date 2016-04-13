@@ -1,16 +1,35 @@
-These are the static files that are served on http://escher-jl.org/
+# Escher
 
-To (re)generate documentation, take the following steps.
+A toolkit for interactive Web UIs in Julia.
 
-Initial one-time set up:
+[![Build Status](https://travis-ci.org/shashi/Escher.jl.svg?branch=master)](https://travis-ci.org/shashi/Escher.jl)
 
-- create a directory called `Escher/docs/build`
-- copy Escher's .git directory to `Escher/docs/build`
-- from `Escher/docs/build`, run `git checkout gh-pages` 
+Read [the documentation](http://escher-jl.org/).
 
-Generating docs:
+Join the Gitter Chat room: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/shashi/Escher.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-- from `Escher/docs` run `sh make-docs.sh` to generate the docs, this will overwrite files in `Escher/docs/build`
-- Now you can commit changes in `Escher/docs/build` directory (`gh-pages` branch) and push to github.
+## Installation
 
-The basic idea is to use `Escher/docs/build` as an Escher repository checked out at `gh-pages`. Running `make-docs.sh` generates a new version of the docs.
+In a Julia REPL, run:
+
+```julia
+Pkg.add("Escher")
+```
+
+You might want to link escher executable to `/usr/local/bin` or somewhere in your `PATH`:
+
+```sh
+ln -s ~/.julia/v0.4/Escher/bin/escher /usr/local/bin/
+```
+
+## Usage
+
+From a directory in which you want to serve Escher UI files, run:
+
+```
+<Escher-package-path/bin>/escher --serve
+```
+
+This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After runnnig the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
+
+See `escher --help` for other options to the exectuable.
