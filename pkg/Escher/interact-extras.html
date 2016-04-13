@@ -1,0 +1,68 @@
+<dom-module
+  id="escher-inertia">
+  <script>
+    Polymer({
+      is: "escher-inertia",
+      properties: {
+        /*
+           The resistance is a number greater than zero which sets the rate at which the action slows down. Higher values slow it down more quickly.
+        */
+        resistance: {
+          type: Number,
+          observer: "_resistanceChanged"
+        },
+
+        /* minimum launch speed (pixels per second) that can start inertia. */
+        minSpeed: {
+          type: Number,
+          observer: "_minSpeedChanged"
+        },
+
+       /* speed at which the action is considered to have stopped */
+        endSpeed: {
+         type: Number,
+         observer: "_endSpeedChanged"
+       },
+       /* indeicates whether the user should be allowed to resume an action while it is in the inertia phase. */
+       allowResume: {
+         type: Boolean
+       },
+       /* boolean which can allow the jump when resuming from inertia to be ignored in the next move event’s dx/dy. This should be set to true (default) when resizing with inertia or dragging or panning elements around. For things like drawing on a canvas it should generally be changed to false. */
+       zeroResumeDelta: {
+         type: Boolean
+       },
+      /* duration (milliseconds) of the interpolated movement from the actual end coords to the position that is snapped or restricted with endOnly. Set the value to 0 to disable end transitions with endOnly snap/restrict. */
+       smoothEndDuration: {
+         type: Boolean
+       }
+
+      }
+    })
+  </script>
+</dom-module>
+
+<!--
+The restriction value specifies the area that the action will be confined to. The value can be:
+
+a rect object with top, left, bottom and right or x, y, width and height,
+an element whose dimensions will be used as the restriction area,
+a function which takes (x, y, element) and returns a rect or an element
+one of these strings:
+'self' – restrict to the target element’s rect
+'parent' – restrict to the rect of the element’s parentNode or
+a CSS selector string – if one of the parents of the target element matches this selector, it’s rect will be used as the restriction area.
+
+
+For the left and right properties, 0 means the left edge of the element and 1 means the right edge. For top and bottom, 0 means the top edge of the element and 1 means the bottom.
+
+{ top: 0.25, left: 0.25, bottom: 0.75, right: 0.75 } would result in a quarter of the element being allowed to hang over the restriction edges.
+
+
+The endOnly option is used to restrict just before the end of a drag or resize. Before the end event is fired, an extra <action>move event is restricted and fired.
+
+If inertia is enabled and endOnly is set to true then the pointer will follow a curve to the restricted coordinates.
+
+<dom-module
+  id="interact-restrict">
+</dom-module>
+-->
