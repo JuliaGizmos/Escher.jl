@@ -55,13 +55,13 @@ $(slider(0:360))
 If you move the slider knob, you can see the value of the slider changing. Let us go ahead and *subscribe* slider movements to the signal `xᵗ`.
 
 ```julia
-    subscribe(slider(0:360), xᵗ)
+    subscribe(xᵗ, slider(0:360))
 ```
 $(begin
     slider(0:360)
 end)
 
-`subscribe(slider(0:360), xᵗ)` *returns a new slider* which sends its updates to the xᵗ signal. The next step in making an interactive UI is to actually use the `xᵗ` signal to make something useful. This can be done using `consume`.
+`subscribe(xᵗ, slider(0:360))` *returns a new slider* which sends its updates to the xᵗ signal. The next step in making an interactive UI is to actually use the `xᵗ` signal to make something useful. This can be done using `consume`.
 
 `consume` applies a function to every value of a given signal and results in a new signal. Specifically, the call `consume(f, xᵗ)` takes a function `f` and a signal `xᵗ` and returns a new signal, `yᵗ` which is such that every update `x` to `xᵗ` will update `yᵗ` with the value `f(x)`.
 
@@ -91,7 +91,7 @@ But `with_hue` is not enough. We want the slider to be present in the final UI a
 
 ```julia
    slider_and_huebox(hue) = vbox(
-        subscribe(slider(0:360), xᵗ),
+        subscribe(xᵗ, slider(0:360)),
         "The current hue is: $hue",
         with_hue(hue)
     )
@@ -104,7 +104,7 @@ Now to consume `xᵗ` to produce our desired result.
 ```
 $(begin
     vbox(
-        subscribe(slider(0:360), xᵗ),
+        subscribe(xᵗ, slider(0:360)),
         "The current hue is: $x",
         with_hue(x)
     ) |> hbox |> packitems(center)
@@ -116,7 +116,7 @@ We can play with the `slider_and_huebox` function and make things more interesti
 
 ```julia
    slider_and_huebox(hue) = vbox(
-        subscribe(slider(0:360), xᵗ),
+        subscribe(xᵗ, slider(0:360)),
         "The current hue offset is: $hue",
         hbox(intersperse(hskip(1em), map(with_hue, (0:45:270) + hue)))
     )
@@ -124,7 +124,7 @@ We can play with the `slider_and_huebox` function and make things more interesti
 
 $(begin
     vbox(
-        subscribe(slider(0:360), x2ᵗ),
+        subscribe(x2ᵗ, slider(0:360)),
         "The current hue offset is: $x2",
         hbox(intersperse(hskip(1em), map(with_hue, (0:45:270) + x2)))
     ) |> hbox |> packitems(center)

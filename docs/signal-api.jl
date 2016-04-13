@@ -11,8 +11,8 @@ $(vskip(1em))
 $(vskip(1em))
 
 $(
-   showdocs([stoppropagation, addinterpreter, constant, pairwith, sampler,
-             plugsampler, watch!, trigger!, subscribe])
+   showdocs([subscribe, intent, sampler,
+             watch!, trigger!, bubble])
 )
 
 $(vskip(4em))

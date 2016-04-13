@@ -106,7 +106,7 @@ end
 
 function argstable(args)
     table(
-        None[],
+        Union{}[],
         reduce(vcat, map(argrow, args))
     )
 end
@@ -149,6 +149,6 @@ end
 
 showdocs(fns) =
    vbox(intersperse([vskip(2em), 
-        border([bottom], solid, 1px, colorant"#ddd", empty),
+        border([bottom], solid, 1Escher.px, colorant"#ddd", empty),
         vskip(2em)],
         map(showdoc, fns)))

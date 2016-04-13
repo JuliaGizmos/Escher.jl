@@ -11,7 +11,7 @@ $(vskip(1em))
 $(vskip(1em))
 
 $(
-    showdocs([list, image, link, abbr])
+    showdocs([Escher.list, image, link, abbr])
 )
 """
 

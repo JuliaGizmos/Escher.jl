@@ -25,7 +25,6 @@ escher_make(file, output_dir; single_file=false, assets_dir="pkg/Escher", copy_a
     w = Window()
     Reactive.stop_event_loop()
     assets = foldp(push!, Any[], w.assets) # Accumulate assets
-    Reactive.foreach(println, w.assets)
     uifn = include(joinpath(pwd(), file))
     ui = uifn(w)
     Reactive.run_till_now()
