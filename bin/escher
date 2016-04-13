@@ -39,7 +39,7 @@ main() = begin
         escher_serve(parsed_args["port"], parsed_args["dir"])
     elseif parsed_args["make"]
         dir = parsed_args["dir"] == "" ? "build" : parsed_args["dir"]
-        Any[escher_make(f, dir; base=parsed_args["base"]) for f in parsed_args["files"]]
+        Any[escher_make(f, dir) for f in parsed_args["files"]]
     else # default to help
        ArgParse.show_help(arg_settings)
     end

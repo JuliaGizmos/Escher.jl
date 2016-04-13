@@ -1,4 +1,5 @@
 using Patchwork
+using Reactive
 
 output_path(file, dir) = begin
     out = abspath(joinpath(dir, file))
@@ -18,19 +19,26 @@ mkoutputdir!(dir) = begin
     end
 end
 
-escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_assets=false, base="") = begin
+escher_make(file, output_dir; single_file=false, assets_dir="pkg/Escher", copy_assets=false) = begin
 
     opath = output_path(file, output_dir)
     w = Window()
+    Reactive.stop_event_loop()
     assets = foldp(push!, Any[], w.assets) # Accumulate assets
+    Reactive.foreach(println, w.assets)
     uifn = include(joinpath(pwd(), file))
     ui = uifn(w)
+    Reactive.run_till_now()
 
     mkoutputdir!(output_dir)
 
     asset_src  = Pkg.dir("Escher", "assets")
     asset_dest = joinpath(output_dir, assets_dir) |> abspath
 
+    dir = dirname(asset_dest)
+    if !isdir(dir)
+        mkpath(dir)
+    end
     if copy_assets
         cp(asset_src, asset_dest)
     else
@@ -47,14 +55,13 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         <html>
         <meta charset="utf-8">
         <head>
-           <base href="$base">
            <script> $(Patchwork.js_runtime()) </script>
            <script src="$assets_dir/bower_components/webcomponentsjs/webcomponents.min.js"></script>
         </head>
 
         $(
 
-        join(map(x -> """<link rel="import" href="$(Escher.resolve_asset(x, assets_dir))">""",
+        join(map(x -> """<link rel="import" href="$(Escher.resolve_asset(x))">""",
                       vcat("basics", value(assets))), "\n")
 
         )
@@ -63,7 +70,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="assets", copy_asset
         <signal-container id="root"></signal-container>
         </div>
         <script>
-            new Patchwork.Node("root", $(Patchwork.jsonfmt(Escher.render(getvalue(ui), state)) |> json))
+            new Patchwork.Node("root", $(replace(replace(Patchwork.jsonfmt(Escher.render(getvalue(ui), state)) |> json, "<", "\\<"), ">", "\\>")))
         </script>
         </body>
         </html>
