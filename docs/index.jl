@@ -14,7 +14,7 @@ pkgname(name="Escher") =
 
 sidenote(note, icon="info", iconcolor="#aaa") =
     hbox(Escher.icon(icon) |>
-            size(100px, 100px) |>
+            size(100Escher.px, 100Escher.px) |>
             fontcolor(iconcolor),
         hskip(4em),
         note |>
@@ -22,7 +22,7 @@ sidenote(note, icon="info", iconcolor="#aaa") =
         pad(1em) |>
         bordercolor("#e1e1e1") |>
         Escher.borderstyle([top, bottom], solid) |>
-        Escher.borderwidth([top, bottom], 1px)
+        Escher.borderwidth([top, bottom], 1Escher.px)
 
 function sierpinski(n)
     if n == 0
@@ -37,7 +37,7 @@ function sierpinski(n)
 end
 
 nᵗ = Signal(5) # The angle at any given time
-connected_slider = subscribe(slider(0:7, value=5), nᵗ)
+connected_slider = subscribe(nᵗ, slider(0:7, value=5))
 
 reactive_eg = map(nᵗ) do n
     vbox(
