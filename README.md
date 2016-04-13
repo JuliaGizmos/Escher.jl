@@ -2,7 +2,9 @@
 
 A toolkit for interactive Web UIs in Julia.
 
-Read [the documentation](https://shashi.github.io/Escher.jl/).
+[![Build Status](https://travis-ci.org/shashi/Escher.jl.svg?branch=master)](https://travis-ci.org/shashi/Escher.jl)
+
+Read [the documentation](http://escher-jl.org/).
 
 Join the Gitter Chat room: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/shashi/Escher.jl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 

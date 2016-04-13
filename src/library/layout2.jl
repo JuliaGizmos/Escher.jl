@@ -38,7 +38,6 @@ end
         doc=md"""The name of the icon. Valid icons can be found in the
         [Polymer iron-icon documentation](https://www.polymer-project.org/0.5/components/iron-icons/demo.html)"""
     )
-    kwarg(name::Symbol=:_iconbutton, doc="A name to identify the widget.")
     kwarg(
         url::AbstractString="",
         doc="Optionally you can specify a url to the png/svg of the icon. icon field will be ignored if url is non-empty."
@@ -53,7 +52,7 @@ render(i::IconButton, state) = begin
 end
 
 wrapbehavior(w::IconButton) =
-    clickable(w, name=w.name)
+    clickable(w)
 
 
 abstract Selection <: Widget
@@ -61,7 +60,6 @@ abstract Selection <: Widget
 @api pages => (Pages <: Selection) begin #FIXME: Why is this a widget?
     doc("A set of pages. Only one selected page will be visible at any given time.")
     arg(pages::TileList, doc="Pages.")
-    kwarg(name::Symbol=:_pages, doc="A name to identify the widget.")
     kwarg(selected::Integer=1, doc="Index of the currently visible page.")
 end
 
@@ -73,7 +71,6 @@ render(ps::Pages, state) =
 @api tabs => (Tabs <: Selection) begin
     doc("A horizontal tab bar.")
     arg(tabs::TileList, doc="The tabs.")
-    kwarg(name::Symbol=:_tabs, doc="A name to identify the widget.")
     kwarg(selected::Integer=1, doc="Index of the currently selected tab.")
 end
 
@@ -82,7 +79,7 @@ render(tabs::Tabs, state) =
         map(t -> Elem("paper-tab", render(t, state)), tabs.tabs.tiles),
         attributes = @d(:selected=>tabs.selected-1))
 
-wrapbehavior(t::Tabs) = selectable(t, name=t.name)
+wrapbehavior(t::Tabs) = selectable(t)
 
 # Menus
 
@@ -96,7 +93,6 @@ wrapbehavior(t::Tabs) = selectable(t, name=t.name)
         multi::Bool=false,
         doc="Can multiple items be selected? If set, output signal contains a vector of indices"
     )
-    kwarg(name::Symbol=:_menu, doc="A name to identify the widget.")
     kwarg(selected::Integer=1, doc="Index of the currently selected menu item.")
 end
 
@@ -105,7 +101,7 @@ render(m::Menu, state) =
         map(x -> render(wrapitem(x), state), m.items.tiles),
         attributes = @d(:selected=>m.selected-1, :multi=>boolattr(m.multi)))
 
-wrapbehavior(m::Menu) = selectable(m, name=m.name, multi=m.multi)
+wrapbehavior(m::Menu) = selectable(m, multi=m.multi)
 
 @api submenu => (SubMenu <: Selection) begin
     doc("A submenu. Must be put inside a menu.")
@@ -119,16 +115,15 @@ wrapbehavior(m::Menu) = selectable(m, name=m.name, multi=m.multi)
         selected::Integer=1,
         doc="Index of the currently selected sub menu item."
     )
-    kwarg(name::Symbol=:_submenu, doc="A name to identify the widget.")
 end
 
 render(m2::SubMenu, state) =
     Elem("paper-submenu",
         [addclasses(render(wrapitem(m2.label), state), "menu-trigger"),
          addclasses(render(menu(m2.items, multi=m2.multi,
-                                selected=m2.selected, name=m2.name), state), "menu-content")])
+                                selected=m2.selected), state), "menu-content")])
 
-wrapbehavior(m::SubMenu) = selectable(m, name=m.name, multi=m.multi)
+wrapbehavior(m::SubMenu) = selectable(m, multi=m.multi)
 
 @api menuitem => (MenuItem <: Tile) begin
     arg(tile::Tile)
@@ -161,7 +156,6 @@ render(t::Toolbar, state) =
 # @api dropdown => (Dropdown <: Widget) begin
 #     doc(md"A dropdown. For a dropdown menu use `dropdownmenu`")
 #     arg(tile::Tile, doc="Contents of the dropdown.")
-#     kwarg(name::Symbol=:_dropdown, doc="Name to identify the widget.")
 #     kwarg(
 #         halign::Side{Horizontal}=right,
 #         doc=md"""Horizontal alingment with respect to container.
@@ -195,10 +189,6 @@ render(t::Toolbar, state) =
              Valid values are `top` and `bottom`."""
     )
     kwarg(
-        name::Symbol=:_dropdown_menu,
-        doc="A name to identify the widget."
-    )
-    kwarg(
         floatinglabel::Bool=true,
         doc="Whether to show a floating label at the top."
     )
@@ -224,4 +214,4 @@ render(dm::DropdownMenu, state) = begin
         )
     )
 end
-wrapbehavior(d::DropdownMenu) = selectable(d, name=d.name, selector=".dropdown-content")
+wrapbehavior(d::DropdownMenu) = selectable(d, selector=".dropdown-content")

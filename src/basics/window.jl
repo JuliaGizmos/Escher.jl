@@ -2,11 +2,11 @@ export Window,
        include_asset
 
 immutable Window
-    alive::Input
-    dimension::Input
-    route::Input
+    alive::Signal
+    dimension::Signal
+    route::Signal
     dir::AbstractString
-    assets::Input
+    assets::Signal
 end
 
 Window(;
@@ -14,7 +14,7 @@ Window(;
     dimension=(0px, 0px),
     route="",
     dir="ltr") =
-    Window(Input{Bool}(alive), Input{Any}(dimension), Input{Any}(route), "ltr", Input{Any}("basics"))
+    Window(Signal(Bool, alive), Signal(Any, dimension), Signal(Any, route), "ltr", Signal(Any, "basics"))
 
 resolve_asset(tup :: (@compat Tuple{AbstractString, AbstractString}), prefix ="/pkg", joinfn=(x, y) -> x * "/" * y) = begin
     pkg = tup[1]

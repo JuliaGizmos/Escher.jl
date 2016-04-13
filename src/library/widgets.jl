@@ -16,21 +16,24 @@ export wrapbehavior,
 # by calling `wrapbehavior` on it.
 abstract Widget <: Behavior
 
-subscribe(w::Widget, x::Input) =
-    subscribe(wrapbehavior(w), x)
+subscribe(x::Signal, w::Widget) =
+    subscribe(x, wrapbehavior(w))
 
-addinterpreter(i::Interpreter, w::Widget) =
-    addinterpreter(i, wrapbehavior(w))
+# Ambiguity
+intent(c::Union{Sampler, Collector}, tile::Widget) =
+    OuterListener(c, tile)
 
-default_interpreter(w::Widget) =
-    default_interpreter(wrapbehavior(w))
+intent(i::Intent, w::Widget) =
+    intent(i, wrapbehavior(w))
+
+default_intent(w::Widget) =
+    default_intent(wrapbehavior(w))
 
 ## Button
 
 @api button => (Button <: Widget) begin
     doc("A button.")
     arg(label::Tile, doc="The button label.")
-    kwarg(name::Symbol=:_button, doc="A name to identify the widget.")
     kwarg(
         raised::Bool=false,
         doc="If set to true, the button appears raised from the plane of the page."
@@ -55,7 +58,7 @@ render(b::Button, state) =
     )
 
 wrapbehavior(b::Button) =
-    clickable(b, name=b.name)
+    clickable(b)
 
 ## Slider
 
@@ -67,7 +70,6 @@ wrapbehavior(b::Button) =
         doc="""The range specifying the minimum and maximum values that the slider
              can take."""
     )
-    kwarg(name::Symbol=:_slider, doc="A name to identify the widget")
     kwarg(
         value::Real=first(range),
         doc="The initial value of the slider. Defaults to the first value in the range."
@@ -90,8 +92,7 @@ wrapbehavior(b::Button) =
 end
 
 wrapbehavior(s::Slider) =
-    addinterpreter(ToType{eltype(s.range)}(),
-        hasstate(s, name=s.name))
+    intent(ToType{eltype(s.range)}(), hasstate(s))
 
 render(s::Slider, state) =
     Elem("paper-slider", attributes=@d(
@@ -112,7 +113,6 @@ render(s::Slider, state) =
     doc("A checkbox.")
     arg(value::Bool=false, doc="State of the checkbox.")
     arg(label::Tile="", doc="The label.")
-    kwarg(name::Symbol=:_checkbox,doc="Name to identify the widget.")
     kwarg(
         disabled::Bool=false,
         doc="If set to true, the checkbox will be disabled."
@@ -120,8 +120,8 @@ render(s::Slider, state) =
 end
 
 wrapbehavior(c::Checkbox) =
-    addinterpreter(ToType{Bool}(),
-        hasstate(c, name=c.name, attr="checked", trigger="change"))
+    intent(ToType{Bool}(),
+        hasstate(c, attr="checked", trigger="change"))
 
 render(c::Checkbox, state) =
     Elem("paper-checkbox",
@@ -136,7 +136,6 @@ render(c::Checkbox, state) =
 @api togglebutton => (ToggleButton <: Widget) begin
     doc("A toggle button.")
     arg(value::Bool=false, doc="State of the toggle button.")
-    kwarg(name::Symbol=:_togglebutton, doc="Name to identify the widget.")
     kwarg(
         disabled::Bool=false,
         doc="If set to true, the toggle button will be disabled."
@@ -148,8 +147,8 @@ render(c::Checkbox, state) =
 end
 
 wrapbehavior(c::ToggleButton) =
-    addinterpreter(ToType{Bool}(),
-        hasstate(c, name=c.name, attr="checked", trigger="change"))
+    intent(ToType{Bool}(),
+        hasstate(c, attr="checked", trigger="change"))
 
 render(c::ToggleButton, state) =
     Elem("paper-toggle-button",
@@ -165,7 +164,6 @@ render(c::ToggleButton, state) =
 @api textinput => (TextInput <: Widget) begin
     doc("A text input box.")
     arg(value::AbstractString="", doc="The current content.")
-    kwarg(name::Symbol=:_textinput, doc="Name to identify the widget.")
     kwarg(label::AbstractString="", doc="The label.")
     kwarg(error::AbstractString="", doc="Error to display if invalid input is entered.")
     kwarg(
@@ -205,8 +203,8 @@ render(c::ToggleButton, state) =
 end
 
 wrapbehavior(t::TextInput, event="input") =
-    hasstate(t, name=t.name, attr="value", trigger=event) |>
-        addinterpreter(ToType{AbstractString}())
+    hasstate(t, attr="value", trigger=event) |>
+        intent(ToType{AbstractString}())
 
 render(t::TextInput, state) = begin
     if t.multiline
@@ -247,6 +245,7 @@ render(t::TextInput, state) = begin
                  "auto-validate" => boolattr(true),
                  "disabled" => boolattr(t.disabled),
                  "char-counter" => boolattr(t.charcounter),
+                 "no-label-float" => boolattr(!t.floatinglabel),
                  )
              )
 end
@@ -290,7 +289,6 @@ render(r::RadioButton, state) =
     doc("""A group of radio buttons. At any time, only one radio button in a group
     can be selected.""")
     arg(radios::AbstractArray, doc="A vector of radio buttons.")
-    kwarg(name::Symbol=:_radiogroup, doc="Name to identify the widget.")
     kwarg(selected::AbstractString="", doc=md"Name of the currently selected `radiobutton`")
 end
 
@@ -304,13 +302,12 @@ render(r::RadioGroup, state) =
         [render(wrapradio(b), state) for b in r.radios],
         attributes=@d(
             :selected=>r.selected,
-            :name=>r.name,
         )
     )
 
 wrapbehavior(r::RadioGroup) =
-    hasstate(r, name=r.name, attr="selected", trigger="paper-radio-group-changed") |>
-        addinterpreter(ToType{AbstractString}())
+    hasstate(r, attr="selected", trigger="paper-radio-group-changed") |>
+        intent(ToType{AbstractString}())
 
 
 @api selector => (Selector <: Widget) begin
@@ -371,14 +368,13 @@ end
 
 
 @api dateselection => (DateSelection <: Behavior) begin
-    curry(tile::Tile)
-    kwarg(name::Symbol=:_date)
+    arg(tile::Tile)
 end
 render(d::DateSelection, state) =
-    render(d.tile, state) << Elem("date-selection", name=d.name)
+    render(d.tile, state) << Elem("date-selection")
 
-immutable DateInterpreter <: Interpreter end
-default_interpreter(::DateSelection) = DateInterpreter()
+immutable DateIntent <: Intent end
+default_intent(::DateSelection) = DateIntent()
 
 
 @api datepicker => (DatePicker <: Widget) begin
@@ -388,7 +384,6 @@ default_interpreter(::DateSelection) = DateInterpreter()
         range::Range{Date}=Date("1971-01-01"):Date("2100-12-31"),
         doc="The range of selectable dates."
     )
-    kwarg(name::Symbol=:_date, doc="Name to identify the widget.")
 end
 render(d::DatePicker, state) =
     Elem(
@@ -396,9 +391,9 @@ render(d::DatePicker, state) =
         value=string(d.date),
         attributes=@d(:min=>string(first(d.range)), :max=>string(last(d.range)))
     )
-wrapbehavior(p::DatePicker) = dateselection(p, name=p.name)
+wrapbehavior(p::DatePicker) = dateselection(p)
 
 # TODO: Interpret as bounds error if date exceeds range
-interpret(::DateInterpreter, d) = begin
+interpret(::DateIntent, d) = begin
     Date(d["year"], d["month"], d["day"])
 end

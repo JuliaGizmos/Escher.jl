@@ -2,10 +2,10 @@ using Colors
 
 include("helpers/page.jl")
 
-xᵗ = Input(0)
-x2ᵗ = Input(0)
+xᵗ = Signal(0)
+x2ᵗ = Signal(0)
 
-intro = lift(xᵗ, x2ᵗ) do x, x2
+intro = map(xᵗ, x2ᵗ) do x, x2
     md"""
 $(h2("User Guide") |> fontweight(200))
 $(vskip(1em))
@@ -27,18 +27,18 @@ $(vskip(1em))
 
 **Signals**
 
-Escher makes use of the [Reactive.jl](https://github.com/JuliaLang/Reactive.jl) package for reactive programming. In Reactive, a *stream of data* is called a **Signal**. The name Signal signifies the continuous nature of these streams--a signal always contains a value at any given time. Reactive.jl provides a toolkit of premitives to create, combine, and filter Signals. In the following section we discuss `Input` and `consume` -- the two most important primives of Reactive.jl used to create signals.
+Escher makes use of the [Reactive.jl](https://github.com/JuliaLang/Reactive.jl) package for reactive programming. In Reactive, a *stream of data* is called a **Signal**. The name Signal signifies the continuous nature of these streams--a signal always contains a value at any given time. Reactive.jl provides a toolkit of premitives to create, combine, and filter Signals. In the following section we discuss `Signal` and `consume` -- the two most important primives of Reactive.jl used to create signals.
 
 $(vskip(1em))
-# Creating interaction: `Input`, `subscribe` and `consume`
+# Creating interaction: `Signal`, `subscribe` and `consume`
 $(vskip(1em))
 
-An *input signal* is created using the `Input` constructor.
+An *input signal* is created using the `Signal` constructor.
 
 For example, in
 
 ```julia
-    xᵗ = Input(0)
+    xᵗ = Signal(0)
 ```
 
 `xᵗ` is an input signal containing a value of type Int64, initially, 0.
@@ -145,5 +145,5 @@ end
 
 function main(window)
     push!(window.assets, "widgets")
-    lift(docpage, intro)
+    map(docpage, intro)
 end

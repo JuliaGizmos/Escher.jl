@@ -1,5 +1,5 @@
 
-key_input = Input{Key}(nokey)
+key_input = Signal(Key, nokey)
 
 function main(window)
     cont = container(40em, 40em) |> fillcolor("#f1f3f1")

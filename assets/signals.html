@@ -7,6 +7,10 @@ EscherMixins.ReactiveSignal = {
       value: null,
       observer: "_nameChanged"
     },
+    index: {
+      type: Number,
+      value: false
+    },
     bubbles: {
       type: Boolean,
       value: false
@@ -44,20 +48,28 @@ EscherMixins.ReactiveSignal = {
     return elem._escherSignals && elem._escherSignals[name]
   },
 
-  update: function (sourceElement, name, value) {
-    var bubbles = sourceElement.bubbles // Hack Alert! This should ideally be set on this Behavior!
-    //console.log("update", sourceElement, name, value, bubbles)
-    if (typeof bubbles === "undefined") {
-      bubbles = this.bubbles
-    }
+  update: function (sourceElement, value) {
     this.value = value // Save for the sampler
-    Polymer.Base.fire.call(sourceElement, "signal-updated", {
-      name: name,
+    this.fire("signal-updated", {
+      name: this.name,
+      index: this.index,
       source: sourceElement,
+
       value: value
     },
-    { bubbles: bubbles }
+    { bubbles: this.bubbles || false }
     )
+    if (this.bubbles && !this.parentNode) {
+      Polymer.dom(this).parentNode.fire("signal-updated", {
+        name: this.name,
+        index: this.index,
+        source: sourceElement,
+
+        value: value
+      },
+      { bubbles: this.bubbles || false }
+      )
+    }
   }
 }
 
@@ -65,14 +77,14 @@ EscherMixins.ReactiveSignal = {
 
 
 <dom-module
-  id="stop-propagation" >
+  id="stop-bubbling" >
 
 <template></template>
 
 <script>
 
 Polymer({
-  is: "stop-propagation",
+  is: "stop-bubbling",
   properties: {
     behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
     names: {
@@ -119,12 +131,10 @@ Polymer({
     var self = this, elem = this.findElem()
 
     elem.addEventListener("signal-updated", function (ev) {
-      if (self.name === ev.detail.name) {
-        Polymer.Base.fire.call(document, "signal-transport", {
-          signalId: self.signalId,
-          value: ev.detail.value
-        }) // Hand-off new signal value to web socket
-      }
+      Polymer.Base.fire.call(document, "signal-transport", {
+        signalId: self.signalId,
+        value: ev.detail.value
+      }) // Hand-off new signal value to web socket
     })
   }
 })
@@ -158,11 +168,9 @@ Polymer({
 
       //console.log("Setting up chan-send", this.chan, this.watch)
       elem.addEventListener("signal-updated", function (ev) {
-        if (self.watch == ev.detail.name) {
-          elem.fire("chan-updated-" + self.chan, {
-              value: ev.detail.value
-          })
-        }
+        elem.fire("chan-updated-" + self.chan, {
+            value: ev.detail.value
+        })
       })
     }
 })

@@ -3,7 +3,7 @@
 <dom-module
   id="watch-state" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 
@@ -38,7 +38,7 @@ Polymer({
     this.setId()
 
     elem.addEventListener(this.trigger, function (ev) {
-      self.update(elem, self.name, self.getValue())
+      self.update(elem, self.getValue())
     })
   }
 })
@@ -50,7 +50,7 @@ Polymer({
 <dom-module
   id="clickable-behavior">
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 
@@ -74,7 +74,7 @@ Polymer({
     if (this.buttons.indexOf(2) >= 0) {
       elem.addEventListener("contextmenu", function (ev) {
         ev.preventDefault()
-        self.update(elem, self.name, 2)
+        self.update(elem, 2)
         return false
       })
     }
@@ -82,10 +82,10 @@ Polymer({
       elem.addEventListener("click", function (ev) {
         if (ev.button == 0 && self.buttons.indexOf(1) >= 0) {
           // Left click
-          self.update(elem, self.name, 1)
+          self.update(elem, 1)
         } else if(ev.button == 1 && self.buttons.indexOf(3) >= 0) {
           // Right click
-          self.update(elem, self.name, 3)
+          self.update(elem, 3)
         }
       })
     }
@@ -101,7 +101,7 @@ Polymer({
 <dom-module
   id="signal-sampler" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 Polymer({
@@ -128,8 +128,7 @@ Polymer({
       this.value = {}
       elem.addEventListener("signal-updated", function (ev) {
         if (self.triggers.indexOf(ev.detail.name) >= 0) { // TODO: use a set
-
-          ev.stopPropagation() // FIXME: Should this be configurable?
+          ev.stopPropagation()
 
           var result = {}
           for(var i=0, l=self.signals.length; i < l; i++) {
@@ -138,7 +137,7 @@ Polymer({
           }
           result[ev.detail.name] = ev.detail.value
           result._trigger = ev.detail.name
-          self.update(elem, self.name, result)
+          self.update(elem, result)
         } else if (self.signals.indexOf(ev.detail.name) >= 0) {
           ev.stopPropagation()
         }
@@ -149,11 +148,87 @@ Polymer({
 
 </dom-module>
 
+<dom-module
+  id="signal-collector" >
+
+  <template><content></content></template>
+
+<script>
+Polymer({
+
+    is: "signal-collector",
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+    properties: {
+      collectorName: String
+    },
+    domInit: function () {
+      var self = this,
+      elem = this.findElem()
+
+      this.setId()
+      this.value = elem.value
+      elem.collectorNames = elem.collectorNames || []
+      elem.collectorNames.push(this.collectorName)
+
+      elem.addEventListener("signal-update-collector-" + this.collectorName, function (ev) {
+        self.update(elem, {
+          index: ev.detail.index,
+          value: ev.detail.value
+        })
+        ev.stopPropagation()
+      })
+    }
+})
+</script>
+
+</dom-module>
+
+<dom-module
+  id="signal-collect" >
+
+  <template><content></content></template>
+
+<script>
+Polymer({
+
+    is: "signal-collect",
+    behaviors: [EscherMixins.LifeCycle],
+
+    properties: {
+      collectorName: String,
+      index: Number
+    },
+    domInit: function () {
+      var self = this,
+          elem = Polymer.dom(this).parentNode
+
+      this.value = elem.value
+
+      var p = this
+      // FIXME: Why doesn't bubbling work here??
+      while (p !== document) {
+        if (p.collectorNames && p.collectorNames.indexOf(this.collectorName) >= 0) {
+          break
+        }
+        p = Polymer.dom(p).parentNode
+      }
+
+      console.log(p)
+
+      elem.addEventListener("signal-updated", function (ev) {
+        Polymer.Base.fire.call(p, "signal-update-collector-" + self.collectorName, {value: ev.detail.value, index: self.index}, {bubbles:false})
+      })
+    }
+})
+</script>
+
+</dom-module>
 
 <dom-module
   id="selectable-behavior" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 Polymer({
@@ -173,7 +248,7 @@ Polymer({
       var val = self.multi ? (elem.selectedValues || []) :
         (elem.selected || 0)
 
-      self.update(elem, self.name, val)
+      self.update(elem, val)
     }
 
     elem.addEventListener("iron-select", handler)
@@ -190,6 +265,8 @@ Polymer({
 
   <template>
     <iron-a11y-keys id="keys" keys="{{keys}}"></iron-a11y-keys>
+
+    <content></content>
   </template>
 
 <script>
@@ -210,13 +287,9 @@ Polymer({
     this.setId()
 
     this.$.keys.target = elem
-    elem.addEventListener("keydown", function (ev) {
-      console.log("keydown", ev)
-    })
-
     this.$.keys.addEventListener("keys-pressed", function (ev) {
         var key = this.keyboardEventToKey(ev.detail.keyboardEvent)
-        self.update(elem, self.name, key)
+        self.update(elem, key)
     })
   }
 })
@@ -227,7 +300,7 @@ Polymer({
 <dom-module
   id="date-selection" >
 
-<template></template>
+  <template><content></content></template>
 
 <script>
 
@@ -249,7 +322,7 @@ Polymer({
         "month": d.getMonth() + 1,
         "day": d.getDate()
       }
-      self.update(elem, self.name, val)
+      self.update(elem, val)
     })
 
   }

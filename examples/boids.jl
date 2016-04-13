@@ -12,8 +12,6 @@
 using Compose
 using Colors
 
-Escher.external_setup()
-
 #----------------------------------------------------------------------
 
 immutable Boid
@@ -33,12 +31,12 @@ end
 
 function main(window)
     # Run at 60 FPS
-    eventloop = fpswhen(window.alive, 60)
+    eventloop = every(1/30)
 
     # Create population of boids
     boids = [Boid() for i in 1:50]
 
-    lift(eventloop) do _
+    map(eventloop) do _
         # Force 1: Attract to center
         boid_center = mapreduce(b->b.pos, +, boids)/length(boids)
         for boid in boids

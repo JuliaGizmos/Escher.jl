@@ -25,8 +25,8 @@ end
 
 ### Update ###
 
-next(board::Board{true}, move) = board
-function next(board, move)
+update(board::Board{true}, move) = board
+function update(board, move)
     i, j = move
     if board.mines[i, j]
         return Board{true}(board.uncovered, board.mines) # Game over
@@ -39,11 +39,11 @@ function next(board, move)
     end
 end
 
-moves_signal = Input((0, 0))
-initial_board_signal = Input{Board}(newboard(10, 10))
+moves_signal = Signal((0, 0))
+initial_board_signal = Signal(Board, newboard(10, 10))
 board_signal = flatten(
-    lift(initial_board_signal) do b
-        foldl(next, b, moves_signal; typ=Board)
+    map(initial_board_signal) do b
+        foldp(update, b, moves_signal; typ=Board)
     end
 )
 
@@ -64,11 +64,11 @@ block(board::Board{true}, i, j) =
         number(board.uncovered[i, j])
 
 block(board, i, j) =
-     constant((i, j), clickable(number(board.uncovered[i, j]))) >>> moves_signal
+     intent(constant((i, j)), clickable(number(board.uncovered[i, j]))) >>> moves_signal
 
 gameover = vbox(
         title(2, "Game Over!") |> Escher.pad(1em),
-        addinterpreter(_ -> newboard(10, 10), button("Start again")) >>> initial_board_signal
+        intent(_ -> newboard(10, 10), button("Start again")) >>> initial_board_signal
     ) |> Escher.pad(1em) |> fillcolor("white")
 
 function showboard{lost}(board::Board{lost})
@@ -84,6 +84,6 @@ function main(window)
        vskip(2em),
        title(3, "minesweeper"),
        vskip(2em),
-       consume(showboard, board_signal, typ=Tile),
+       map(showboard, board_signal, typ=Tile),
     ) |> packacross(center)
 end

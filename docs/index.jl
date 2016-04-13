@@ -5,8 +5,6 @@ using Gadfly
 
 import Escher: @d
 
-Escher.external_setup()
-
 # Home page.
 
 pkgname(name="Escher") =
@@ -38,10 +36,10 @@ function sierpinski(n)
     end
 end
 
-nᵗ = Input(5) # The angle at any given time
+nᵗ = Signal(5) # The angle at any given time
 connected_slider = subscribe(slider(0:7, value=5), nᵗ)
 
-reactive_eg = lift(nᵗ) do n
+reactive_eg = map(nᵗ) do n
     vbox(
         connected_slider,
         sierpinski(n)
@@ -83,9 +81,9 @@ $(vskip(3em))
 $(title(2, "What's inside") |> Escher.fontsize(1.75em))
 
 $(
-vbox(md"**A web server for 2015.** Escher's built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.",
+vbox(md"**A web server for 2016.** Escher's built-in web server allows you to create interactive UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.",
 
-md"**A rich functional library of UI components.** the built-in library functions support Markdown, Input widgets, TeX-style Layouts, Styling, TeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs. The API comprehensively covers features from HTML and CSS, and also provides advanced features. Its user merely needs to know how to write code in Julia."
+md"**A rich functional library of UI components.** the built-in library functions support Markdown, Signal widgets, TeX-style Layouts, Styling, TeX, Code, Behaviors, Tabs, Menus, Slideshows, Plots (via [Gadfly](http://gadfly.org), [Vega](http://johnmyleswhite.github.io/Vega.jl/), [VegaLite](https://github.com/fredo-dedup/VegaLite.jl)) and Vector Graphics (via [Compose](http://composejl.org)) -- everything a Julia programmer would need to effectively visualize data or to create user-facing GUIs. The API comprehensively covers features from HTML and CSS, and also provides advanced features. Its user merely needs to know how to write code in Julia."
 ) |> pad([left, right], 2em)
 )
 
@@ -450,7 +448,7 @@ There are two facets to this rule:
 * Getting the input from tiles
 * Creating a signal of UI using these signals
 
-Firstly, some Tiles (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to Reactive's `Input` signals. Widgets such as sliders, buttons, dropdown menus are subtypes of `Behavior`. The function `subscribe` lets you pipe updates from a behavior into a signal.
+Firstly, some Tiles (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to Reactive's `Signal` signals. Widgets such as sliders, buttons, dropdown menus are subtypes of `Behavior`. The function `subscribe` lets you pipe updates from a behavior into a signal.
 
 **Example 1.**
 
@@ -458,7 +456,7 @@ Let's create a slider and subscribe its current value to a Reactive signal.
 
 ```julia
 
-iterations = Input(0) # The angle at any given time
+iterations = Signal(0) # The angle at any given time
 connected_slider = subscribe(slider(0:7), iterations)
 ```
 
@@ -482,10 +480,10 @@ function main(window)
     # Load HTML dependencies related to the slider
     push!(window.assets, "widgets")
 
-    iterations = Input(5) # The number of iterations to show
+    iterations = Signal(5) # The number of iterations to show
     connected_slider = subscribe(slider(0:7, value=5), iterations)
 
-    lift(iterations) do n
+    map(iterations) do n
         vbox(
             connected_slider,
             sierpinski(n)
@@ -543,11 +541,11 @@ function next(board, move)
     end
 end
 
-movesᵗ = Input((0, 0))
-initial_boardᵗ = Input{Board}(newboard(10, 10))
+movesᵗ = Signal((0, 0))
+initial_boardᵗ = Signal(Board, newboard(10, 10))
 boardᵗ = flatten(
-    lift(initial_boardᵗ) do b
-        foldl(next, b, movesᵗ; typ=Board)
+    map(initial_boardᵗ) do b
+        foldp(next, b, movesᵗ; typ=Board)
     end
 )
 
@@ -584,7 +582,7 @@ end
 function main(window)
     push!(window.assets, "widgets")
 
-    lift(boardᵗ) do board
+    map(boardᵗ) do board
         vbox(
            vskip(2em),
            title(3, "minesweeper"),
@@ -640,7 +638,7 @@ function main(window)
     push!(window.assets, "codemirror")
     push!(window.assets, "layout2")
 
-    lift(reactive_eg) do example
+    map(reactive_eg) do example
         vbox(
             pkgname(),
             vskip(1em),

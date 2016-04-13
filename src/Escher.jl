@@ -34,6 +34,7 @@ include("basics/typography.jl")
 include("basics/embellishment.jl")
 include("basics/behavior.jl")
 include("basics/window.jl")
+include("basics/component.jl")
 
 include("library/markdown.jl")
 include("library/tex.jl")
@@ -57,5 +58,9 @@ end
 
 serve(port=5555) =
     include(joinpath(dirname(@__FILE__), "cli", "serve.jl"))(port)
+
+
+# 3rd party package interop
+include("basics/lazyload.jl")
 
 end

@@ -78,12 +78,12 @@ swap!(tilestream, next::Signal) =
     push!(tilestream, next)
 
 swap!(tilestream, next) =
-    push!(tilestream, Input(next))
+    push!(tilestream, Signal(next))
 
 const commands = Dict([
     ("signal-update", (window, msg) -> begin
         id = msg["data"]["signalId"]
-        interp, sig = Escher.fromid(id)
+        sig, interp = Escher.fromid(id)
         push!(sig, Escher.interpret(interp, msg["data"]["value"]))
     end),
     ("window-size", (window, msg) -> begin
@@ -116,7 +116,7 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
 
     write(sock, patch_cmd(id, Patchwork.diff(render(Escher.empty, state), init)))
 
-    foldl(init, keepwhen(window.alive, Escher.empty, sig); typ=Any) do prev, next
+    foldp(init, filterwhen(window.alive, empty, sig); typ=Any) do prev, next
 
         st = Dict()
         st["embedded_signals"] = Dict()
@@ -129,15 +129,15 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
                 rethrow(ex)
             end
         end
-        for (key, sig) in st["embedded_signals"]
-            start_updates(sig, window, sock, key)
+        for (key, embedded) in st["embedded_signals"]
+            start_updates(embedded, window, sock, key)
         end
 
         rendered_next
-    end
+    end |> preserve
 
-    for (key, sig) in state["embedded_signals"]
-        start_updates(sig, window, sock, key)
+    for (key, embedded) in state["embedded_signals"]
+        start_updates(embedded, window, sock, key)
     end
 end
 
@@ -151,14 +151,14 @@ uisocket(dir) = (req) -> begin
     h = @compat parse(Int, d["h"])
 
     sock = req[:socket]
-    tilestream = Input{Signal}(Input{Tile}(empty))
+    tilestream = Signal(Signal, Signal(Tile, empty))
 
     # TODO: Initialize window with session,
     # window dimensions and what not
 
     window = Window(dimension=(w*px, h*px))
 
-    lift(asset -> write(sock, JSON.json(import_cmd(asset))),
+    Reactive.foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
          window.assets)
 
     main = loadfile(file)
@@ -176,11 +176,11 @@ uisocket(dir) = (req) -> begin
         println( str )
     end
 
-    swap!(tilestream, current)
-
     start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
-    @async while isopen(sock)
+    swap!(tilestream, current)
+
+    t = @async while isopen(sock)
         data = read(sock)
 
         msg = JSON.parse(bytestring(data))
@@ -209,6 +209,7 @@ uisocket(dir) = (req) -> begin
         # Replace the current main signal
         swap!(tilestream, next)
     end
+    wait(t)
 
 end
 

@@ -39,7 +39,7 @@ intersperse(0, [1, 2, 3], true)
 """ ->
 intersperse(x, xs, enclose=false) = begin
     if length(xs) > 1
-        res = foldl((acc, nxt) -> vcat(acc, x, nxt),
+        res = foldp((acc, nxt) -> vcat(acc, x, nxt),
                     Any[xs[1]], xs[2:end])
     else
         res = xs
@@ -106,14 +106,14 @@ teeprint(x, fn=println) = begin
 end
 
 
-@doc """
-memoize anything's rendered output and state
-"""
-
-@api memoize => (Memoized<:Tile) begin
-    arg(tile::Any)
-    arg(store::WeakKeyDict=WeakKeyDict())
-end
+# @doc """
+# memoize anything's rendered output and state
+# """ ->
+#
+# @api memoize => (Memoized<:Tile) begin
+#     arg(tile::Any)
+#     arg(store::WeakKeyDict=WeakKeyDict())
+# end
 
 deepmerge!(a::Associative, b::Associative) = begin
     for (k, v) in b
@@ -130,15 +130,15 @@ end
 
 # Todo: allow specifying hash function,
 # allow mirroring to JLD optionally
-render(m::Memoized, state) = begin
-    if haskey(m.store, m.tile)
-        deepmerge!(state, st) # This.
-        m.store[m.tile]
-    else
-        st = Dict("embedded_signals"=>Dict())
-        elem = render(convert(Tile, m.tile), st)
-        deepmerge!(state, st)
-        m.store[m.tile] = (elem, st)
-        elem
-    end
-end
+# render(m::Memoized, state) = begin
+#     if haskey(m.store, m.tile)
+#         deepmerge!(state, st) # This.
+#         m.store[m.tile]
+#     else
+#         st = Dict("embedded_signals"=>Dict())
+#         elem = render(convert(Tile, m.tile), st)
+#         deepmerge!(state, st)
+#       m.store[m.tile] = (elem, st)
+#       elem
+#   end
+#end

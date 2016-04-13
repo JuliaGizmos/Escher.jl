@@ -1,4 +1,4 @@
-julia 0.3
+julia 0.4
 ArgParse
 Colors
 Compat
@@ -6,7 +6,7 @@ Dates
 JSON
 Markdown
 Mux 0.1.0
-Reactive 0.2.3
+Reactive 0.3.0
 Requires
 Patchwork 0.1.5
-WebSockets
+WebSockets 0.1.2

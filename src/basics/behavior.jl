@@ -10,11 +10,11 @@ export hasstate,
        rightbutton,
        scrollbutton
 
+wrapbehavior(x::Behavior) = x
 
 @api hasstate => (WithState <: Behavior) begin
     doc("Watch for changes to an attribute/property.")
-    curry(tile::Tile, doc="Tile to watch.")
-    kwarg(name::Symbol=:_state, doc="A name to identify the behavior.")
+    arg(tile::Tile, doc="Tile to watch.")
     kwarg(
         attr::AbstractString="value",
         doc=md"""The attribute/property to watch. Note that this is the property
@@ -30,13 +30,12 @@ export hasstate,
     )
 end
 
-default_interpreter(::WithState) = identity
+default_intent(::WithState) = identity
 
 render(t::WithState, state) =
     render(t.tile, state) <<
         Elem(
             "watch-state", attributes=@d(
-                :name=>t.name,
                 :attr=>t.attr,
                 :trigger=>t.trigger,
                 :selector=>t.selector,
@@ -51,12 +50,11 @@ render(t::WithState, state) =
                  specifiers is [here](https://www.polymer-project.org/0.5/components/core-a11y-keys/index.html)."""
     )
     curry(tile::Tile, doc="The tile to watch keypresses from.")
-    kwarg(name::Symbol=:_keys, doc="Name to identify the behavior.")
 end
 
 render(k::Keypress, state) =
     render(k.tile, state) & @d(:attributes => @d(:tabindex => 0)) <<
-        Elem("keypress-behavior", attributes = @d(:keys=>k.keys, :name=>k.name))
+        Elem("keypress-behavior", attributes = @d(:keys=>k.keys))
 
 immutable Key
     key::AbstractString
@@ -68,11 +66,11 @@ end
 
 const nokey = Key("", false, false, false, false)
 
-immutable KeyInterpreter <: Interpreter end
+immutable KeyIntent <: Intent end
 
-default_interpreter(k::Keypress) = KeyInterpreter()
+default_intent(k::Keypress) = KeyIntent()
 
-interpret(::KeyInterpreter, d) =
+interpret(::KeyIntent, d) =
     Key(d["key"], d["alt"], d["ctrl"], d["meta"], d["shift"])
 
 abstract MouseButton
@@ -92,20 +90,19 @@ end
                  `leftbutton`, `rightbutton`, `scrollbutton`."""
     )
     curry(tile::Tile, doc="The tile to watch for clicks on.")
-    kwarg(name::Symbol=:_clicks, doc="Name to identify the behavior.")
 end
 
 button_number(::LeftButton) = 1
 button_number(::RightButton) = 2
 button_number(::ScrollButton) = 3
 
-immutable ClickInterpreter <: Interpreter
+immutable ClickIntent <: Intent
 end
 
-default_interpreter(c::Clickable) =
-    ClickInterpreter()
+default_intent(c::Clickable) =
+    ClickIntent()
 
-interpret(c::ClickInterpreter, x) =
+interpret(c::ClickIntent, x) =
     try
         [leftbutton, rightbutton, scrollbutton][x]
     catch
@@ -116,7 +113,6 @@ render(c::Clickable, state) =
     render(c.tile, state) <<
         Elem("clickable-behavior";
             attributes=@d(
-                :name=>c.name,
                 :buttons=>string(map(button_number, c.buttons)),
             )
         )
@@ -124,7 +120,6 @@ render(c::Clickable, state) =
 @api selectable => (Selectable <: Behavior) begin
     doc("Watch for a selection in a selection widget.")
     curry(tile::Tile, doc="A selection widget.")
-    kwarg(name::Symbol=:_clicks, doc="The name to identify the behavior.")
     kwarg(multi::Bool=false, doc="True when watching widgets that allow multiple selections")
     kwarg(selector::AbstractString="::parent", doc="CSS selector of the selectable widget.")
 end
@@ -133,19 +128,18 @@ render(t::Selectable, state) =
     render(t.tile, state) <<
         Elem("selectable-behavior",
             attributes = @d(
-                :name=>t.name,
-		:multi=>boolattr( t.multi ),
+                :multi=>boolattr( t.multi ),
                 :selector=>t.selector
             )
         )
 
 inc(x) = x+1
 inc(x::AbstractArray) = map(inc, x)
-default_interpreter(t::Selectable) = begin
+default_intent(t::Selectable) = begin
     if t.multi
-        InterpreterFn(inc) # FIXME: How do I ToType{Int} each element?
+        ApplyIntent(inc) # FIXME: How do I ToType{Int} each element?
     else
-        Chained(InterpreterFn(inc), ToType{Int}())
+        Chained(ApplyIntent(inc), ToType{Int}())
     end
 end
 
@@ -160,7 +154,6 @@ end
 @api hoverable => (Hoverable <: Behavior) begin
     typedarg(get_coords::Bool=false)
     curry(tile::Tile)
-    kwarg(name::Symbol=:_hover)
 end
 
 immutable Hover
@@ -169,7 +162,6 @@ immutable Hover
 end
 
 immutable Editable <: Behavior
-    name::Symbol
     tile::Tile
 end
 
@@ -179,16 +171,11 @@ export send, recv, wire
 
 immutable ChanSend <: Behavior
     chan::Symbol
-    watch::Symbol
     tile::Tile
 end
 
-# expose contained signal to outside
-name(c::ChanSend) = c.watch
-send(chan::Symbol, watch::Symbol, b) =
-    ChanSend(chan, watch, wrapbehavior(b))
-send(chan::Symbol, b::Behavior) =
-    ChanSend(chan, name(b), wrapbehavior(b))
+send(chan::Symbol, b) =
+    ChanSend(chan, wrapbehavior(b))
 
 @apidoc send => (ChanSend <: Behavior) begin
     doc("Emit changes to an attribute/property to a named channel.")
@@ -198,8 +185,10 @@ send(chan::Symbol, b::Behavior) =
 end
 
 render(chan::ChanSend, state) =
-    render(chan.tile, state) <<
-        Elem("chan-send", attributes=@d(:chan=>chan.chan, :watch=>chan.watch))
+    withlastchild(render(chan.tile, state)) do child
+        child <<
+            Elem("chan-send", attributes=@d(:chan=>chan.chan))
+    end
 
 
 immutable ChanRecv <: Tile

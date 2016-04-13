@@ -4,7 +4,6 @@ export codemirror
 @api codemirror => (CodeMirror <: Widget) begin
     doc("Create a code viewer/editor")
     arg(code::AbstractString="", doc="The code to display.")
-    kwarg(name::Symbol=:_code, doc="The name for the widget")
     kwarg(readonly::Bool=false, doc="If set to true, editing will be disabled.")
     kwarg(language::AbstractString="julia", doc="The language used for syntax highlighting.")
     kwarg(
@@ -17,7 +16,7 @@ export codemirror
 end
 
 wrapbehavior(c::CodeMirror) =
-    hasstate(c, name=c.name, attr="immediateValue", trigger="change")
+    hasstate(c, attr="immediateValue", trigger="change")
 
 # Render to virtual DOM
 render(c::CodeMirror, state) =
