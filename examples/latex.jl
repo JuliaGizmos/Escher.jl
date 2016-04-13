@@ -1,4 +1,3 @@
-
 function main(window)
     push!(window.assets, "tex")
     push!(window.assets, "widgets")
@@ -15,13 +14,6 @@ function main(window)
              textinput() >>> texᵗ,
              hbox("Show as a block", hskip(1em), checkbox(mode) >>> modeᵗ),
              vskip(1em),
-             tex(t, block=mode)) |> pad(1em) |> maxwidth(30em)
+             tex(t, block=mode)) |> Escher.pad(1em) |> maxwidth(30em)
     end
-end
-function main(window)
-    push!(window.assets, "tex")
-
-    tex("""f(x) = \int_{-\infty}^\infty
-        \hat f(\xi)\,e^{2 \pi i \xi x}
-        \,d\xi""")
 end
