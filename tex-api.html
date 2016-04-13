@@ -2,7 +2,6 @@
 <html>
 <meta charset="utf-8">
 <head>
-   <base href="">
    <script> (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var VNode = require('vtree/vnode');
 var svg = require('virtual-hyperscript/svg');
@@ -24,6 +23,7 @@ var P = Patchwork = {
             el = document.getElementById(id)
         }
         this.id = id
+        this.renderOptions = renderOpts
         if (jlNode) {
             // Note: makes this.root
             var vnode = P.makeVNode(jlNode)
@@ -164,26 +164,41 @@ Patchwork.Node.prototype = {
         if (!isVPatch(vpatches)) {
             vpatches = P.makeVPatches(this.root, vpatches)
         }
-        this.element = patch(this.element, vpatches)
+        this.element = patch(this.element, vpatches, this.renderOptions)
         this.root = patchVNode(this.root, vpatches)
     }
 }
 
+function init(nb, cue) {
+    if (!Patchwork.inited) {
+        try {
+            console.log("attempting Patchwork setup, cue:", cue)
+            var commMgr =  nb.kernel.comm_manager;
+            commMgr.register_target("PatchStream", function (comm, msg) {
+                var nodeId = msg.content.data.pwid;
+                comm.on_msg(function (msg) {
+                    var node = P.nodes[nodeId],
+                        patches = msg.content.data
+                    node.applyPatch(patches)
+                    P.log("received patches", patches)
+                });
+            });
+            Patchwork.inited = true;
+        } catch (e) {
+            Patchwork.inited = false;
+            console.log("ERROR initializing patchwork: ", e);
+            console.log("attempting failed, cue:", cue)
+        }
+    }
+}
 
 // IJulia setup
-if (typeof(window.IPython) !== "undefined" && typeof(window.jQuery) !== "undefined") {
-    $(document).ready(function () {
-        var commMgr =  IPython.notebook.kernel.comm_manager;
-        commMgr.register_target("PatchStream", function (comm, msg) {
-            var nodeId = msg.content.data.pwid;
-            comm.on_msg(function (msg) {
-                var node = P.nodes[nodeId],
-                    patches = msg.content.data
-                node.applyPatch(patches)
-                P.log("received patches", patches)
-            });
-        });
-    });
+if (typeof(window.IPython) !== "undefined") {
+    init(IPython.notebook, "immediate");
+    $(document).ready(function () { init(IPython.notebook, "document ready"); });
+    $([IPython.events]).on("kernel_ready.Kernel kernel_created.Kernel", function (evt, nb) {
+        init(nb, "kernel start")
+    })
 }
 
 window.Patchwork = Patchwork;
@@ -299,21 +314,24 @@ var isHook = require("vtree/is-vhook")
 
 module.exports = applyProperties
 
-function applyProperties(node, props, previous) {
+function applyProperties(node, props, previous, renderOptions) {
+    var domNode = renderOptions && renderOptions.extractNode ?
+            renderOptions.extractNode(node) : node
+
     for (var propName in props) {
         var propValue = props[propName]
 
         if (propValue === undefined) {
-            removeProperty(node, props, previous, propName);
+            removeProperty(domNode, props, previous, propName);
         } else if (isHook(propValue)) {
-            propValue.hook(node,
+            propValue.hook(domNode,
                 propName,
                 previous ? previous[propName] : undefined)
         } else {
             if (isObject(propValue)) {
-                patchObject(node, props, previous, propName, propValue);
+                patchObject(domNode, props, previous, propName, propValue);
             } else if (propValue !== undefined) {
-                node[propName] = propValue
+                domNode[propName] = propValue
             }
         }
     }
@@ -404,7 +422,6 @@ function id(x) { return x }
 function createElement(vnode, opts) {
 
     var doc = opts ? opts.document || document : document
-    var domWrap = opts ? opts.domWrap || id : id
     var warn = opts ? opts.warn : null
 
     vnode = handleThunk(vnode).a
@@ -421,11 +438,11 @@ function createElement(vnode, opts) {
     }
 
     var node = (vnode.namespace === null) ?
-        domWrap(doc.createElement(vnode.tagName, vnode.properties.is)) :
-        domWrap(doc.createElementNS(vnode.namespace, vnode.tagName))
+        doc.createElement(vnode.tagName, vnode.properties.is) :
+        doc.createElementNS(vnode.namespace, vnode.tagName)
 
     var props = vnode.properties
-    applyProperties(node, props)
+    applyProperties(node, props, null, opts)
 
     var children = vnode.children
 
@@ -576,7 +593,7 @@ function applyPatch(vpatch, domNode, renderOptions) {
             reorderChildren(domNode, patch)
             return domNode
         case VPatch.PROPS:
-            applyProperties(domNode, patch, vNode.properties)
+            applyProperties(domNode, patch, vNode.properties, renderOptions)
             return domNode
         case VPatch.THUNK:
             return replaceRoot(domNode,
@@ -723,8 +740,8 @@ var domIndex = require("./dom-index")
 var patchOp = require("./patch-op")
 module.exports = patch
 
-function patch(rootNode, patches) {
-    return patchRecursive(rootNode, patches)
+function patch(rootNode, patches, renderOptions) {
+    return patchRecursive(rootNode, patches, renderOptions)
 }
 
 function patchRecursive(rootNode, patches, renderOptions) {
@@ -738,10 +755,14 @@ function patchRecursive(rootNode, patches, renderOptions) {
     var ownerDocument = rootNode.ownerDocument
 
     if (!renderOptions) {
-        renderOptions = { patch: patchRecursive }
+        renderOptions = {}
         if (ownerDocument !== document) {
             renderOptions.document = ownerDocument
         }
+    }
+
+    if (!renderOptions.patch) {
+        renderOptions.patch = patchRecursive
     }
 
     for (var i = 0; i < indices.length; i++) {
@@ -2132,16 +2153,16 @@ function vNodePatch(node, patch) {
 
 },{}]},{},[1]);
  </script>
-   <script src="assets/bower_components/webcomponentsjs/webcomponents.min.js"></script>
+   <script src="pkg/Escher/bower_components/webcomponentsjs/webcomponents.min.js"></script>
 </head>
 
-<link rel="import" href="assets/basics.html">
+<link rel="import" href="pkg/Escher/basics.html">
 
 <body>
 <signal-container id="root"></signal-container>
 </div>
 <script>
-    new Patchwork.Node("root", {"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}},{"t":"div","p":{"style":{"padding":"4.0em","maxWidth":"50.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"span","p":{"className":"title-2 "},"c":[{"txt":"TeX"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"h1","p":{"className":"md-heading heading-1 "},"c":[{"txt":"Functions"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"font-monospace flex-wrap flow horizontal "},"c":[{"t":"span","p":{"className":"font-bold "},"c":[{"txt":"tex"}]},{"t":"span","c":[{"txt":"("}]},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"source"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"String"}]}]},{"t":"span","c":[{"txt":"; "}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"block"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"Bool"}]},{"t":"span","c":[{"txt":"="}]},{"t":"span","p":{"style":{"color":"#808080"}},"c":[{"txt":"false"}]}]},{"t":"span","c":[{"txt":")"}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"span","c":[{"txt":"→"}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"abbr","p":{"style":{"color":"#707070"},"title":"TeX"},"c":[{"t":"span","c":[{"txt":"Tile"}]}]}]},{"t":"div","p":{"style":{"paddingLeft":"1.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"style":{"paddingLeft":"1.0em"}},"c":[{"t":"span","c":[{"txt":"Show TeX/LaTeX."}]}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"span","p":{"className":"font-italic ","style":{"color":"#000000","fontWeight":500}},"c":[{"txt":"Arguments"}]},{"t":"div","p":{"style":{"paddingTop":"0.5em","paddingBottom":"0.5em"}},"c":[{"t":"div","p":{"style":{"paddingRight":"1.0em","paddingLeft":"1.0em"}},"c":[{"t":"table","c":[{"t":"tbody","c":[{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"source"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"The source TeX code."}]}]}]},{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"block"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "},"c":[{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#DC7F38","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"abbr","p":{"style":{"fontSize":"0.94em"},"title":"Keyword argument"},"c":[{"t":"span","c":[{"txt":"kwarg"}]}]}]}]},{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#E1F0E5","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"span","p":{"style":{"fontSize":"0.94em"}},"c":[{"txt":"default=false"}]}]}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"If set to true, the resulting tile will be a block. It is inline\nby default"}]}]}]}]}]}]}]}]}]}]}]},{"t":"div","p":{"style":{"height":"4.0em","width":"0.0px"}}}]}]},{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}}]})
+    new Patchwork.Node("root", {"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}},{"t":"div","p":{"style":{"padding":"4.0em","maxWidth":"50.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"span","p":{"className":"title-2 "},"c":[{"txt":"TeX"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"h1","p":{"className":"md-heading heading-1 "},"c":[{"txt":"Functions"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"font-monospace flex-wrap flow horizontal "},"c":[{"t":"span","p":{"className":"font-bold "},"c":[{"txt":"Escher.tex"}]},{"t":"span","c":[{"txt":"("}]},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"source"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"AbstractString"}]}]},{"t":"span","c":[{"txt":"; "}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"block"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"Bool"}]},{"t":"span","c":[{"txt":"="}]},{"t":"span","p":{"style":{"color":"#808080"}},"c":[{"txt":"false"}]}]},{"t":"span","c":[{"txt":")"}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"span","c":[{"txt":"→"}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"abbr","p":{"style":{"color":"#707070"},"title":"TeX"},"c":[{"t":"span","c":[{"txt":"Tile"}]}]}]},{"t":"div","p":{"style":{"paddingLeft":"1.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"style":{"paddingLeft":"1.0em"}},"c":[{"t":"span","c":[{"txt":"Show TeX/LaTeX."}]}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"span","p":{"style":{"fontWeight":500,"color":"#000000"},"className":"font-italic "},"c":[{"txt":"Arguments"}]},{"t":"div","p":{"style":{"paddingTop":"0.5em","paddingBottom":"0.5em"}},"c":[{"t":"div","p":{"style":{"paddingRight":"1.0em","paddingLeft":"1.0em"}},"c":[{"t":"table","c":[{"t":"tbody","c":[{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"source"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"The source TeX code."}]}]}]},{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"block"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "},"c":[{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#DC7F38","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"abbr","p":{"style":{"fontSize":"0.94em"},"title":"Keyword argument"},"c":[{"t":"span","c":[{"txt":"kwarg"}]}]}]}]},{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#E1F0E5","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"span","p":{"style":{"fontSize":"0.94em"}},"c":[{"txt":"default=false"}]}]}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"If set to true, the resulting tile will be a block. It is inline\nby default"}]}]}]}]}]}]}]}]}]}]}]},{"t":"div","p":{"style":{"height":"4.0em","width":"0.0px"}}}]}]},{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}}]})
 </script>
 </body>
 </html>

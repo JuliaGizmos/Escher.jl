@@ -1,25 +1,56 @@
 {
   "name": "paper-input",
+  "version": "1.0.11",
+  "description": "Material design text fields",
+  "authors": [
+    "The Polymer Authors"
+  ],
+  "keywords": [
+    "web-components",
+    "polymer",
+    "input"
+  ],
+  "main": [
+    "paper-input.html",
+    "paper-textarea.html",
+    "paper-input-behavior.html",
+    "paper-input-container.html",
+    "paper-input-error.html",
+    "paper-input-char-counter.html"
+  ],
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/PolymerElements/paper-input.git"
+  },
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/PolymerElements/paper-input",
+  "ignore": [],
   "dependencies": {
-    "polymer": "Polymer/polymer#^0.5",
-    "core-icon": "Polymer/core-icon#^0.5",
-    "core-icons": "Polymer/core-icons#^0.5",
-    "core-input": "Polymer/core-input#^0.5",
-    "core-style": "Polymer/core-style#^0.5"
+    "polymer": "Polymer/polymer#^1.0.0",
+    "iron-autogrow-textarea": "PolymerElements/iron-autogrow-textarea#^1.0.0",
+    "iron-behaviors": "PolymerElements/iron-behaviors#^1.0.0",
+    "iron-form-element-behavior": "PolymerElements/iron-form-element-behavior#^1.0.0",
+    "iron-input": "PolymerElements/iron-input#^1.0.0",
+    "paper-styles": "PolymerElements/paper-styles#^1.0.0"
   },
   "devDependencies": {
-    "web-component-tester": "Polymer/web-component-tester#^1.0.0"
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.0.0",
+    "iron-validator-behavior": "PolymerElements/iron-validator-behavior#^1.0.0",
+    "test-fixture": "PolymerElements/test-fixture#^1.0.0",
+    "web-component-tester": "*",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
+    "iron-icon": "PolymerElements/iron-icon#^1.0.0",
+    "paper-icon-button": "PolymerElements/paper-icon-button#^1.0.0"
   },
-  "version": "0.5.6",
-  "homepage": "https://github.com/Polymer/paper-input",
-  "_release": "0.5.6",
+  "_release": "1.0.11",
   "_resolution": {
     "type": "version",
-    "tag": "0.5.6",
-    "commit": "7409968bd18b2906c4180b2f230a5f1741707609"
+    "tag": "v1.0.11",
+    "commit": "a7af749e55fff7599d2ad9da47c86b286e9e2d6f"
   },
-  "_source": "git://github.com/Polymer/paper-input.git",
-  "_target": "^0.5",
-  "_originalSource": "Polymer/paper-input"
+  "_source": "git://github.com/PolymerElements/paper-input.git",
+  "_target": "^1.0.0",
+  "_originalSource": "PolymerElements/paper-input"
 }

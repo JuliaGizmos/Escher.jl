@@ -1,19 +1,45 @@
 {
   "name": "paper-toggle-button",
+  "version": "1.0.6",
+  "description": "A material design toggle button control",
+  "authors": [
+    "The Polymer Authors"
+  ],
+  "keywords": [
+    "web-components",
+    "polymer",
+    "toggle",
+    "control"
+  ],
   "private": true,
-  "dependencies": {
-    "font-roboto": "Polymer/font-roboto#^0.5",
-    "paper-radio-button": "Polymer/paper-radio-button#^0.5"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/PolymerElements/paper-toggle-button"
   },
-  "version": "0.5.6",
-  "homepage": "https://github.com/Polymer/paper-toggle-button",
-  "_release": "0.5.6",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/PolymerElements/paper-toggle-button",
+  "ignore": [],
+  "dependencies": {
+    "paper-ripple": "PolymerElements/paper-ripple#^1.0.0",
+    "paper-styles": "PolymerElements/paper-styles#^1.0.0",
+    "paper-behaviors": "PolymerElements/paper-behaviors#^1.0.0",
+    "polymer": "Polymer/polymer#^1.0.0"
+  },
+  "devDependencies": {
+    "web-component-tester": "*",
+    "test-fixture": "PolymerElements/test-fixture#^1.0.0",
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.0.0",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  },
+  "_release": "1.0.6",
   "_resolution": {
     "type": "version",
-    "tag": "0.5.6",
-    "commit": "2d5179cbac3ce22a5a0d3da7ef597c1a0bf2ac09"
+    "tag": "v1.0.6",
+    "commit": "e0bc6b17079da9487c62aaadeb46e3a199a7a112"
   },
-  "_source": "git://github.com/Polymer/paper-toggle-button.git",
-  "_target": "^0.5",
-  "_originalSource": "Polymer/paper-toggle-button"
+  "_source": "git://github.com/PolymerElements/paper-toggle-button.git",
+  "_target": "^1.0.0",
+  "_originalSource": "PolymerElements/paper-toggle-button"
 }

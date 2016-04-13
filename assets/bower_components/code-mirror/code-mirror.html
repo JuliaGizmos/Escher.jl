@@ -1,91 +1,131 @@
-<!--
-Copyright 2013 The Polymer Authors. All rights reserved.
-Use of this source code is governed by a BSD-style
-license that can be found in the LICENSE file.
--->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="codemirror-import.html">
 
-<polymer-element name="code-mirror" attributes="value mode theme tabSize lineNumbers">
-  <template>
-    <link rel="stylesheet" href="codemirror-5.0/lib/codemirror.css">
-    <link href="codemirror-5.0/theme/ambiance.css" rel="stylesheet">
-    <link href="codemirror-5.0/theme/ambiance-mobile.css" rel="stylesheet">
-    <link href="codemirror-5.0/theme/elegant.css" rel="stylesheet">
-    <link href="codemirror-5.0/theme/monokai.css" rel="stylesheet">
-    <link href="codemirror-5.0/theme/solarized.css" rel="stylesheet">
-    <link href="codemirror-5.0/theme/twilight.css" rel="stylesheet">
-    <link href="codemirror-5.0/addon/fold/foldgutter.css" rel="stylesheet">
+<script src="codemirror/lib/codemirror.js"></script>
+<link rel="stylesheet" href="codemirror/lib/codemirror.css">
 
-    <style>
-      :host {
-        display: block;
-        height: auto;
-      }
-      .CodeMirror {
-        top: 0;
-        left: 0;
-        height: inherit;
-      }
-    </style>
-  </template>
+<script src="codemirror/mode/julia/julia.js"></script>
+<link id="theme" rel="stylesheet" href="codemirror/theme/elegant.css">
+
+<style>
+  :host {
+    height: auto;
+  }
+  .CodeMirror {
+    height: inherit;
+  }
+</style>
+
+<dom-module id="code-mirror">
+  <template></template>
+
   <script>
-    Polymer('code-mirror', {
-      value: '',
-      mode: 'htmlmixed',
-      theme: 'xq-light',
-      tabSize: 2,
-      lineNumbers: true,
-      viewportMargin: Infinity,
-      ready: function() {
-        if (!this.value) {
-          this.value = this.textContent;
-        }
-        this.mirror = CodeMirror(this.shadowRoot, {
-          value: this.value || this.textContent,
-          mode: this.mode,
-          theme: this.theme,
-          tabSize: this.tabSize,
-          readOnly: this.readOnly,
-          lineNumbers: this.lineNumbers,
-          viewportMargin: Infinity,
-          foldGutter: true,
-          gutters: ["CodeMirror-linenumbers"]
-        });
-        var self = this
-        this.mirror.on("change", function () {
-            console.log("Change")
-            self.currentValue = self.mirror.getValue()
-            self.fire("change")
-        })
-        // Avoid slide changes in slideshow mode
-        this.addEventListener("keydown", function (ev) {
-            if (ev.which <= 40 && ev.which >= 37 || ev.which == 13) {
-                ev.stopPropagation()
-            }
-        })
+
+  Polymer({
+    is: "code-mirror",
+    behaviors: [EscherMixins.LifeCycle],
+
+    properties: {
+      value: {
+        type: String,
+        value: '',
+        observer: "_valueChanged"
       },
-      refresh: function() {
-        this.mirror.refresh();
+      mode: {
+        type: String,
+        value: 'julia',
+        observer: "_modeChanged"
       },
-      valueChanged: function() {
-        this.mirror.setValue(this.value);
+      theme: {
+        type: String,
+        value: 'elegant',
+        observer: "_themeChanged"
       },
-      modeChanged: function() {
-        this.mirror.setOption('mode', this.mode);
+      tabSize: {
+        type: Number,
+        value: 2,
+        observer: "_tabSizeChanged"
       },
-      themeChanged: function() {
-        this.mirror.setOption('theme', this.theme);
-      },
-      tabSizeChanged: function() {
-        this.mirror.setOption('tabSize', this.tabSize);
-      },
-      lineNumbersChanged: function() {
-        this.mirror.setOption('lineNumbers', this.lineNumbers);
-      },
-      focus: function() {
-        this.mirror.focus();
+      lineNumbers: {
+        type: Boolean,
+        value: true,
+        observer: "_lineNumbersChanged"
       }
-    });
+    },
+
+    // mutation observers
+    _valueChanged: function() {
+      if (this.mirror) {
+        this.mirror.setValue(this.value);
+      }
+    },
+    _modeChanged: function() {
+      //this.$.mode.src = this._modeScript(this.mode)
+      //console.log("loading JS", this.mode)
+      if (this.mirror) {
+        this.mirror.setOption('mode', this.mode)
+      }
+    },
+    _themeChanged: function() {
+      //this.$.theme.href = this._themeStylesheet(this.theme)
+      //console.log("loading CSS", this.theme)
+      if (this.mirror) {
+        this.mirror.setOption('theme', this.theme);
+      }
+    },
+    _tabSizeChanged: function() {
+      if (this.mirror) {
+        this.mirror.setOption('tabSize', this.tabSize);
+      }
+    },
+    _lineNumbersChanged: function () {
+      if (this.mirror) {
+        this.mirror.setOption('lineNumbers', this.lineNumbers);
+      }
+    },
+
+
+    // utility functions
+    _themeStylesheet: function (theme) {
+      return "codemirror/theme/" + theme + ".css"
+    },
+    _modeScript: function (mode) {
+      return "codemirror/mode/" + mode + "/" + mode + ".js"
+    },
+
+    ready: function () {
+      this.mirror = CodeMirror(this, {
+        value: this.value || this.textContent,
+        mode: this.mode,
+        theme: this.theme,
+        tabSize: this.tabSize,
+        readOnly: this.readOnly,
+        lineNumbers: this.lineNumbers,
+        viewportMargin: Infinity,
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers"]
+      });
+   },
+
+  get immediateValue () {
+    if (this.mirror) {
+      return this.mirror.getValue()
+    } else {
+      return ""
+    }
+  },
+    domInit: function() {
+      //this.$.theme.href = this._themeStylesheet(this.theme)
+      //this.$.mode.src = this._modeScript(this.mode)
+
+
+      var self = this
+
+      this.mirror.on("change", function () {
+          self.fire("change")
+      })
+
+      setTimeout(function(){self.mirror.refresh()}, 100) // FIXME: Why is this required??
+    }
+  });
   </script>
-</polymer-element>
+</dom-module>

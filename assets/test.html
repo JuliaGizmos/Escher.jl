@@ -1,4 +1,35 @@
-<script>
+<html>
+<head>
+  <script src="bower_components/webcomponentsjs/webcomponents.min.js"></script>
+  <script src="bower_components/web-component-tester/browser.js"></script>
+  <link rel="import" href="bower_components/test-fixture/test-fixture.html">
+  <script src="bower_components/test-fixture/test-fixture-mocha.js"></script>
+  <link rel="import" href="bower_components/paper-button/paper-button.html">
+</head>
 
-    alert("hello!")
-</script>
+<body>
+  <test-fixture id="pb">
+    <template>
+    <paper-button>Test button</paper-button>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite("paper-button", function () {
+        var btn
+        setup(function () {
+          btn = fixture("pb")
+        })
+        test("the toggle button activates when clicked", function () {
+          btn.toggles = true
+          btn.click()
+        })
+        test("the toggle button", function () {
+          btn.click()
+          expect(btn.active).to.be.equal(false)
+        })
+    })
+  </script>
+</body>
+
+</html>

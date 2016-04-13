@@ -1,7 +1,26 @@
 paper-toggle-button
 ===================
 
-**This element is compatible with Polymer 0.5 and lower only, and will be deprecated.**  
-You can check out a similar 0.8-compatible version of this element at [https://github.com/polymerelements/paper-toggle-button](https://github.com/polymerelements/paper-toggle-button)
+`paper-toggle-button` provides a ON/OFF switch that user can toggle the state
+by tapping or by dragging the swtich.
 
-See the [component page](https://www.polymer-project.org/0.5/docs/elements/paper-toggle-button.html) for more information.
+Example:
+
+```html
+<paper-toggle-button></paper-toggle-button>
+```
+
+Styling toggle-button:
+
+```html
+<style is="custom-style">
+  * {
+    --paper-toggle-button-unchecked-bar-color: #FF4081;
+    --paper-toggle-button-unchecked-button-color: #9c27b0;
+    --paper-toggle-button-unchecked-ink-color: #009688;
+    --paper-toggle-button-checked-bar-color: #5677fc;
+    --paper-toggle-button-checked-button-color: #ff4081;
+    --paper-toggle-button-checked-ink-color: #ff4081;
+  }
+</style>
+```

@@ -1,146 +1,212 @@
-<!-- a signal -->
+<script>
 
-<polymer-element
-    name="reactive-signal"
-    attributes="name value" >
+EscherMixins.ReactiveSignal = {
+  properties: {
+    name: {
+      type: String,
+      value: null,
+      observer: "_nameChanged"
+    },
+    index: {
+      type: Number,
+      value: false
+    },
+    bubbles: {
+      type: Boolean,
+      value: false
+    },
+    selector: {
+      type: String,
+      value: "::parent"
+    }
+  },
+
+  // This should be overriden by children
+  // for the benefit of signal-sampler
+  getValue: function () {
+    return this.value
+  },
+
+  findElem: function () {
+    var self = Polymer.dom(this)
+    if (this.selector === "::parent") {
+      return self.parentNode
+    } else {
+      return self.parentNode.querySelector(this.selector)
+    }
+  },
+
+  setId: function (name) {
+    this.setAttribute("id", "signal-" + (name || this.name))
+  },
+
+  _nameChanged: function (name) {
+    this.setId(name)
+  },
+
+  getNamedSignal: function (elem, name) {
+    return elem._escherSignals && elem._escherSignals[name]
+  },
+
+  update: function (sourceElement, value) {
+    this.value = value // Save for the sampler
+    this.fire("signal-updated", {
+      name: this.name,
+      index: this.index,
+      source: sourceElement,
+
+      value: value
+    },
+    { bubbles: this.bubbles || false }
+    )
+    if (this.bubbles && !this.parentNode) {
+      Polymer.dom(this).parentNode.fire("signal-updated", {
+        name: this.name,
+        index: this.index,
+        source: sourceElement,
+
+        value: value
+      },
+      { bubbles: this.bubbles || false }
+      )
+    }
+  }
+}
+
+</script>
+
+
+<dom-module
+  id="stop-bubbling" >
 
 <template></template>
 
 <script>
 
 Polymer({
-    name: null,
-    value: null,
-    elem: null,
-    type: "Any",
-    findElem: function () {
-        var elem = this.elem
-        if (elem === null || elem === "::parent") {
-            elem = this.parentNode
-        } else if (typeof(elem) === "string") {
-            elem = this.parentNode.querySelector(this.elem)
-        }
-        return elem
-    },
-    domReady: function () {
-        this.setAttribute("id", "signal-" + this.name)
-    },
-    update: function () {
-        // console.log("signal updated", a,b,c)
-        this.fire("signal-updated", {
-            name: this.name,
-            source: this,
-            value: this.value
-        })
+  is: "stop-bubbling",
+  properties: {
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+    names: {
+      type: Array,
+      value: []
     }
+  },
+
+  domInit: function () {
+    var self = this, elem = this.findElem()
+
+    elem.addEventListener("signal-updated", function (ev) {
+        if (self.names.indexOf(ev.detail.name) >= 0) {
+            ev.stopPorpagation()
+        }
+    })
+
+  }
 })
 
 </script>
 
-</polymer-element>
+</dom-module>
 
 
-<polymer-element
-    name="stop-propagation"
-    attributes="name" >
-<template><content></content></template>
-
-<script>
-    Polymer({
-        names: [],
-        elem: null,
-        domReady: function () {
-            var self = this
-            this.elem = this.elem || this.parentNode
-            this.elem.addEventListener("signal-updated", function (ev) {
-                if (self.names.indexOf(ev.detail.name) > 0) {
-                    ev.stopPorpagation()
-                }
-            })
-        }
-    })
-
-</script>
-
-</polymer-element>
-
-
-<polymer-element
-    name="signal-transport"
-    attributes="signalId name" >
-
-<template><content></content></template>
-
-<script>
-    Polymer({
-        signalId: null,
-        name: null,
-        elem: null,
-        domReady: function () {
-            var self = this
-            this.elem = this.elem || this.parentNode
-            this.elem.addEventListener("signal-updated", function (ev) {
-                if (self.name == ev.detail.name) {
-                    self.fire("signal-transport", {
-                        signalId: self.signalId,
-                        value: ev.detail.value
-                    }) // bail
-                }
-            })
-        }
-    })
-</script>
-
-</polymer-element>
-
-
-
-<polymer-element
-    name="chan-send"
-    attributes="chan watch">
+<dom-module
+  id="signal-transport" >
 
 <template></template>
 
 <script>
-    Polymer({
-        chan: null,
-        watch: null,
-        domReady: function () {
-            var self = this
-            this.elem = this.elem || this.parentNode
 
-            console.log("Setting up chan-send", this.chan, this.watch)
-            this.elem.addEventListener("signal-updated", function (ev) {
-                if (self.watch == ev.detail.name) {
-                    self.elem.fire("chan-updated-" + self.chan, {
-                        value: ev.detail.value
-                    })
-                }
-            })
-        }
+Polymer({
+
+  is: "signal-transport",
+  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+  properties: {
+    signalId: String,
+    name: String
+  },
+
+  domInit: function () {
+    var self = this, elem = this.findElem()
+
+    elem.addEventListener("signal-updated", function (ev) {
+      Polymer.Base.fire.call(document, "signal-transport", {
+        signalId: self.signalId,
+        value: ev.detail.value
+      }) // Hand-off new signal value to web socket
     })
-</script>
-</polymer-element>
+  }
+})
 
-<polymer-element
+</script>
+
+</dom-module>
+
+
+
+<dom-module
+  id="chan-send" >
+
+<template></template>
+
+<script>
+
+Polymer({
+    is: "chan-send",
+
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+    properties: {
+      chan: String,
+      watch: String,
+    },
+
+    domInit: function () {
+      var self = this,
+        elem = this.findElem()
+
+      //console.log("Setting up chan-send", this.chan, this.watch)
+      elem.addEventListener("signal-updated", function (ev) {
+        elem.fire("chan-updated-" + self.chan, {
+            value: ev.detail.value
+        })
+      })
+    }
+})
+
+</script>
+</dom-module>
+
+
+
+<dom-module
     name="chan-recv"
     attributes="chan attr">
 
 <template></template>
 
 <script>
-    Polymer({
-        chan: null,
-        attr: null,
-        domReady: function () {
-            var self = this
-            this.elem = this.elem || this.parentNode
 
-            console.log("Setting up chan-recv", this.chan, this.attr)
-            document.addEventListener("chan-updated-" + this.chan, function (ev) {
-                self.elem[self.attr] = ev.detail.value
-            })
-        }
-    })
+  Polymer({
+    is: "chan-recv",
+
+    behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+    properties: {
+      chan: String,
+      attr: String,
+    },
+    domInit: function () {
+        var self = this,
+          elem = this.findElem()
+
+        document.addEventListener("chan-updated-" + this.chan, function (ev) {
+            elem.setAttribute(self.attr, ev.detail.value)
+        })
+    }
+})
+
 </script>
-</polymer-element>
+
+</dom-module>
