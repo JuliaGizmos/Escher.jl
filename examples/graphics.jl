@@ -10,10 +10,11 @@ function main(window)
 
         vskip(1em),
         h2("Vector Graphics"),
-        md"Any [Compose.jl](http://composejl.org/) graphic can be readily used inside Escher.",
+        md"Any [Compose.jl](http://composejl.org/) graphic can be used inside Escher if you install the `ComposeDiff` package. ",
         vskip(1em),
         listing("""
         using Compose
+        using ComposeDiff
         duck = compose(context(), 
           (context(), circle(0.45cx, 0.15cy, 0.02cx), fill("white")),
           (context(), circle(0.55cx, 0.15cy, 0.02cx), fill("white")),
