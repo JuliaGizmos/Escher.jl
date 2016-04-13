@@ -50,7 +50,7 @@ board_signal = flatten(
 ### View ###
 
 
-colors = ["#fff", colormap("reds", 7)]
+colors = ["#fff"; colormap("reds", 7)]
 
 box(content, color) =
     inset(Escher.middle,
