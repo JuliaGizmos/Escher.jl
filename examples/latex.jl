@@ -17,11 +17,3 @@ function main(window)
              tex(t, block=mode)) |> Escher.pad(1em) |> maxwidth(30em)
     end
 end
-
-function main(window)
-    push!(window.assets, "tex")
-
-    tex("""f(x) = \\int_{-\\infty}^\\infty
-        \\hat f(\\xi)\\,e^{2 \\pi i \\xi x}
-        \\,d\\xi""")
-end
