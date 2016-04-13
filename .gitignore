@@ -4,5 +4,6 @@
 *#
 assets/bower_components
 assets/build
+docs/build
 
 .DS_Store
