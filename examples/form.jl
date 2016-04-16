@@ -1,3 +1,4 @@
+using Reactive
 function main(window)
     push!(window.assets, "widgets")
 

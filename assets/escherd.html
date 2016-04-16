@@ -50,10 +50,10 @@ function teelog(x) {
            }
             if (typeof(window.Blink) !== "undefined") {
                 Escher.send = function (data) {
-                    Blink.msg("escher", data)
+                  console.log("Sending ", data)
+                  Blink.msg("escher", data)
                 }
                 Escher.recv = function (data) {
-                  console.log(data)
                   global_handle_message(data)
                 }
             } else {
