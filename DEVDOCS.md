@@ -18,20 +18,21 @@ The `@api` macro lets Escher use a high-level DSL for defining the API for a Til
 
 ```julia
 @api <constructor_name> => (<TypeName>  <: Tile) begin
+  doc(md"<documentation string>")
   <arg_specifics> # one or more
 end
 ```
 
 This expression generates a type whose name is `<TypeName>`, while the constructor itself will be named `<constructor_name>`. The convention in Escher is to use lower cased names for the actual constructors and CamelCased names for the types.
 
-`<arg_specifics>` can be one of:
+The fields are defined by on or more `<arg_specifics>`. The annotation also includes information about how the filed figures as an arguement in the constructor. `<arg_specifics>` can be one of:
 
 - `arg(x::SomeType)`
   - **it becomes:** `x::Any` in all method signatures, argument will be converted to `SomeType` before construction.
   - **what it means for the caller:** it's a normal argument. the value gets converted to the right type if it can be.
 - `arg(x::SomeType=default_value)`
   - **results in** two kinds of method signatures, one with `x::Any`, argument will be converted to `SomeType` before construction; the other is without `x` in the list of arguments, the constructor then uses the default value in its place.
-  - **it means** the argument is not required, if it's missing the default value is used. It's similar to Julia's trailing optional arguments, but they can appear in the beginning of an argument list too.
+  - **it means** the argument is not required, if it's missing the default value is used. It's similar to Julia's trailing optional arguments, but it can appear in the beginning of an argument list too.
 - `kwarg(x::SomeType=default_value)`
   - **it becomes**  `x=default_value` (kwarg) in all method definitions, argument will be converted to `SomeType`.
   - **it means** it's a regular old keyword argument. the value gets converted to the right type if it can be.
@@ -45,7 +46,7 @@ This expression generates a type whose name is `<TypeName>`, while the construct
    - **means** a keyword argument which must be a `SomeType` instance
 - `curry(x::SomeType)`
    - **results in** the creation of two kinds of methods. One which has the argument `x::SomeType` in its signature, another that does not have an argument in its place. The latter method returns a lambda that takes `x` and calls the former method to actually construct the type.
-   - **means** if this argument is missing, then you get back a lambda which you can call with the missing argument. Usually only the last non-keyword argument, if any, is created with `curry`. This makes `|>` convenient to use in many cases.
+   - **means** if this argument is missing, then you get back a lambda which you can call with the missing argument. Usually only the last non-keyword argument, if any, is created with `curry`. This makes `|>` convenient to use in many cases. This argument encourages a free-flowing experimental style. You can more easily write `<a long expression> |> x` than `x(<a long expression>)`, handy while playing with changes, sometimes `|>` reads better.
 
 For example:
 
@@ -62,12 +63,20 @@ will generate the definitions:
 
 ```julia
 border(side::Any, tile::Any; color=colorant"black", thickness::Length=1pt) = Bordered(side, convert(Tile, tile), convert(Color, color), thickness)
-border(side::Any; color=colorant"black", thickness::Length=1pt) = Bordered(side, tile, convert(Color, color), thickness)
+border(side::Any; color=colorant"black", thickness::Length=1pt) = tile -> Bordered(side, tile, convert(Color, color), thickness)
 ```
 
-The `tile` argument is the object that will be getting the border in this case. This is a general style in Julia, you construct new tiles to endow some property to a tile.
+The `tile` argument is the object that will be getting the border in this case. This is a general style in Julia, you construct new tiles to endow some property to an input tile.
 
-Let's complicate a bit more with a `typedarg`:
+The user can call it in two different ways.
+
+```julia
+border(side, tile, color=my_color, thickness=2pt)
+tile |> border(side, color=my_color, thickness=2pt)
+```
+
+Let's complicate this API a bit more with a `typedarg`:
+
 ```julia
 @api border => (Bordered <: Tile) begin
     arg(style::BorderStyle)
@@ -92,8 +101,15 @@ border(style::Any, side::Array{Side}; color=colorant"black", thickness::Length=1
 border(style::Any; color=colorant"black", thickness::Length=1pt) =
   tile -> Bordered(convert(BorderStyle, style), [left,right,top,bottom], tile, convert(Color, color), thickness)
 
-border(style::Any; color=colorant"black", thickness::Length=1pt) =
-  tile -> Bordered(convert(BorderStyle, style), [left,right,top,bottom], tile, convert(Color, color), thickness)
+```
+
+So the possible invocations are:
+
+```julia
+border(dotted, [left], tile, color=colorant"blue") # => Bordered(Dotted(), [Left()], FooTile(), RGB(...))
+tile |> border(dotted, [left], color=colorant"red") # => Bordered(Dotted(), [Left()], FooTile(), RGB(...))
+border(dotted, tile, color=colorant"red")  # => Bordered(Dotted(), [Left(),Right(),Top(),Bottom()], FooTile(), RGB(...))
+tile |> border(dotted, color=colorant"red") # => Bordered(Dotted(), [Left(),Right(),Top(),Bottom()], FooTile(), RGB(...))
 ```
 
 Type parameters can be involved in `@api` definitions, for example.
@@ -105,6 +121,10 @@ Type parameters can be involved in `@api` definitions, for example.
     kwarg(color::Color=colorant"black")
 end
 ```
+
+**Documenting with `@api`**
+
+A `doc(md"<doc string>")` expression defines the documentation of a Tile constructor. The arg pecs take a keyword argument `doc=""` which can define the documentation of each argument (e.g. `arg(color::Color, doc="border color.")`. This is what gets used while generating the API documentation at escher-jl.org.
 
 TODO:
 - example invocations of the generated methods
