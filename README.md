@@ -133,7 +133,7 @@ HTML Templates for dependencies which are not always required ([Widgets](http://
 For your reference, the default HTML content of the `assets/` folder is listed below:
 
 no | HTML file | content | API | loading-time
--- | ----- | ----------- | --- | ----------
+-- | --------- | ------- | --- | ------------
 1 | animations.html | HTML animations elements | - | user
 2 | basics.html | imported by every Escher page implicitly. It loads Polymer, escherd.html, signals.html, behavior.html and the default stylesheets, in that order. | | auto
 3 | behaviour.html |  contains custom elements used to set up the most basic event handlers, such as clickable-behavior, keypress-behavior, watch-state (fired when some attribute of the parent changes). | [Behavior](http://escher-jl.org/behavior-api.html) | auto
