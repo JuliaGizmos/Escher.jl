@@ -334,7 +334,7 @@ end
 
 The [Higher Order Layout API](http://escher-jl.org/layout2-api.html) provides ready-to-use interactive `Tiles` like tabs, pages, menus etc.
 
-**Examples**
+**Example**
 ```julia
 function main(window)
     # create the tabs
