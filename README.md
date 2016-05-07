@@ -132,20 +132,20 @@ HTML Templates for dependencies which are not always required ([Widgets](http://
 
 For your reference, the default HTML content of the `assets/` folder is listed below:
 
-no | HTML file | content | API | loading-time
--- | --------- | ------- | --- | ------------
-1 | animations.html | HTML animations elements | - | user
-2 | basics.html | imported by every Escher page implicitly. It loads Polymer, escherd.html, signals.html, behavior.html and the default stylesheets, in that order. | | auto
-3 | behaviour.html |  contains custom elements used to set up the most basic event handlers, such as clickable-behavior, keypress-behavior, watch-state (fired when some attribute of the parent changes). | [Behavior](http://escher-jl.org/behavior-api.html) | auto
-4 | camera.html | camera widget custom element | - | user
-5 | codemirror.html | codemirror HTML element | [Widgets](http://escher-jl.org/widgets-api.html) | user
-6 | date.html | datepicker HTML element | [Widgets](http://escher-jl.org/widgets-api.html) | user
-7 | escherd.html | it sets up the comunications with the browser side code | | auto
-8 | icons.html | icon and icon button elements | [Higher Order Layouts](http://escher-jl.org/layout2-api.html) | user
-9 | layout2.html | advanced layout elements like menus, tabs, pages etc. | [Higher Order Layouts](http://escher-jl.org/layout2-api.html) | user
-10 | signals.html | the elements here correspond to those rendered by basics/signal.jl signal-transport element, which is used to annotate that another element would like to send some events to the server. | [Signal](http://escher-jl.org/signal-api.html) | auto
-11 | tex.html | TeX/LaTeX element | [TeX](http://escher-jl.org/tex-api.html) | user
-12 | widgets.html | interactive HTML elements like buttons, text input etc. | [Widgets](http://escher-jl.org/widgets-api.html) | user
+| no | HTML file | content | API | loading-time |
+| --- | --------- | ------- | --- | ------------ |
+| 1 | animations.html | HTML animations elements | - | user |
+| 2 | basics.html | imported by every Escher page implicitly. It loads Polymer, escherd.html, signals.html, behavior.html and the default stylesheets, in that order. | | auto |
+| 3 | behaviour.html |  contains custom elements used to set up the most basic event handlers, such as clickable-behavior, keypress-behavior, watch-state (fired when some attribute of the parent changes). | [Behavior](http://escher-jl.org/behavior-api.html) | auto |
+| 4 | camera.html | camera widget custom element | - | user |
+| 5 | codemirror.html | codemirror HTML element | [Widgets](http://escher-jl.org/widgets-api.html) | user |
+| 6 | date.html | datepicker HTML element | [Widgets](http://escher-jl.org/widgets-api.html) | user |
+| 7 | escherd.html | it sets up the comunications with the browser side code | | auto |
+| 8 | icons.html | icon and icon button elements | [Higher Order Layouts](http://escher-jl.org/layout2-api.html) | user |
+| 9 | layout2.html | advanced layout elements like menus, tabs, pages etc. | [Higher Order Layouts](http://escher-jl.org/layout2-api.html) | user |
+| 10 | signals.html | the elements here correspond to those rendered by basics/signal.jl signal-transport element, which is used to annotate that another element would like to send some events to the server. | [Signal](http://escher-jl.org/signal-api.html) | auto |
+| 11 | tex.html | TeX/LaTeX element | [TeX](http://escher-jl.org/tex-api.html) | user |
+| 12 | widgets.html | interactive HTML elements like buttons, text input etc. | [Widgets](http://escher-jl.org/widgets-api.html) | user |
 
 For detailed information, not required for general use, please read the Browser-Side Section of this [documentation](https://github.com/shashi/Escher.jl/blob/master/DEVDOCS.md).
 
