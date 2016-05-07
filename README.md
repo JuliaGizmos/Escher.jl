@@ -397,7 +397,7 @@ function main(window)
     input_signal = Signal(X)
 
     # link a widget to the input_signal to create a linked_widget / linked_signal
-    linked_signal = subscribe(widget, input_signal)
+    linked_signal = subscribe(input_signal, widget)
 
     # create a Signal of UI as a return UI_expression
     # output_signal = Signal(UI_function(linked_signal)) = map(UI_function, linked_signal)
@@ -429,7 +429,7 @@ function main(window)
 
     # create a Signal of UI as a return UI_expression
     # in this simple case, the liked_signal is passed as a UI_expression
-    connected_slider = subscribe(slider(0:7), iterations)
+    connected_slider = subscribe(iterations, slider(0:7))
 end
 ```
 
@@ -452,7 +452,7 @@ function main(window)
     iterations = Signal(5)
 
      # link a widget to the iterations Signal to create a connected_slider
-    connected_slider = subscribe(slider(0:7, value=5), iterations)
+    connected_slider = subscribe(iterations, slider(0:7, value=5))
 
     # create a Signal of UI as a return UI_expression
     map(iterations) do n
