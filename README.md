@@ -314,7 +314,7 @@ For general `Tile` use, like `border`, `bordercolor`, `borderwidth` etc., you ca
 
 ##### 4.2.3.1. Basic Layouts
 
-Escher provides primitives like `hbox`, `vbox`, `hskip`, `vskip`, and `flex` for laying out tiles into grids. Complex layouts can be composed from smaller parts. For detailed information, please read the [Guide](http://escher-jl.org/layout-guide.html) and the [Layout API](http://escher-jl.org/layout-api.html).
+Escher provides primitives like `hbox`, `vbox`, `hskip`, `vskip`, and `flex` for laying out tiles into grids. Complex layouts can be composed from smaller parts. For detailed information, please read the [Layout Guide](http://escher-jl.org/layout-guide.html) and the [Layout API](http://escher-jl.org/layout-api.html).
 
 **Example**
 ```julia
@@ -380,7 +380,7 @@ Moreover, using the curried version with the `|>` infix operator makes for code 
 
 #### 4.2.5. Interactive UI
 
-**Reactive.jl** package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time. Reactive.jl's [documentation](http://julialang.org/Reactive.jl/) provides an overview of the `Signal` framework. At this point it is highly recommended that you read it. Also, you shold read the Escher [Signal API](http://escher-jl.org/signal-api.html).
+**Reactive.jl** package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time. Reactive.jl's [documentation](http://julialang.org/Reactive.jl/) provides an overview of the `Signal` framework. At this point it is highly recommended that you read it. Also, you should read the Escher [Signal API](http://escher-jl.org/signal-api.html).
 
 There are two facets to this rule:
 - Getting the input from tiles
