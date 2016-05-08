@@ -298,7 +298,7 @@ end
 
 ---------------------------------------------
 
-
+![Gadfly Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/gadfly_tile.png "Gadfly Tile")
 
 ---------------------------------------------
 
@@ -338,7 +338,7 @@ end
 
 ---------------------------------------------
 
-
+![Compose Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/compose_tile.png "Compose Tile")
 
 ---------------------------------------------
 
@@ -351,7 +351,7 @@ If, instead of `Tile`, other type of value is used, Escher will try to convert i
 
 ```julia
 function main(window)
-    pad(1em, "Simple text")
+    fillcolor("pink", pad(1em, "Simple text"))
 end
 ```
 
@@ -359,7 +359,7 @@ end
 
 ---------------------------------------------
 
-
+![Text Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/text_tile.png "Text Tile")
 
 ---------------------------------------------
 
@@ -395,7 +395,7 @@ end
 
 ---------------------------------------------
 
-
+![Basic Layout Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/basic_layout_tile.png "Basic Layout Tile")
 
 ---------------------------------------------
 
@@ -435,7 +435,7 @@ The `pages` function combines tiles into a set of pages - only a single page is 
 
 ---------------------------------------------
 
-
+![Higher Order Layout Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/higher_order_layout_tile.png "Higher Order Layout Tile")
 
 ---------------------------------------------
 
