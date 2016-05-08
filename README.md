@@ -405,6 +405,8 @@ The [Higher Order Layout API](http://escher-jl.org/layout2-api.html) provides re
 
 **Example:**
 ```julia
+using Compose, Gadfly
+
 function main(window)
     # create the tabs
     tabbar = tabs([
