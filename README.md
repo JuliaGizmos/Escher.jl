@@ -200,6 +200,14 @@ function main(window)
 end
 ```
 
+**Output:**
+
+---------------------------------------------
+
+![Empty Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/empty tile.png "Empty Tile")
+
+---------------------------------------------
+
 A second kind of empty tiles are created with the `hline` and `vline` functions, from the [Embellishment API](http://escher-jl.org/embellishment-api.html). These are used to create horizontal and vertical lines, and they return bordered tiles of height or width `0`.
 
 ##### 4.2.1.2. Create Text Tiles
@@ -212,6 +220,14 @@ function main(window)
     plaintext("Hello, World!")
 end
 ```
+
+**Output:**
+
+---------------------------------------------
+
+Hello World!
+
+---------------------------------------------
 
 ##### 4.2.1.3. Other Content Tiles
 
@@ -233,6 +249,17 @@ function main(window)
 end
 ```
 
+**Output:**
+
+---------------------------------------------
+
+**Things to do:**
+
+- Create *universe*
+- Make a *pie*
+
+---------------------------------------------
+
 ##### 4.2.1.5. Create TeX Tiles
 
 The `tex` function creates a TeX tile. This one requires to load the `"tex"` asset.
@@ -246,6 +273,14 @@ function main(window)
 end
 ```
 
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
+
 ##### 4.2.1.6. Create Plot Tiles
 
 [Gadfly](http://gadflyjl.org/) plots are essentially immutable values too. Escher type-casts Gadfly plots to tiles. Gadfly module is not loaded by default, it may take a while to load for the first time.
@@ -258,6 +293,14 @@ function main(window)
     plot(z=(x,y) -> x*exp(-(x-int(x))^2-y^2), x=linspace(-8,8,150), y=linspace(-2,2,150), Geom.contour)
 end
 ```
+
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
 
 ##### 4.2.1.7. Create Vector Graphics
 
@@ -291,9 +334,20 @@ function main(window)
 end
 ```
 
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
+
+
 ##### 4.2.1.8. Converting other Types to Tile
 
 If, instead of `Tile`, other type of value is used, Escher will try to convert it to one. One such examples is using textual data, like `String`. The next line of code is valid and will return a `Tile` with the content `"Simple text"` and a `1em` padding.
+
+**Example:**
 
 ```julia
 function main(window)
@@ -301,6 +355,13 @@ function main(window)
 end
 ```
 
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
 
 #### 4.2.2. Customize Tiles
 
@@ -314,9 +375,9 @@ For general `Tile` use, like `border`, `bordercolor`, `borderwidth` etc., you ca
 
 ##### 4.2.3.1. Basic Layouts
 
-Escher provides primitives like `hbox`, `vbox`, `hskip`, `vskip`, and `flex` for laying out tiles into grids. Complex layouts can be composed from smaller parts. For detailed information, please read the [Layout Guide](http://escher-jl.org/layout-guide.html) and the [Layout API](http://escher-jl.org/layout-api.html).
+Escher provides primitives like `hbox`, `vbox`, `hskip`, `vskip`, and `flex` for laying out tiles into grids. Complex layouts can be composed from smaller parts. For detailed information, please read the [Guide](http://escher-jl.org/layout-guide.html) and the [Layout API](http://escher-jl.org/layout-api.html).
 
-**Example**
+**Example:**
 ```julia
 a,b,c,d = map(fillcolor, ["#837", "#859", "#892", "#875"],
     map(pad([left, right], 1em), ["A", "B", "C", "D"]))
@@ -330,11 +391,19 @@ end
 ```
 `x` and `y` are vertial arrangements of 4 tiles each, these arrangements are themselves put in a `hbox` to place `x` next to `y`.
 
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
+
 ##### 4.2.3.2. Higher Order Layouts
 
 The [Higher Order Layout API](http://escher-jl.org/layout2-api.html) provides ready-to-use interactive `Tiles` like tabs, pages, menus etc.
 
-**Example**
+**Example:**
 ```julia
 function main(window)
     # create the tabs
@@ -362,6 +431,14 @@ end
 
 The `pages` function combines tiles into a set of pages - only a single page is visible at a time. Pages can be combined with `tabs` to allow switching between pages.
 
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
+
 A special case is the [Slideshow API](http://escher-jl.org/slideshow-api.html), used in presentations to create Julia slideshows.
 
 Another useful feature is the `class` function found in the [Utils API](http://escher-jl.org/util-api.html).
@@ -380,7 +457,7 @@ Moreover, using the curried version with the `|>` infix operator makes for code 
 
 #### 4.2.5. Interactive UI
 
-**Reactive.jl** package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time. Reactive.jl's [documentation](http://julialang.org/Reactive.jl/) provides an overview of the `Signal` framework. At this point it is highly recommended that you read it. Also, you should read the Escher [Signal API](http://escher-jl.org/signal-api.html).
+**Reactive.jl** package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time. Reactive.jl's [documentation](http://julialang.org/Reactive.jl/) provides an overview of the `Signal` framework. At this point it is highly recommended that you read it. Also, you shold read the Escher [Signal API](http://escher-jl.org/signal-api.html).
 
 There are two facets to this rule:
 - Getting the input from tiles
@@ -405,7 +482,8 @@ function main(window)
 end
 ```
 
-Please note that the `UI_function` can be replaced with the **Do-Block Syntax** and ` map(UI_function, linked_signal)` will become
+Please note that the `UI_function` can be replaced with the **Do-Block Syntax** and ` map(UI_function, linked_signal)` will become:
+
 ```julia
 map(linked_signal) do args
     # function_body
@@ -418,7 +496,7 @@ Also note that multiple Signals can be used and passed as arguments to the UI_fu
 
 Some `Tiles` (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to Reactive's `Signal` signals. Widgets such as sliders, buttons, dropdown menus are subtypes of Behavior. The function `subscribe` lets you pipe updates from a behavior into a signal.
 
-**Example**
+**Example:**
 ```julia
 function main(window)
     # load assets, in this case "widgets"
@@ -435,11 +513,19 @@ end
 
 The `connected_slider` renders as a slider and updates the signal iterations when the slider's knob is moved by the user.
 
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
+
 ##### 4.2.5.2. Getting the input from tiles
 
 Let's now use the iterations signal to show an interactive Sierpinski's triangle.
 
-**Example**
+**Example:**
 ```julia
 using Compose
 
@@ -463,6 +549,14 @@ function main(window)
     end
 end
 ```
+
+**Output:**
+
+---------------------------------------------
+
+
+
+---------------------------------------------
 
 ##### 4.2.5.3. Interactive Tiles
 
