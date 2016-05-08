@@ -431,6 +431,8 @@ function main(window)
 end
 ```
 
+For more icon graphics visit the [Polymer Catalog](https://elements.polymer-project.org/elements/iron-icons?view=demo:demo/index.html&active=iron-icons). Choose from the Icons section the one you like, the format is `icons:icon_name` and use it by calling `icon("icon_name")`.
+
 The `pages` function combines tiles into a set of pages - only a single page is visible at a time. Pages can be combined with `tabs` to allow switching between pages.
 
 **Output:**
