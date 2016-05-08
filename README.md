@@ -204,7 +204,7 @@ end
 
 ---------------------------------------------
 
-![Empty Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/empty tile.png "Empty Tile")
+![Empty Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/empty_tile.png "Empty Tile")
 
 ---------------------------------------------
 
