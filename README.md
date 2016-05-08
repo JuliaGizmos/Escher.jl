@@ -269,7 +269,7 @@ The `tex` function creates a TeX tile. This one requires to load the `"tex"` ass
 function main(window)
     push!(window.assets, "tex")
 
-    tex("cos(x)")
+    tex("cos(x^2)")
 end
 ```
 
