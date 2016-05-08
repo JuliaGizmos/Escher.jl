@@ -277,7 +277,7 @@ end
 
 ---------------------------------------------
 
-
+![TeX Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/tex_tile.png "TeX Tile")
 
 ---------------------------------------------
 
