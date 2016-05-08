@@ -345,7 +345,7 @@ end
 
 ##### 4.2.1.8. Converting other Types to Tile
 
-If, instead of `Tile`, other type of value is used, Escher will try to convert it to one. One such examples is using textual data, like `String`. The next line of code is valid and will return a `Tile` with the content `"Simple text"` and a `1em` padding.
+If, instead of `Tile`, other type of value is used, Escher will try to convert it to one. One such examples is using textual data, like `String`. The next line of code is valid and will return a "pink" `Tile` with the content `"Simple text"` and a `1em` padding.
 
 **Example:**
 
