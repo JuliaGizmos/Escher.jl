@@ -517,7 +517,7 @@ The `connected_slider` renders as a slider and updates the signal iterations whe
 
 ---------------------------------------------
 
-
+![Interactive Tile 1 Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/interactive_tile_1.png "Interactive Tile 1")
 
 ---------------------------------------------
 
@@ -554,7 +554,7 @@ end
 
 ---------------------------------------------
 
-
+![Interactive Tile 2 Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/interactive_tile_2.png "Interactive Tile 2")
 
 ---------------------------------------------
 
