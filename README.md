@@ -117,7 +117,7 @@ A short explanation (for detailed explanation visit the links) of the technologi
 - the webpages are stored on the Browser in a data structure called the [Document Object Model](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model), or DOM
 - to make the interaction between the server and the browser more efficient a copy of the DOM is saved on the server, in what is called a [Local /Shadow /Virtual DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM), and only the changes are sent to the browser.
 
-In Escher's case, the UI starts out as a `UI_expression` `Tile` object, then gets converted /rendered to a [Patchwork.jl](https://github.com/shashi/Patchwork.jl) `Elem` object, in the `Virtual DOM`, and then sent over the network to the Browser as [JSON](http://www.json.org/), where it gets rendered as the `DOM`.
+In Escher's case, the UI starts out as a `UI_expression` `Tile` object, then gets converted /rendered to a [Patchwork.jl](https://github.com/shashi/Patchwork.jl) `Elem` object in the `Virtual DOM`, and then, the changes are sent over the network to the Browser as [JSON](http://www.json.org/), where it gets rendered as the `DOM`.
 
 `UI_expression Escher.Tile -> Patchwork.Elem -> DOM`
 
