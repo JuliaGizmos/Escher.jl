@@ -105,22 +105,15 @@ where:
 ### 4.1. Escher foundation
 
 Escher functionality is based on the
-[Web Components Standard](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
-and makes use of the
-[Google Polymer](https://www.polymer-project.org/1.0/docs/start/what-is-polymer.html)
-libraries.
+[Web Components Standard](https://developer.mozilla.org/en-US/docs/Web/Web_Components). The key facility of the Web Components spec is that it gives developers the ability to create their own custom [HTML](http://www.w3schools.com/html/html_intro.asp) elements which can have pre-defined behavior which can interact with its parent / sibling / child elements.
 
 > Web Components consists of several separate technologies. You can think of Web Components as reusable user interface widgets that are created using open Web technology. They are part of the browser, and so they do not need external libraries like jQuery or Dojo. An existing Web Component can be used without writing code, simply by adding an import statement to an HTML page. Web Components use new or still-developing standard browser capabilities.
 
-Web Components consists of these four technologies (although each can be used separately):
+A short explanation of the technologies used is that one can create [Custom HTML Elements](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Custom_Elements), have them saved in [HTML Templates](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) and [load /import](https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports) them in the Browser on demand. The webpages are stored on the Browser in a data structure called the [Document Object Model](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model), or DOM. To make the interaction between the server and the browser more efficient a copy of the DOM is saved on the server, in what is called a [Local /Shadow /Virtual DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM), and only the changes are sent to the browser.
 
-- [Custom Elements](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Custom_Elements)
-- [HTML Templates](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template)
-- [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM)
-- [HTML Imports](https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports)
+In Escher's case, the UI starts out as a `UI_expression` `Tile` object, then gets converted /rendered to a [Patchwork.jl](https://github.com/shashi/Patchwork.jl) `Elem` object, in the `Virtual DOM`, which is sent over the network to the Browser as `JSON`, where it gets rendered as the `DOM`.
 
-The basic functionality of Escher may be represented as follows:
-`UI_expression -> Shadow DOM -> DOM`. While the `UI_expression` and the `Shadow DOM` or `Virtual DOM` runs on the server, the `DOM` is run on the client side. The `Virtual DOM` is made available via the [Patchwork.jl](https://github.com/shashi/Patchwork.jl) package. Escher works with `Tile` types and the `Virtual DOM` works with the `Elem` type, so the rendering chain can be written as `Tile -> Elem -> HTML + JS`.
+`UI_expression Escher.Tile -> Patchwork.Elem -> DOM`
 
 Escher uses a bunch of custom HTML elements as well as an off-the-shelf library of [Polymer elements](https://elements.polymer-project.org/). All HTML Templates are stored inside the `assets/` folder in Escher. Basic elements are loaded by default, like [Signal](http://escher-jl.org/signal-api.html) `signals.html`, [Behavior](http://escher-jl.org/behavior-api.html) `behavior.html` and other basic third party custom element libraries (including some Polymer).
 
