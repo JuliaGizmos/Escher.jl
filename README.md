@@ -109,7 +109,13 @@ Escher functionality is based on the
 
 > Web Components consists of several separate technologies. You can think of Web Components as reusable user interface widgets that are created using open Web technology. They are part of the browser, and so they do not need external libraries like jQuery or Dojo. An existing Web Component can be used without writing code, simply by adding an import statement to an HTML page. Web Components use new or still-developing standard browser capabilities.
 
-A short explanation of the technologies used is that one can create [Custom HTML Elements](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Custom_Elements), have them saved in [HTML Templates](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) and [load /import](https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports) them in the Browser on demand. The webpages are stored on the Browser in a data structure called the [Document Object Model](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model), or DOM. To make the interaction between the server and the browser more efficient a copy of the DOM is saved on the server, in what is called a [Local /Shadow /Virtual DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM), and only the changes are sent to the browser.
+A short explanation (for detailed explanation visit the links) of the technologies used is:
+
+- one can create [Custom HTML Elements](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Custom_Elements) to run in the Browser natively without other dependencies.
+- Custom Elements are created from [HTML Templates](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).
+- Templates must be [loaded /imported](https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports) in the webpage, once per page, to provide de source code for Created Elements.
+- the webpages are stored on the Browser in a data structure called the [Document Object Model](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model), or DOM
+- to make the interaction between the server and the browser more efficient a copy of the DOM is saved on the server, in what is called a [Local /Shadow /Virtual DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM), and only the changes are sent to the browser.
 
 In Escher's case, the UI starts out as a `UI_expression` `Tile` object, then gets converted /rendered to a [Patchwork.jl](https://github.com/shashi/Patchwork.jl) `Elem` object, in the `Virtual DOM`, and then sent over the network to the Browser as [JSON](http://www.json.org/), where it gets rendered as the `DOM`.
 
