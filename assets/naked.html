@@ -1,0 +1,35 @@
+<dom-module id="raw-html">
+  <template><span id="rendered"></span></template>
+  <script>
+  Polymer({
+	is: "raw-html",
+	behaviors: [EscherMixins.LifeCycle],
+	render: function() {
+		var isSafari = navigator.vendor && navigator.vendor.indexOf("Apple") > -1 && navigator.userAgent && !navigator.userAgent.match("CriOS");
+		while (this.firstChild) {
+		  this.removeChild(this.firstChild);
+		}
+		// fragmentFromString(strHTML) from http://stackoverflow.com/a/25214113/868184
+		var range = document.createRange();
+		// Safari does not support `createContextualFragment` without selecting a node.
+		if (isSafari) {
+			range.selectNode(this);
+		}
+		var fragment = range.createContextualFragment(this.value);
+		this.appendChild(fragment);
+
+		//this.$.rendered
+	},
+	properties: {
+		value: {
+			type: String,
+			value: '',
+			observer: "_valueChanged"
+		}
+	},
+	_valueChanged: function () {
+		this.render()
+	}
+  });
+  </script>
+</dom-module>

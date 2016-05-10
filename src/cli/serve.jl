@@ -160,9 +160,8 @@ uisocket(dir) = (req) -> begin
 
     Reactive.foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
          window.assets)
-
     main = loadfile(file)
-
+    
     current = Escher.empty
     try
         current = main(window)
