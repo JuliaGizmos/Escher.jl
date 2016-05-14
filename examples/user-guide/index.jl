@@ -1,6 +1,6 @@
-const content = 
+const content =
     vbox(
-        title(1, "Content"),
+        link("content.jl",title(1, "Content")),
         "Rendering everyday Julia objects",
         "Markdown",
         "Font",
@@ -12,7 +12,7 @@ const content =
 
 const layout =
     vbox(
-        title(1, "Layout"),
+        link("layout.jl", title(1, "Layout")),
         "Width and Height",
         md"`hbox` and `vbox`",
         "Padding",
@@ -46,5 +46,5 @@ function main(window)
         hbox(content, hskip(2em), layout),
         hbox(interaction, hskip(2em), widgets_toc),
     ) |> Escher.pad(2em)
-    
+
 end
