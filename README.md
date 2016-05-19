@@ -261,14 +261,20 @@ end
 
 ##### 4.2.1.5. Create TeX Tiles
 
-The `tex` function creates a TeX tile. This one requires to load the `"tex"` asset.
+Escher can create [TeX](https://khan.github.io/KaTeX/) `Tiles` from TeX objects using the `tex(text::LaTeXString)`. TeX asset is not loaded by default.
 
-**Example:**
+To create a LaTeX string there are two options:
+- use the `L" "`, and `L""" """` for multi-line text, macro.
+- use the `latexstring(args...)` function.
+
+The `latexstring(args...)` works in similar fashion to `string(args...)`, supports string interpolation, but the arguments are required to have escaped characters (`\` and `$` become `\\` and `\$`). For more information about the `LaTeXString` type read [here](https://github.com/stevengj/LaTeXStrings.jl).
+
+**Example 4: TeX tile from macro**
 ```julia
 function main(window)
     push!(window.assets, "tex")
 
-    tex("cos(x^2)")
+    tex(L"f(x) = \int_{-\infty}^\infty \hat f(\xi)\,e^{2 \pi i \xi x} \,d\xi")
 end
 ```
 
@@ -276,20 +282,42 @@ end
 
 ---------------------------------------------
 
-![TeX Tile Output](https://github.com/alinchis/Escher.jl/blob/master/assets/img/tex_tile.png "TeX Tile")
+![TeX Tile Output](https://cloud.githubusercontent.com/assets/25916/15371196/03cd08ec-1d58-11e6-90af-b282502ad565.png "TeX Tile")
 
 ---------------------------------------------
+
+**Example 5: TeX tile from function**
+```julia
+function main(window)
+    push!(window.assets, "tex")
+
+    a = "f(x) = \\int_{-\\infty}^\\infty \\hat"
+    b = "f(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi"
+
+    tex(latexstring(a, " ",b))
+end
+```
+
+**Output:**
+
+---------------------------------------------
+
+![TeX Tile Output](https://cloud.githubusercontent.com/assets/25916/15371196/03cd08ec-1d58-11e6-90af-b282502ad565.png "TeX Tile")
+
+---------------------------------------------
+
 
 ##### 4.2.1.6. Create Plot Tiles
 
 [Gadfly](http://gadflyjl.org/) plots are essentially immutable values too. Escher type-casts Gadfly plots to tiles. Gadfly module is not loaded by default, it may take a while to load for the first time.
 
-**Example:**
+**Example 6: Gadfly Plot tile**
 ```julia
 using Gadfly
 
 function main(window)
-    plot(z=(x,y) -> x*exp(-(x-int(x))^2-y^2), x=linspace(-8,8,150), y=linspace(-2,2,150), Geom.contour)
+    plot(z=(x,y) -> x*exp(-(x-int(x))^2-y^2),
+        x=linspace(-8,8,150), y=linspace(-2,2,150), Geom.contour)
 end
 ```
 
