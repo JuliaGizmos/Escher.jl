@@ -25,8 +25,6 @@ $ ln -s ~/.julia/v0.4/Escher/bin/escher /usr/local/bin/
 
 ## 2. Usage
 
-Escher comes with a few example files, you may use them to learn more about the framework. The examples are located in the `examples/` folder in the julia `Escher` package folder, usually `~/.julia/vX.Y/Escher/examples`.
-
 ### 2.1. Start the server
 
 The Escher server will start a web server on port 5555 (default).
@@ -36,11 +34,10 @@ The Escher server will start a web server on port 5555 (default).
 Go to a directory from which you want to serve Escher UI files. You can start with the examples folder.
 ```sh
 $ cd <path-to-escher-ui-files>
-```
-<Escher-package-path/bin>/escher --serve
+$ <Escher-package-path/bin>/escher --serve
 ```
 
-This will bring up a web server on port 5555. The `examples/` directory in `Pkg.dir("Escher")` contains a few examples. After runnnig the escher server from this directory, you can visit `http://localhost:5555/<example-file.jl>` to see the output of `<example-file.jl>`. Note that examples containing plots may take a while to load the first time you visit them.
+Escher comes with a few example files, you may use them to learn more about the framework. The examples are located in the `examples/` folder in the julia `Escher` package folder, usually `~/.julia/vX.Y/Escher/examples`.
 
 #### b. From the Julia REPL
 
@@ -50,7 +47,8 @@ julia> using Escher
 julia> include(Pkg.dir("Escher", "src", "cli", "serve.jl"))
 ```
 
-Move to a directory from which you want to serve Escher UI files. Below, we use the examples folder.
+Move to a directory from which you want to serve Escher UI files.
+
 ```julia
 julia> cd(Pkg.dir("Escher", "examples"))
 ```
@@ -70,8 +68,6 @@ Please Note:
 
 
 ## 3. Escher UI file format
-
-
 
 The most basic Julia Escher UI file may be summed up as below:
 
@@ -94,6 +90,35 @@ where:
 - user `inner_code` should contain code needed for rendering. Such code may be pushing HTML assets to `window.assets` and preparing the content and layout, explained in the UI Build Guide.
 - as with any Julia function, if `return` keyword is missing, the last expression is returned.
 - the returned `UI_expression` is the one used to generate the UI, so everything you need to render needs to be inside it. One can build complex webpages using the layouts API to package the content, explained in the UI Build Guide.
+
+When your files get complicated, or you like to follow protocol, you may need to break the code into sections. Escher is inspired by [Elm language](http://elm-lang.org/) and borrows his file pattern:
+
+- **Model**  : the state af your application
+- **Update** : a way to update your state
+- **View**   : a way to view your state as HTML
+
+With this pattern in mind, the extended general UI Escher file looks like this:
+
+```julia
+# using, import, include statements
+
+### Model ###
+# declare functions to build your application's state
+# declare types and instantiate variables to hold model data
+
+### Update ###
+# declare functions to update the state
+# declare types and instantiate variables to hold update data
+
+### View ###
+# declare functions to display the state
+# declare types and instantiate variables to hold view data
+
+function main(window)
+  # maybe some code
+  UI_expression
+end
+```
 
 
 ## 4. UI Build Guide
@@ -144,7 +169,10 @@ For your reference, the default HTML content of the `assets/` folder is listed b
 
 For detailed information, not required for general use, please read the Browser-Side Section of this [documentation](https://github.com/shashi/Escher.jl/blob/master/DEVDOCS.md).
 
+
 ### 4.2. Escher Basics
+
+#### 4.2.1. Escher `Tile` type
 
 Escher introduces the Julia abstract immutable type `Tile`. Every renderable UI element is a subtype of `Tile`. The return expression of the function `main()`, named `UI_expression` in chapter 3, is a `Tile`.
 
@@ -182,9 +210,24 @@ Run the function on the `Tile` type to get a detailed overview.
 julia> showtypetree(Tile)
 ```
 
-#### 4.2.1. Create Tiles
+#### 4.2.2. Escher `Tile` types use cases
 
-##### 4.2.1.1. Create Empty Tile
+A **Tile** is the basic currency in Escher. Most of the functions in the Escher API take Tiles, among other things, as arguments, and return a `Tile` as the result. Tiles are immutable, once created there is no way to mutate them. When a function is said to be called on a `Tile` it actually returns a new `Tile` with the new characteristics.
+
+A **Behavior** is a `Tile` that can result in a stream of values. The stream of values can be given intents, put into signals, used to trigger updates from other behaviors. See `subscribe`, `intent`, `sampler` and `capture` in the [Signal API](https://github.com/shashi/Escher.jl/blob/master/docs/signal-api.jl).
+
+A **Widget** is an abstract Subtype of `Behavior`. It is used to create interactive `Tiles`.
+
+An **Intent** is a transformation applied to the stream of values coming from a `Behavior Tile`. The purpose of an `Intent` is to turn `Widget` messages into types in the business logic of the application, JSON messages into appropriate values. Attaching an `Intent` to a `Behavior` results in a new `Behavior`. A `Widget` or a `Behavior` has a default `Intent` defined by the `default_intent` generic function. When another `Intent` is attached to a `Behavior`, it gets chained to the default `Intent`.
+
+A **Selection** is an abstract Subtype of `Widget` used to represent elements like `DropdownMenu`, `Menu`, `Pages`, `SlideShow`, `SubMenu` or `Tabs`.
+
+**Flex Container** is a special `Tile` that can stretch or contract inside its context based on set rules.
+
+
+#### 4.2.3. Create Tiles
+
+##### 4.2.3.1. Create Empty Tile
 
 A special kind of `Tile` is the `Escher.Empty`, a concrete subtype of `Escher.Tile` type. It can be created using the `empty` keyword. The following example code will create an empty "orange" `Tile` with the size of `10em` x `10em`:
 
@@ -205,7 +248,7 @@ end
 
 A second kind of empty tiles are created with the `hline` and `vline` functions, from the [Embellishment API](http://escher-jl.org/embellishment-api.html). These are used to create horizontal and vertical lines, and they return bordered tiles of height or width `0`.
 
-##### 4.2.1.2. Create Text Tiles
+##### 4.2.3.2. Create Text Tiles
 
 Functions that can take textual arguments and return a `Tile` are found in the **Typography API**. Some of these functions are `plaintext`, `heading`, `h1`, `h2`, `h3`, `h4`, `title`, `blockquote` and `code`. For detailed information, please see the [documentation](http://escher-jl.org/typography-api.html).
 
@@ -224,11 +267,11 @@ Hello World!
 
 ---------------------------------------------
 
-##### 4.2.1.3. Other Content Tiles
+##### 4.2.3.3. Other Content Tiles
 
 Other kind of content can be created using the `list`, `image`, `link` and `abbr` functions. Detailed information is available in the [Content API](http://escher-jl.org/content-api.html).
 
-##### 4.2.1.4. Create Markdown Tiles
+##### 4.2.3.4. Create Markdown Tiles
 
 A special case for creating tiles is the Markdown tile. The `md""` string macro can generate markdown tiles from a markdown string.
 
@@ -255,7 +298,7 @@ end
 
 ---------------------------------------------
 
-##### 4.2.1.5. Create TeX Tiles
+##### 4.2.3.5. Create TeX Tiles
 
 Escher can create [TeX](https://khan.github.io/KaTeX/) `Tiles` from TeX objects using the `tex(text::LaTeXString)`. TeX asset is not loaded by default.
 
@@ -303,7 +346,7 @@ end
 ---------------------------------------------
 
 
-##### 4.2.1.6. Create Plot Tiles
+##### 4.2.3.6. Create Plot Tiles
 
 [Gadfly](http://gadflyjl.org/) plots are essentially immutable values too. Escher type-casts Gadfly plots to tiles. Gadfly module is not loaded by default, it may take a while to load for the first time.
 
@@ -325,7 +368,7 @@ end
 
 ---------------------------------------------
 
-##### 4.2.1.7. Create Vector Graphics
+##### 4.2.3.7. Create Vector Graphics
 
 [Compose](http://composejl.org/) graphics work the same way as Gadfly plots. Compose and Color madules are not loaded by default.
 
@@ -367,7 +410,7 @@ end
 ---------------------------------------------
 
 
-##### 4.2.1.8. Converting other Types to Tile
+##### 4.2.3.8. Converting other Types to Tile
 
 If, instead of `Tile`, other type of value is used, Escher will try to convert it to one. One such examples is using textual data, like `String`. The next line of code is valid and will return a "pink" `Tile` with the content `"Simple text"` and a `1em` padding. Please note that **Compose** package exports its own version of `pad` function. For this reason it is required that you use `Escher.pad`.
 
@@ -387,7 +430,7 @@ end
 
 ---------------------------------------------
 
-#### 4.2.2. Customize Tiles
+#### 4.2.4. Customize Tiles
 
 Tiles are immutable, when a function is said to modify a `Tile`, it instead returns a different `Tile` with the required specifications.
 
@@ -395,9 +438,9 @@ For the text tiles, there are some specific functions that apply to text, like `
 
 For general `Tile` use, like `border`, `bordercolor`, `borderwidth` etc., you can use the [Embellishment API](http://escher-jl.org/embellishment-api.html).
 
-#### 4.2.3. Layouts
+#### 4.2.5. Layouts
 
-##### 4.2.3.1. Basic Layouts
+##### 4.2.5.1. Basic Layouts
 
 Escher provides primitives like `hbox`, `vbox`, `hskip`, `vskip`, and `flex` for laying out tiles into grids. Complex layouts can be composed from smaller parts. For detailed information, please read the [Guide](http://escher-jl.org/layout-guide.html) and the [Layout API](http://escher-jl.org/layout-api.html).
 
@@ -423,7 +466,7 @@ end
 
 ---------------------------------------------
 
-##### 4.2.3.2. Higher Order Layouts
+##### 4.2.5.2. Higher Order Layouts
 
 The [Higher Order Layout API](http://escher-jl.org/layout2-api.html) provides ready-to-use interactive `Tiles` like tabs, pages, menus etc.
 
@@ -477,7 +520,7 @@ A special case is the [Slideshow API](http://escher-jl.org/slideshow-api.html), 
 
 Another useful feature is the `class` function found in the [Utils API](http://escher-jl.org/util-api.html).
 
-#### 4.2.4. Syntax simplification
+#### 4.2.6. Syntax simplification
 
 While it is possible to chain function calls to obtain the desired result, it quickly becomes cumbersome. Fear not, Escher functions have curried methods: omitting the last `Tile` argument to Escher functions returns a 1-argument function that takes a `Tile` argument.
 
@@ -489,7 +532,7 @@ Therefore, `Escher.pad(10mm, txt)` is equivalent to `Escher.pad(10mm)(txt)` or `
 Moreover, using the curried version with the `|>` infix operator makes for code that reads better.
 
 
-#### 4.2.5. Interactive UI
+#### 4.2.7. Interactive UI
 
 **Reactive.jl** package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time. Reactive.jl's [documentation](http://julialang.org/Reactive.jl/) provides an overview of the `Signal` framework. At this point it is highly recommended that you read it. Also, you shold read the Escher [Signal API](http://escher-jl.org/signal-api.html).
 
@@ -497,38 +540,60 @@ There are two facets to this rule:
 - Getting the input from tiles
 - Creating a signal of UI using these signals
 
-The **general formula** goes something like this:
+In practice, the main function might take the form below. We have used two Signals and two Assets to illustrate how they work together.
 
 ```julia
 function main(window)
-    # load assets, in this case "widgets"
-    push!(window.assets, "widgets")
+    # load "assets" HTML code, for example "widgets" or "tex"
+    push!(window.assets, "assets")
 
-    # create a signal
-    input_signal = Signal(X)
+    # create signals to hold your assets value, with an initial value
+    # Signal can also be typed: Signal{Type}()
+    input_signal_1 = Signal("initial_value_1")
+    input_signal_2 = Signal("initial_value_2")
 
-    # link a widget to the input_signal to create a linked_widget / linked_signal
-    linked_signal = subscribe(input_signal, widget)
+    # link the interactive assets to the input signals to create linked assets,
+    # for example a `slider` or a `textinput` widget
+    linked_asset_1 = subscribe(input_signal_1, asset_1)
+    linked_asset_2 = subscribe(input_signal_2, asset_2)
 
     # create a Signal of UI as a return UI_expression
-    # output_signal = Signal(UI_function(linked_signal)) = map(UI_function, linked_signal)
-    map(UI_function, linked_signal)
+    # output_signal = Signal(UI_function(input_signal)) = map(UI_function, input_signal)
+    # return UI_expression that includes linked widgets and passes input signals as arguments
+    # in this example `vbox` was used to group the two assets in one `Tile`, but it can also be `hbox`
+    vbox(
+      map(linked_asset_1, input_signal_1),
+      map(linked_asset_2, input_signal_2)
+      )
 end
 ```
 
-Please note that the `UI_function` can be replaced with the **Do-Block Syntax** and ` map(UI_function, linked_signal)` will become:
+Please note that:
+- the `map` function can be replaced with the **Do-Block Syntax** and will become:
 
-```julia
-map(linked_signal) do args
-    # function_body
-end
-```
+  ```julia
+  map(input_signal) do args
+      # function_body
+      # return UI_expression that includes linked_widget
+  end
+  ```
+- multiple Signals and normal variables can be used and passed as arguments to the UI_function.
+- the UI expression `vbox(map(asset_1, signal_1), map(asset_2, signal_2))` can also be expressed as:
 
-Also note that multiple Signals can be used and passed as arguments to the UI_function.
+  ```julia
+  map(signal_1, signal_2) do args
+    vbox(
+      asset_1,
+      asset_2
+    )
+  end
+  ```
+- `args` can be replaced with `_` character, in case you don't need to use the Signal value in the UI. One such example is the Button widget, if the user only requires it to fire an action.
 
-##### 4.2.5.1. Creating a signal of UI using these signals
 
-Some `Tiles` (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to Reactive's `Signal` signals. Widgets such as sliders, buttons, dropdown menus are subtypes of Behavior. The function `subscribe` lets you pipe updates from a behavior into a signal.
+##### 4.2.7.1. Creating a signal of UI using these signals
+
+Some `Tiles` (particularly those that are subtypes of `Behavior` which is in turn a subtype of `Tile`) can write to Reactive's `Signal` signals. Widgets such as sliders, buttons, dropdown menus are subtypes of `Behavior`. The function `subscribe` lets you pipe updates from a behavior into a signal.
 
 **Example 11: Interactive Tiles**
 ```julia
@@ -555,7 +620,7 @@ The `connected_slider` renders as a slider and updates the signal iterations whe
 
 ---------------------------------------------
 
-##### 4.2.5.2. Getting the input from tiles
+##### 4.2.7.2. Getting the input from tiles
 
 Let's now use the iterations `Signal` to show an interactive Sierpinski's triangle.
 
@@ -595,9 +660,10 @@ end
 
 ---------------------------------------------
 
-##### 4.2.5.3. Interactive Tiles
+##### 4.2.7.3. Interactive Tiles
 
 Escher provides ready-to-use `Tiles` like buttons, input, codemirror etc., in the [Widgets API](http://escher-jl.org/widgets-api.html). Keep in mind that, regular and interactive, `Tiles` can be augmented with clickable, selectable, keypress etc. behavior via the [Behavior API](http://escher-jl.org/behavior-api.html).
+
 
 
 ### 4.3. Escher Advanced
@@ -616,7 +682,7 @@ To create a new custom `Tile` you need three things:
 
 1. a [custom HTML element](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) you wish to use
 2. a `Tile` which corresponds to the custom element. The `Tile` fields do not necessarily mirror the properties of the HTML.
-3. a `render(::myTile, state) which returns an [Elem](https://github.com/shashi/Patchwork.jl#creating-elements), which in turn creates the the same custom HTML element mentioned in step 1.
+3. a `render(::myTile, state)` which returns an [Elem](https://github.com/shashi/Patchwork.jl#creating-elements), which in turn creates the the same custom HTML element mentioned in step 1.
 
 These three requirements are placed in two different files:
 
@@ -843,10 +909,10 @@ The connection between the Escher `Tile`, and the browser is done using the `ren
 The general format is as follow, but for detailed information please read the Patchwork.jl [documentation](https://github.com/shashi/Patchwork.jl#creating-elements):
 
 ``` julia
-render(e::TypeName, state) = Elem("custom-element", attributes = @d(:htmlPropertyOne => e.fieldOne, :htmlPropertyTwo => e.fieldTwo))
+render(e::TypeName, state) = Elem("custom-element", attributes = Dict(:htmlPropertyOne => e.fieldOne, :htmlPropertyTwo => e.fieldTwo))
 ```
 
-`@d` macro
+The `state` object gets passed around when a `Tile` renders other tiles contained by it. It's just a plain dictionary, so the render methods can decide what to use it for.
 
 #### 4.3.4. Real life use
 
