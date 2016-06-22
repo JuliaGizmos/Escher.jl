@@ -8,6 +8,7 @@ using JSON
 
 using Reactive
 using Patchwork
+using WebSockets
 
 import Mux: @d
 
@@ -63,7 +64,7 @@ function setup_socket(file)
 end
 
 send_command(window::Window{WebSocket}, msg) =
-    JSON.print(window.output, msg)
+    write(window.output, JSON.json(msg))
 
 query_dict(qstr) = begin
     parts = split(qstr, '&')
