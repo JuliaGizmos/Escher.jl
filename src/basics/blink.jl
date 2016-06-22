@@ -50,6 +50,6 @@ function launch(f::Function, w=Blink.Window())
     launch(f(escher_win), w)
 end
 
-function launch(f::AbstractString, w=Blink.Window())
+function launch_file(f::AbstractString, w=Blink.Window())
     launch(include(joinpath(pwd(), f)), w)
 end
