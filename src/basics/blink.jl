@@ -26,7 +26,7 @@ function preparewindow(blinkwin::Blink.Window)
         path = Escher.resolve_asset(asset)
         importhtml!(blinkwin, path; async=true)
     end
-    Blink.handle(win, "escher") do msg
+    Blink.handle(blinkwin, "escher") do msg
         println("handling ", msg)
         handle_command(win, msg)
     end
