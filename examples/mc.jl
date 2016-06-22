@@ -70,8 +70,8 @@ function main(window)
              vbox(
                  hbox("Number of runs", slider(10^3:10^3:5*10^6) >>> N, hskip(2em), hbox(button("Start", raised=true, disabled=r) >>> btn)) |> packacross(center),
                  hbox("Current value: ", hskip(1em), @sprintf("%2.4f", ys[end]) |> emph, hskip(1em)," at iteration :", hskip(1em), string(xs[end])),
-                 plot(x=xs, y=ys, Geom.line) |> pad(2em)
+                 plot(x=xs, y=ys, Geom.line) |> Escher.pad(2em)
              )
          end
-    ) |> pad(2em)
+    ) |> Escher.pad(2em)
 end
