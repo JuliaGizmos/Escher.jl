@@ -37,7 +37,7 @@ render_fallback(m::MIME"image/svg+xml", x) = Elem(:div, innerHTML=stringmime(m, 
 render_fallback(m::MIME"image/png", x) =
     Elem(:img, src="data:image/png;base64," * stringmime(m, x))
 
-render(x::AbstractFloat, state) = render(@sprintf "%0.3f" x, state)
+render(x::AbstractFloat, state) = render((@sprintf "%0.3f" x), state)
 render(x::Symbol, state) = render(string(x), state)
 render(x::AbstractString, state) = Elem(:span, x)
 
