@@ -534,11 +534,11 @@ Moreover, using the curried version with the `|>` infix operator makes for code 
 
 #### 4.2.7. Interactive UI
 
-**Reactive.jl** package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming with signals of data. A signal is a value that can change over time. Reactive.jl's [documentation](http://julialang.org/Reactive.jl/) provides an overview of the `Signal` framework. At this point it is highly recommended that you read it. Also, you should read the Escher [Signal API](http://escher-jl.org/signal-api.html).
+**Reactive.jl** package allows "reactive programming" in Julia. Reactive programming is a style of event-driven programming based on signals.  A signal is a change/update in a data value which can also be linked/associated with a UI object/widget, asset, to form a UI Signal which is triggered by event and/or change in state of a UI.  A UI is not required to use the Signal Communication paradigm. A UI Signal is a specific case of Signaling communication, it is a Signal which is associated with a UI Object/Widget. Reactive.jl's [documentation](http://julialang.org/Reactive.jl/) provides an overview of the `Signal` framework. At this point it is highly recommended that you read it. Also, you should read the Escher [Signal API](http://escher-jl.org/signal-api.html).
 
 There are two facets to this rule:
 - Getting the input from tiles
-- Creating a signal of UI using these signals
+- Creating a UI Signal(s) by associating a UI object/widget (asset) with a signal(s)
 
 In practice, the main function might take the form below. We have used two Signals and two Assets to illustrate how they work together.
 
