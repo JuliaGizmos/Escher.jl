@@ -44,4 +44,4 @@ convert(::Type{Length}, x::Real) =
 
 Base.string{unit}(x::Length{unit}) = string(x.value, unit)
 Base.string(x::Length{:cent}) = string(x.value, :%)
-JSON._print(io::IO, ::JSON.State, x::Length) = Base.print(io, "\"", string(x), "\"")
+JSON.lower(x::Length) = string(x)
