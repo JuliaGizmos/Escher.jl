@@ -1,0 +1,42 @@
+<script>
+
+function NestedPropHook(change, value) {
+    if (!(this instanceof NestedPropHook)) {
+        return new NestedPropHook(change, value);
+    }
+
+    this.change = change;
+    this.value = value;
+}
+
+NestedPropHook.prototype.hook = function (node, prop, prev) {
+    if (prev && prev.type === 'NestedPropHook' &&
+        prev.value === this.value &&
+        prev.change === this.change) {
+        return;
+    }
+
+    patchObject(node, prop, this.value, prev)
+    this.change(node, prop, prev);
+};
+
+var patchObject = function (node, prop, val, prev) {
+    if (typeof node[prop] !== "object" || val !== "object") {
+        node[prop] = val
+    } else {
+        for (var k in val) {
+            patchObject(node[prop], k, val[k], prev[prop])
+        }
+    }
+};
+
+NestedPropHook.prototype.type = 'NestedPropHook';
+
+Patchwork.register_hook("NestedUpdate", function (v) {
+  console.log(v);
+  return NestedPropHook(function (x,y,z) {
+    console.log("nested update", x,y,z);
+  }, v);
+});
+
+</script>
