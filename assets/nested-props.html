@@ -1,42 +1,101 @@
 <script>
 
-function NestedPropHook(change, value) {
-    if (!(this instanceof NestedPropHook)) {
-        return new NestedPropHook(change, value);
-    }
+// We make a generic hook, which stores a value
+// and the {hook: fn, unhook: fn} object
+function vhook(fns) {
+  proto = {
+    type: "_generic_hook",
+    hook: function (node, prop, prev) {
+      if (prev && prev.type === '_generic_hook' &&
+          prev.value === this.value &&
+          prev.hook === this.hook) {
+          return;
+      }
 
-    this.change = change;
-    this.value = value;
+      if (fns && fns.hook) {
+        console.log("Calling", fns.hook, "(", this.value, node, prop, prev, ")");
+        return fns.hook(this.value, node, prop, prev);
+      }
+    },
+    // note: this needs an upgrade to virtual-dom. Leaving it here for future integration?
+    unhook: function (node, prop, prev) {
+      if (prev && prev.type === '_generic_hook' &&
+          prev.value === this.value &&
+          prev.unhook === this.unhook) {
+          return;
+      }
+
+      if (fns && fns.unhook)
+        return fns.unhook(this.value, node, prop, prev);
+    }
+  }
+
+  return function (value) {
+    console.log("Constructing hook " + proto.type + " with val ", value)
+    h = Object.create(proto)
+    h.value = value
+    return h;
+  }
 }
 
-NestedPropHook.prototype.hook = function (node, prop, prev) {
-    if (prev && prev.type === 'NestedPropHook' &&
-        prev.value === this.value &&
-        prev.change === this.change) {
-        return;
-    }
-
-    patchObject(node, prop, this.value, prev)
-    this.change(node, prop, prev);
-};
-
 var patchObject = function (node, prop, val, prev) {
-    if (typeof node[prop] !== "object" || val !== "object") {
+  console.log("patch options", node, prop, val, prev)
+    console.log("currently set to", node[prop])
+    if (val === null) {
+      delete node[prop]
+    } else if (typeof node[prop] !== "object" || typeof val !== "object") {
         node[prop] = val
     } else {
         for (var k in val) {
-            patchObject(node[prop], k, val[k], prev[prop])
+            patchObject(node[prop], k, val[k], prev && prev[prop])
         }
     }
 };
 
-NestedPropHook.prototype.type = 'NestedPropHook';
+Patchwork.register_hook("nested_update", vhook({
+  hook: function (value, node, prop, prev) {
+    patchObject(node, prop, value, prev)
+  },
+  unhook: function (value, node, prop, prev) {
+  }
+}));
 
-Patchwork.register_hook("NestedUpdate", function (v) {
-  console.log(v);
-  return NestedPropHook(function (x,y,z) {
-    console.log("nested update", x,y,z);
-  }, v);
-});
+var _escher_prop_hooks = {}
+PropertyHook = {
+  patch: patchObject,
+  patchAfter: function (f) {
+    return function (val, node, prop, prev) {
+      x = f(val, node, prop, prev)
+      patchObject(node, prop, val, prev)
+      return x
+    }
+  },
+  patchBefore: function (f) {
+    return function (val, node, prop, prev) {
+      patchObject(node, prop, val, prev)
+      return f(val, node, prop, prev)
+    }
+  },
+  setupHook: function (tagName, prop, hook, unhook) {
+    _escher_prop_hooks[tagName] =
+      _escher_prop_hooks[tagName] || {}
+    _escher_prop_hooks[tagName][prop] =
+      vhook({hook:hook, unhook: unhook})
+  }
+}
+
+Patchwork.register_hook("escher-property-hook", vhook({
+  hook: function (val, node, prop, prev) {
+    var hook = _escher_prop_hooks[node.tagName]
+    if (hook) { hook = hook[prop] }
+    if (typeof hook == "undefined") {
+      patchObject(node,prop,val,prev)
+    } else {
+      return hook(val, node, prop, prev)
+    }
+  },
+  unhook: function (val,node,prop,prev) {
+  }
+}))
 
 </script>
