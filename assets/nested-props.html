@@ -37,7 +37,6 @@ function vhook(fns) {
 }
 
 var patchObject = function (node, prop, val, prev) {
-    console.log("currently set to", node[prop])
     if (val === null) {
       delete node[prop]
     } else if (typeof node[prop] !== "object" || typeof val !== "object") {
