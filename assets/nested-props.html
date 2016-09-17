@@ -13,7 +13,6 @@ function vhook(fns) {
       }
 
       if (fns && fns.hook) {
-        console.log("Calling", fns.hook, "(", this.value, node, prop, prev, ")");
         return fns.hook(this.value, node, prop, prev);
       }
     },
@@ -31,7 +30,6 @@ function vhook(fns) {
   }
 
   return function (value) {
-    console.log("Constructing hook " + proto.type + " with val ", value)
     h = Object.create(proto)
     h.value = value
     return h;
@@ -39,7 +37,6 @@ function vhook(fns) {
 }
 
 var patchObject = function (node, prop, val, prev) {
-  console.log("patch options", node, prop, val, prev)
     console.log("currently set to", node[prop])
     if (val === null) {
       delete node[prop]
