@@ -237,7 +237,7 @@ typexpr(typ) =
 
 typename(typ::Symbol) = typ
 typename(typ) =
-    typ.head in [:comparison, :curly] ?
+    typ.head in [:comparison, :curly, :<:] ?
         typename(typ.args[1]) : typ
 
 paramdict(typ::Symbol) = Dict()
