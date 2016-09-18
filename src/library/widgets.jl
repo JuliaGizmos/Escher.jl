@@ -111,7 +111,7 @@ render(s::Slider, state) =
 ## Checkbox
 @api checkbox => (Checkbox <: Widget) begin
     doc("A checkbox.")
-    arg(value::Bool=false, doc="State of the checkbox.")
+    typedarg(value::Bool=false, doc="State of the checkbox.")
     arg(label::Tile="", doc="The label.")
     kwarg(
         disabled::Bool=false,

@@ -178,7 +178,7 @@ render(tile::StopBubbling, state) =
     doc(md"""A means to make forms. Use `watch!` and `trigger!` to specify which
          widgets/behavior to watch and which widgets/behavior trigger the form.
          """)
-    arg(triggers::Dict=Dict(), doc="Internal store for trigger elements.")
+    typedarg(triggers::Dict=Dict(), doc="Internal store for trigger elements.")
     arg(watches::Dict=Dict(), doc="Internal store for watches elements.")
 end
 
@@ -246,7 +246,7 @@ end
     The `aggregator` returns an intent which can then be applied to a tile that encapsulates
     all the aggregated behaviors
     """)
-    arg(name::Symbol=:_collector, doc="A name for the collector. Events bubbling from collected tiles are matched to a collector using this name.")
+    typedarg(name::Symbol=:_collector, doc="A name for the collector. Events bubbling from collected tiles are matched to a collector using this name.")
     arg(intents::Vector=Intent[], doc="Internal storage of Intents of collected behaviors")
 end
 
