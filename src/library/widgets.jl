@@ -89,10 +89,18 @@ wrapbehavior(b::Button) =
         secondaryprogress::Real=0,
         doc="Highlight the slider bar from the beginning to this value."
     )
+    kwarg(
+        immediate::Bool=false,
+        doc="""If set to true, also trigger while the user is dragging the slider.
+        Due to the JavaScript implementation, this causes repeats in the subscribed
+        values when the text box is edited. Use `droprepeats` from `Reactive.jl`
+        to remove them."""
+    )
 end
 
 wrapbehavior(s::Slider) =
-    intent(ToType{eltype(s.range)}(), hasstate(s))
+    intent(ToType{eltype(s.range)}(),
+           s.immediate ? hasstates(s, triggers=Dict("value"=>"change", "immediateValue"=>"immediate-value-change")) : hasstate(s))
 
 render(s::Slider, state) =
     Elem("paper-slider", attributes=@d(

@@ -1,4 +1,5 @@
 export hasstate,
+       hasstates,
        keypress,
        Key,
        nokey,
@@ -12,35 +13,35 @@ export hasstate,
 
 wrapbehavior(x::Behavior) = x
 
-@api hasstate => (WithState <: Behavior) begin
-    doc("Watch for changes to an attribute/property.")
+@api hasstates => (WithStates <: Behavior) begin
+    doc("Watch for changes to attributes/properties.")
     arg(tile::Tile, doc="Tile to watch.")
     kwarg(
-        attr::AbstractString="value",
-        doc=md"""The attribute/property to watch. Note that this is the property
-                 of the DOM node and not of the `Tile`."""
+        triggers::Dict{AbstractString, AbstractString}=@d("value"=>"change"),
+        doc=md"""A dict where the keys are attributes/properties and the values are
+                 events that trigger re-reads. Note that the attributes/properties
+                 are on the DOM node and not on the `Tile`."""
     )
     kwarg(
         selector::AbstractString="::parent",
         doc="A CSS selector for the element to watch."
         )
-    kwarg(
-        trigger::AbstractString="change",
-        doc="The event that triggers a re-read of the attribute/property."
-    )
 end
 
-default_intent(::WithState) = identity
+default_intent(::WithStates) = identity
 
-render(t::WithState, state) =
+render(t::WithStates, state) =
     render(t.tile, state) <<
         Elem(
-            "watch-state", attributes=@d(
-                :attr=>t.attr,
-                :trigger=>t.trigger,
+            "watch-states"; :triggers=>t.triggers, attributes=@d(
                 :selector=>t.selector,
             )
         )
+
+@doc "Watch for changes to an attribute/property." ->
+function hasstate(tile::Tile; attr::AbstractString="value", trigger::AbstractString="change", selector::AbstractString="::parent")
+    hasstates(tile; triggers=Dict(attr=>trigger), selector=selector)
+end
 
 @api keypress => (Keypress <: Behavior) begin
     doc("A keypress listener.")

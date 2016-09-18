@@ -1,24 +1,20 @@
 <link rel="import" href="bower_components/iron-a11y-keys/iron-a11y-keys.html">
 
 <dom-module
-  id="watch-state" >
+  id="watch-states" >
 
   <template><content></content></template>
 
 <script>
 
 Polymer({
-  is: "watch-state",
+  is: "watch-states",
   behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
 
   properties: {
-    attr: {
-      type: String,
-      value: "value"
-    },
-    trigger: {
-      type: String,
-      value: "change"
+    triggers: {
+      type: Object,
+      value: {value: "change"}
     }
   },
 
@@ -28,8 +24,8 @@ Polymer({
       val : elem.getAttribute(attr)
   },
 
-  getValue: function () {
-     return this.getAttr(this.findElem(), this.attr)
+  getValue: function (attr) {
+     return this.getAttr(this.findElem(), attr)
   },
 
   domInit: function () {
@@ -37,9 +33,12 @@ Polymer({
 
     this.setId()
 
-    elem.addEventListener(this.trigger, function (ev) {
-      self.update(elem, self.getValue())
-    })
+    for (var attr in this.triggers) {
+      var trigger = this.triggers[attr]
+      elem.addEventListener(trigger, function (ev) {
+        self.update(elem, self.getValue(attr))
+      })
+    }
   }
 })
 
