@@ -7,7 +7,8 @@ export tabs,
        menuitem,
        icon,
        iconbutton,
-       toolbar
+       toolbar,
+       listbox
 # Higher-order layouts: e.g. tabs, pages
 
 # Icons and icon button
@@ -215,3 +216,30 @@ render(dm::DropdownMenu, state) = begin
     )
 end
 wrapbehavior(d::DropdownMenu) = selectable(d, selector=".dropdown-content")
+
+
+@api listbox => (ListBox <: Selection) begin
+    doc("A list box.")
+    arg(
+        items::TileList,
+        doc="list-box items. Some of the items can also be sub-menus"
+    )
+    kwarg(
+        multi::Bool=false,
+        doc="Can multiple items be selected? If set, output signal contains a vector of indices"
+    )
+    kwarg(selected::Integer=1, doc="Index of the currently selected menu item.")
+
+
+#    arg(date::Date=today(), doc=md"The date. Requires the `Dates` module on Julia v0.3")
+#    kwarg(
+#        range::Range{Date}=Date("1971-01-01"):Date("2100-12-31"),
+#        doc="The range of selectable dates."
+#    )
+end
+render(l::ListBox, state) =
+    Elem("paper-listbox",
+         map(x -> render(wrapitem(x), state), l.items.tiles)
+#         attributes = @d(:selected=>l.selected-1, :multi=>boolattr(l.multi))
+    )
+wrapbehavior(l::ListBox) = selectable(l)
