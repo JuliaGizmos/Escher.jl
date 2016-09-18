@@ -39,13 +39,10 @@ Escher.@api drawing => (ComposeGraphic <: Escher.Tile) begin
     arg(graphic::Any) # Either a plot or a compose node
 end
 
-function compose_setup()
-
+@require ComposeDiff begin
     if !(try Pkg.installed("ComposeDiff") > v"0.0.0" catch err false end)
         error("You need to install the ComposeDiff package to use Gadfly or Compose in Escher.")
     end
-
-    eval(Expr(:import, :ComposeDiff))
 
     Escher.drawing(w::Compose.Measure, h::Compose.Measure, p) =
         Escher.drawing(ComposeDiff.Patchable(w, h), p)
@@ -73,13 +70,13 @@ function compose_setup()
 end
 
 @require Compose begin
-    compose_setup()
+    using ComposeDiff
 end
 
 @require Gadfly begin
     import Gadfly: Compose
 
-    compose_setup()
+    using ComposeDiff
     convert(::Type{Tile}, p::Gadfly.Plot) =
         Escher.drawing(
             ComposeDiff.Patchable(
