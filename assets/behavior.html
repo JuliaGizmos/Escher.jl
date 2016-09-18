@@ -48,6 +48,52 @@ Polymer({
 </dom-module>
 
 <dom-module
+  id="watch-states" >
+
+  <template><content></content></template>
+
+<script>
+
+Polymer({
+  is: "watch-states",
+  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
+
+  properties: {
+    triggers: {
+      type: Object,
+      value: {value: "change"}
+    }
+  },
+
+  getAttr: function (elem, attr) {
+    var val = elem[attr]
+    return (typeof val !== "undefined") ?
+      val : elem.getAttribute(attr)
+  },
+
+  getValue: function (attr) {
+     return this.getAttr(this.findElem(), attr)
+  },
+
+  domInit: function () {
+    var self = this, elem = this.findElem()
+
+    this.setId()
+
+    for (var attr in this.triggers) {
+      var trigger = this.triggers[attr]
+      elem.addEventListener(trigger, function (ev) {
+        self.update(elem, self.getValue(attr))
+      })
+    }
+  }
+})
+
+</script>
+
+</dom-module>
+
+<dom-module
   id="clickable-behavior">
 
   <template><content></content></template>
