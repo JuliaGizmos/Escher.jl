@@ -20,7 +20,7 @@ using JSON
 
 # Polymer Setup
 custom_elements() =
-    readall(Pkg.dir("Escher", "assets", "basics/basics.html"))
+    readstring(Pkg.dir("Escher", "assets", "basics/basics.html"))
 
 include("basics/macros.jl")
 include("basics/tile.jl")

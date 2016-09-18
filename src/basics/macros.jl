@@ -243,7 +243,7 @@ typename(typ) =
 paramdict(typ::Symbol) = Dict()
 paramdict(typ) =
     typ.head === :curly ?
-    [param.args[1] => param.args[2] for param in typ.args[2:end]] :
+    Dict(Pair[param.args[1] => param.args[2] for param in typ.args[2:end]]) :
         (typ.head === :(<:) ?
             paramdict(typ.args[1]) : Dict())
 

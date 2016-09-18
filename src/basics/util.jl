@@ -96,7 +96,7 @@ radius for different corners etc.
 mapparts(sentinal, parts, prefix, suffix, value) =
    parts === sentinal ?
        @d(prefix * suffix => value) :
-       [prefix * name(part) * suffix => value for part in parts]
+       Dict(Pair[prefix * name(part) * suffix => value for part in parts])
 
 style(x) = @d(:style => x)
 

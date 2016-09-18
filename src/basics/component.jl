@@ -51,7 +51,7 @@ Component must not have inner constructors for this to work
 immutable SetField{field, T} <: Action
     value::T
 end
-Base.call{f,T}(::Type{SetField{f}}, x::T) = SetField{f, T}(x)
+@compat (::Type{SetField{f}}){f,T}(x::T) = SetField{f, T}(x)
 
 setfield(f::Symbol) = SetField{f}
 setfield(f, x) = SetField{f}(x)
