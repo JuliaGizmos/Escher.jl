@@ -3,7 +3,7 @@ ArgParse
 Colors
 Compat
 Dates
-JSON
+JSON 0.7
 Markdown
 Mux 0.1.0
 Reactive 0.3.0
