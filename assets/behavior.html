@@ -1,53 +1,6 @@
 <link rel="import" href="bower_components/iron-a11y-keys/iron-a11y-keys.html">
 
 <dom-module
-  id="watch-state" >
-
-  <template><content></content></template>
-
-<script>
-
-Polymer({
-  is: "watch-state",
-  behaviors: [EscherMixins.LifeCycle, EscherMixins.ReactiveSignal],
-
-  properties: {
-    attr: {
-      type: String,
-      value: "value"
-    },
-    trigger: {
-      type: String,
-      value: "change"
-    }
-  },
-
-  getAttr: function (elem, attr) {
-    var val = elem[attr]
-    return (typeof val !== "undefined") ?
-      val : elem.getAttribute(attr)
-  },
-
-  getValue: function () {
-     return this.getAttr(this.findElem(), this.attr)
-  },
-
-  domInit: function () {
-    var self = this, elem = this.findElem()
-
-    this.setId()
-
-    elem.addEventListener(this.trigger, function (ev) {
-      self.update(elem, self.getValue())
-    })
-  }
-})
-
-</script>
-
-</dom-module>
-
-<dom-module
   id="watch-states" >
 
   <template><content></content></template>
