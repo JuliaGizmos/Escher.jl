@@ -347,6 +347,9 @@ render(sig::Subscription, state) =
 
 (>>>)(t::Tile, s::Union{Signal, Collector}) = subscribe(s, t)
 
+# This allows easy rendering of subscriptions
+convert(::Type{Node}, sub::Subscription) = render(sub, Dict())
+
 import Base.Random: UUID, uuid4
 
 const object_to_id = Dict()
@@ -372,4 +375,3 @@ end
 Given the unique ID created by makeid, return the object associated with it.
 """
 fromid(id) = id_to_object[id]
-
