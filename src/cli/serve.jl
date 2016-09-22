@@ -15,7 +15,7 @@ function loadfile(filename)
     if isfile(filename)
         try
             ui = include(filename)
-            if typeof(ui) == Function
+            if isa(ui, Function)
                 return ui
             else
                 warn("$filename did not return a function")
