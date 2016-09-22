@@ -53,9 +53,9 @@ Move to a directory from which you want to serve Escher UI files.
 julia> cd(Pkg.dir("Escher", "examples"))
 ```
 Note:
-Example files which include plots, such as plotting.jl, also require the Gadfly package to be installed.
+Example files which include plots, such as plotting.jl, also require the Gadfly and ComposeDiff packages to be installed.
 ```julia
-julia> Pkg.add("Gadfly")
+julia> Pkg.add("Gadfly", "ComposeDiff")
 ```
 
 Start the Escher Server.
