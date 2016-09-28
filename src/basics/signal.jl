@@ -372,4 +372,3 @@ end
 Given the unique ID created by makeid, return the object associated with it.
 """
 fromid(id) = id_to_object[id]
-
