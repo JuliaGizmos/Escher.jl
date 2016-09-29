@@ -23,7 +23,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="pkg/Escher", copy_a
 
     opath = output_path(file, output_dir)
     w = Window()
-    Reactive.stop_event_loop()
+    Reactive.stop()
     assets = foldp(push!, Any[], w.assets) # Accumulate assets
     uifn = include(joinpath(pwd(), file))
     ui = uifn(w)
@@ -66,10 +66,18 @@ escher_make(file, output_dir; single_file=false, assets_dir="pkg/Escher", copy_a
         )
 
         <body>
-        <signal-container id="root"></signal-container>
+        <signal-container id="root">
+            $(readstring(Pkg.dir("Escher", "assets", "spinner.html")))
+        </signal-container>
         </div>
         <script>
+        window.addEventListener('WebComponentsReady', function() {
             new Patchwork.Node("root", $(replace(replace(Patchwork.jsonfmt(Escher.render(getvalue(ui), state)) |> json, "<", "\\<"), ">", "\\>")))
+            var el = document.querySelector("#spinner")
+            if (el) {
+                el.style.display ="none";
+            }
+        });
         </script>
         </body>
         </html>
