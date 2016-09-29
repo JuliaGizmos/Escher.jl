@@ -12,7 +12,7 @@ $(vskip(1em))
 $(vskip(1em))
 
 $(
-   showdocs([hasstate, keypress, clickable, selectable, send, recv, wire])
+   showdocs([hasstates, keypress, clickable, selectable, send, recv, wire])
 )
 
 $(vskip(4em))

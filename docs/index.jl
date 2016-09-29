@@ -599,7 +599,8 @@ Below is a screen grab of a game that was just lost.
 
 (Run `examples/minesweeper.jl` via escher server to play the game)
 
-![](pkg/Escher/img/minesweeper.png)
+
+<img height="auto" src="/pkg/Escher/img/minesweeper.png"></img>
 
 
 # Documentation
