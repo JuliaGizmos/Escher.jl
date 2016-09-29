@@ -95,12 +95,23 @@ function teelog(x) {
         }
     // Store for patches of nodes as yet uncreated
     Escher.patches = {}
+    function stopSpinner(node) {
+      try {
+      var spnode = node.element && node.element.parentNode && node.element.parentNode.node
+      if (spnode && spnode.stopSpinner) { spnode.stopSpinner() }
+      } catch (err) {
+        console.log("Error stopping spinner", err);
+      }
+    }
     Escher.applyPatch = function (id, patch) {
         if (typeof(Escher.patches[id]) === "undefined") {
             Escher.patches[id] = []
         }
         if (typeof(Escher.subtrees.ready[id]) !== "undefined") {
-            Escher.subtrees.ready[id].applyPatch(patch)
+            var node = Escher.subtrees.ready[id];
+
+            stopSpinner(node);
+            node.applyPatch(patch)
         } else if (typeof(Escher.subtrees.destroyed[id]) !== "undefined") {
             console.log("Patch received for a previously destroyed subtree. This is why we can't have good things.")
         } else {
@@ -112,8 +123,8 @@ function teelog(x) {
         delete Escher.subtrees.destroyed[id]
         Escher.subtrees.ready[id] = node
         if (typeof(Escher.patches[id]) !== "undefined") {
-            for (var i=0, l=Escher.patches[id].length;
-                    i < l; i++) {
+            for (var i=0, l=Escher.patches[id].length; i < l; i++) {
+                stopSpinner(node);
                 node.applyPatch(Escher.patches[id][i])
             }
         }
@@ -243,9 +254,15 @@ function teelog(x) {
       vnode: Object
     },
 
+    stopSpinner: function () {
+      var el = this.querySelector("#spinner")
+      if (el) {
+        el.style.display = "none";
+      }
+    },
+
     _initCleanSubtree: function (id) {
         // XXX: Initial value of tile signals is Escher.empty which is <div></div>
-        Polymer.dom(this).innerHTML = "<div></div>" 
         this.vnode = new Patchwork.Node(id, {t: "div"}, new Sneaky(this), sneakyDoc);
         Escher.addSubtree(id, this.vnode)
         this._prevId = id
@@ -253,7 +270,6 @@ function teelog(x) {
 
     domInit: function () {
       var id = this.signalId
-      console.log(this.signalId)
       this._initCleanSubtree(id)
     },
 

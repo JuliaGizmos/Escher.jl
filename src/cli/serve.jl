@@ -49,12 +49,14 @@ function setup_socket(file)
     write(io, """<script src="/pkg/Escher/bower_components/webcomponentsjs/webcomponents.min.js"></script>""")
     write(io, """<link rel="import" href="$(Escher.resolve_asset("basics"))">""")
 
-    write(io, """</head> <body fullbleed unresolved>""")
-    write(io, """<script>window.addEventListener('WebComponentsReady', function(e) {
+    write(io, """</head> <body fullbleed>""")
+    write(io, """
+    <signal-container id="root" signal-id="root">$(readstring(Pkg.dir("Escher","assets", "spinner.html")))</signal-container>
+
+    <script>window.addEventListener('WebComponentsReady', function(e) {
       Escher.init($(JSON.json(file)));
     })
     </script>
-    <signal-container signal-id="root"></signal-container>
     </body>
     </html>""")
     takebuf_string(io)
