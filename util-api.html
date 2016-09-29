@@ -59,7 +59,29 @@ var P = Patchwork = {
                 }
             }
         }
-        return props;
+        return P.setupHooks(props);
+    },
+    hooks: {},
+    register_hook: function (hook, f) {
+        P.hooks[hook] = f;
+    },
+    setupHooks: function (props) {
+        if (typeof props !== "object" || props == null) {
+            return props;
+        } else if (props && "_hook" in props) {
+            if (props._hook in P.hooks) {
+                v = P.hooks[props._hook](P.setupHooks(props.val));
+                return v
+            } else {
+                console.warn("Unknown hook " + props._hook + "use Patchwork.register_hook to set it up")
+                return undefined
+            }
+        } else {
+            for (var k in props) {
+                props[k] = P.setupHooks(props[k]);
+            }
+            return props;
+        }
     },
     makeVNode: function (jlNode) {
         if ('txt' in jlNode) return new VText(jlNode.txt);
@@ -2002,7 +2024,9 @@ function reorder(array, moves) {
 
 function patchObject(obj, patch) {
     for (var key in patch) {
-        if (isObject(patch[key]) && isObject(obj[key])) {
+        if (patch[key] && typeof patch[key].hook == "function") {
+            obj[key] = patch[key]
+        } else if (isObject(patch[key]) && isObject(obj[key])) {
             obj[key] = patchObject(obj[key], patch[key]);
         } else {
             obj[key] = patch[key]
@@ -2159,10 +2183,127 @@ function vNodePatch(node, patch) {
 <link rel="import" href="pkg/Escher/basics.html">
 
 <body>
-<signal-container id="root"></signal-container>
+<signal-container id="root">
+    
+<!--
+  SpinKit - folding cube
+  http://tobiasahlin.com/spinkit/
+-->
+
+<div id="spinner">
+  <div class="sk-folding-cube">
+      <div class="sk-cube1 sk-cube"></div>
+      <div class="sk-cube2 sk-cube"></div>
+      <div class="sk-cube4 sk-cube"></div>
+      <div class="sk-cube3 sk-cube"></div>
+  </div>
+</div>
+
+<style>
+#root .sk-folding-cube {
+  margin-top: 45vh;
+}
+
+.sk-folding-cube {
+  margin: 20px auto;
+  width: 40px;
+  height: 40px;
+  position: relative;
+  -webkit-transform: rotateZ(45deg);
+          transform: rotateZ(45deg);
+}
+
+.sk-folding-cube .sk-cube {
+  float: left;
+  width: 50%;
+  height: 50%;
+  position: relative;
+  -webkit-transform: scale(1.1);
+      -ms-transform: scale(1.1);
+          transform: scale(1.1); 
+}
+.sk-folding-cube .sk-cube:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #333;
+  -webkit-animation: sk-foldCubeAngle 2.4s infinite linear both;
+          animation: sk-foldCubeAngle 2.4s infinite linear both;
+  -webkit-transform-origin: 100% 100%;
+      -ms-transform-origin: 100% 100%;
+          transform-origin: 100% 100%;
+}
+.sk-folding-cube .sk-cube2 {
+  -webkit-transform: scale(1.1) rotateZ(90deg);
+          transform: scale(1.1) rotateZ(90deg);
+}
+.sk-folding-cube .sk-cube3 {
+  -webkit-transform: scale(1.1) rotateZ(180deg);
+          transform: scale(1.1) rotateZ(180deg);
+}
+.sk-folding-cube .sk-cube4 {
+  -webkit-transform: scale(1.1) rotateZ(270deg);
+          transform: scale(1.1) rotateZ(270deg);
+}
+.sk-folding-cube .sk-cube2:before {
+  -webkit-animation-delay: 0.3s;
+          animation-delay: 0.3s;
+}
+.sk-folding-cube .sk-cube3:before {
+  -webkit-animation-delay: 0.6s;
+          animation-delay: 0.6s; 
+}
+.sk-folding-cube .sk-cube4:before {
+  -webkit-animation-delay: 0.9s;
+          animation-delay: 0.9s;
+}
+@-webkit-keyframes sk-foldCubeAngle {
+  0%, 10% {
+    -webkit-transform: perspective(140px) rotateX(-180deg);
+            transform: perspective(140px) rotateX(-180deg);
+    opacity: 0; 
+  } 25%, 75% {
+    -webkit-transform: perspective(140px) rotateX(0deg);
+            transform: perspective(140px) rotateX(0deg);
+    opacity: 1; 
+  } 90%, 100% {
+    -webkit-transform: perspective(140px) rotateY(180deg);
+            transform: perspective(140px) rotateY(180deg);
+    opacity: 0; 
+  } 
+}
+
+@keyframes sk-foldCubeAngle {
+  0%, 10% {
+    -webkit-transform: perspective(140px) rotateX(-180deg);
+            transform: perspective(140px) rotateX(-180deg);
+    opacity: 0; 
+  } 25%, 75% {
+    -webkit-transform: perspective(140px) rotateX(0deg);
+            transform: perspective(140px) rotateX(0deg);
+    opacity: 1; 
+  } 90%, 100% {
+    -webkit-transform: perspective(140px) rotateY(180deg);
+            transform: perspective(140px) rotateY(180deg);
+    opacity: 0; 
+  }
+}
+</style>
+
+
+</signal-container>
 </div>
 <script>
+window.addEventListener('WebComponentsReady', function() {
     new Patchwork.Node("root", {"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}},{"t":"div","p":{"style":{"padding":"4.0em","maxWidth":"50.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"span","p":{"className":"title-2 "},"c":[{"txt":"Util"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"h1","p":{"className":"md-heading heading-1 "},"c":[{"txt":"Functions"}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"className":"font-monospace flex-wrap flow horizontal "},"c":[{"t":"span","p":{"className":"font-bold "},"c":[{"txt":"Escher.class"}]},{"t":"span","c":[{"txt":"("}]},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"class"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"AbstractString"}]}]},{"t":"span","c":[{"txt":","}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"« "}]},{"t":"abbr","p":{"title":"Curried"},"c":[{"t":"span","c":[{"txt":"content"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"TileList"}]}]},{"t":"span","c":[{"txt":" »"}]}]},{"t":"span","c":[{"txt":"; "}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"forcewrap"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"Bool"}]},{"t":"span","c":[{"txt":"="}]},{"t":"span","p":{"style":{"color":"#808080"}},"c":[{"txt":"false"}]}]},{"t":"span","c":[{"txt":","}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"div","p":{"className":"flow horizontal "},"c":[{"t":"span","c":[{"txt":"wrap"}]},{"t":"span","p":{"style":{"color":"#A0A0A0"}},"c":[{"txt":"::"}]},{"t":"span","p":{"style":{"color":"#49796B"}},"c":[{"txt":"Symbol"}]},{"t":"span","c":[{"txt":"="}]},{"t":"span","p":{"style":{"color":"#808080"}},"c":[{"txt":":div"}]}]},{"t":"span","c":[{"txt":")"}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"span","c":[{"txt":"→"}]},{"t":"div","p":{"style":{"height":"0.0px","width":"0.5em"}}},{"t":"abbr","p":{"style":{"color":"#707070"},"title":"Class"},"c":[{"t":"span","c":[{"txt":"Tile"}]}]}]},{"t":"div","p":{"style":{"paddingLeft":"1.0em"}},"c":[{"t":"div","p":{"className":"flow vertical "},"c":[{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"div","p":{"style":{"paddingLeft":"1.0em"}},"c":[{"t":"span","c":[{"txt":"Add a HTML class."}]}]},{"t":"div","p":{"style":{"height":"1.0em","width":"0.0px"}}},{"t":"span","p":{"style":{"fontWeight":500,"color":"#000000"},"className":"font-italic "},"c":[{"txt":"Arguments"}]},{"t":"div","p":{"style":{"paddingTop":"0.5em","paddingBottom":"0.5em"}},"c":[{"t":"div","p":{"style":{"paddingRight":"1.0em","paddingLeft":"1.0em"}},"c":[{"t":"table","c":[{"t":"tbody","c":[{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"class"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"Space separated classes."}]}]}]},{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"content"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "},"c":[{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#72B5A1","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"abbr","p":{"style":{"fontSize":"0.94em"},"title":"Curried argument: if you leave this argument out, you will get a function which takes this argument"},"c":[{"t":"span","c":[{"txt":"curried"}]}]}]}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"A tile or a vector of tiles."}]}]}]},{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"forcewrap"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "},"c":[{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#DC7F38","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"abbr","p":{"style":{"fontSize":"0.94em"},"title":"Keyword argument"},"c":[{"t":"span","c":[{"txt":"kwarg"}]}]}]}]},{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#E1F0E5","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"span","p":{"style":{"fontSize":"0.94em"}},"c":[{"txt":"default=false"}]}]}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"If set to true, contents will be put in a containing tag and the\nclasses are set on the container, even if there is only one tile.\n"}]}]}]},{"t":"tr","c":[{"t":"td","c":[{"t":"code","c":[{"t":"span","c":[{"txt":"wrap"}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"2.0em","width":"0.0px"}}}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"div","p":{"className":"flex-wrap flow horizontal "},"c":[{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#DC7F38","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"abbr","p":{"style":{"fontSize":"0.94em"},"title":"Keyword argument"},"c":[{"t":"span","c":[{"txt":"kwarg"}]}]}]}]},{"t":"div","p":{"style":{"padding":"0.2em"}},"c":[{"t":"div","p":{"style":{"backgroundColor":"#E1F0E5","paddingRight":"0.4em","paddingLeft":"0.4em"}},"c":[{"t":"span","p":{"style":{"fontSize":"0.94em"}},"c":[{"txt":"default=:div"}]}]}]}]}]},{"t":"td","c":[{"t":"div","p":{"style":{"height":"0.0px","width":"1.0em"}}}]},{"t":"td","c":[{"t":"span","c":[{"txt":"The tag to use for the container."}]}]}]}]}]}]}]}]}]}]}]},{"t":"div","p":{"style":{"height":"4.0em","width":"0.0px"}}}]}]},{"t":"div","p":{"style":{"flexBasis":"0.0mm","flexGrow":1.0}}}]})
+    var el = document.querySelector("#spinner")
+    if (el) {
+        el.style.display ="none";
+    }
+});
 </script>
 </body>
 </html>
