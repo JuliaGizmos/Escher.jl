@@ -13,8 +13,7 @@ Polymer({
 
   properties: {
     triggers: {
-      type: Object,
-      value: {value: "change"}
+      type: Object
     }
   },
 
@@ -131,8 +130,9 @@ Polymer({
 
           var result = {}
           for(var i=0, l=self.signals.length; i < l; i++) {
-            var name = self.signals[i];
-            result[name] = Polymer.dom(elem).querySelector("#signal-" + name).getValue("value")
+            var name = self.signals[i]
+            var signal = Polymer.dom(elem).querySelector("#signal-" + name)
+            result[name] = signal.getValue(Object.keys(signal.triggers)[0]) // the signal should only have a single trigger
           }
           result[ev.detail.name] = ev.detail.value
           result._trigger = ev.detail.name
