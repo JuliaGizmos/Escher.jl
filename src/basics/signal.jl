@@ -184,7 +184,7 @@ end
 
 interpret(s::Sampler, msg) = begin
     d = Dict()
-    d[:_trigger] = symbol(msg["_trigger"])
+    d[:_trigger] = Symbol(msg["_trigger"])
 
     for (name, interp) in s.triggers
       if(haskey( msg, string(name)))
@@ -193,7 +193,6 @@ interpret(s::Sampler, msg) = begin
     end
 
     for (name, interp) in s.watches
-        @show name, interp
        d[name] = interpret(interp, msg[string(name)])
     end
 

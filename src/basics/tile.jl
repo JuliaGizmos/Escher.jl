@@ -26,7 +26,7 @@ convert{ns, tag}(::Type{Tile}, x::Elem{ns, tag}) = Leaf(x)
 
 bestmime(val) = begin
   for mime in ("text/html", "image/svg+xml", "image/png", "text/plain")
-    mimewritable(mime, val) && return MIME(symbol(mime))
+    mimewritable(mime, val) && return MIME(Symbol(mime))
   end
   error("Cannot render $val.")
 end
