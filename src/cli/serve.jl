@@ -110,19 +110,53 @@ query_dict(qstr) = begin
     dict
 end
 
-start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
+last_vals = Dict()
+last_ids = Dict()
+
+start_updates(sig, window, sock, id=Escher.makeid(sig), depth = 1) = begin
+    global last_vals
+    global last_ids
+
+    println("START_UPDATES")
+    println(id)
 
     state = Dict()
     state["embedded_signals"] = Dict()
+#    last_val = render(Escher.empty, state)
     init = render(value(sig), state)
 
-    write(sock, patch_cmd(id, Patchwork.diff(render(Escher.empty, state), init)))
+    if (depth in keys(last_vals))
+#        last_val = render(Escher.empty, state)
+        last_val = last_vals[depth]
+#        last_id = last_ids[depth]
+   else
+        last_val = render(Escher.empty, state)
+#        last_id = id
+    end
+
+    diff = Patchwork.diff(last_val, init)
+    last_vals[depth] = init
+
+    println("DIFF --------------------")
+    println(diff)
+#    if (11 in keys(diff))
+#        diff = Dict(13 => diff[11])
+#    end
+    write(sock, patch_cmd(id, diff))
+#    last_ids[depth] = id
 
     foldp(init, filterwhen(window.alive, empty, sig); typ=Any) do prev, next
-
         st = Dict()
         st["embedded_signals"] = Dict()
         rendered_next = render(next, st)
+
+        diff = Patchwork.diff(prev, rendered_next)
+        println("PREV --------------------")
+        println(prev)
+        println("RENDERED_NEXT --------------------")
+        println(rendered_next)
+        println("DIFF --------------------")
+        println(diff)
 
         try
             write(sock, patch_cmd(id, Patchwork.diff(prev, rendered_next)))
@@ -131,20 +165,26 @@ start_updates(sig, window, sock, id=Escher.makeid(sig)) = begin
                 rethrow(ex)
             end
         end
+        d = depth
         for (key, embedded) in st["embedded_signals"]
-            start_updates(embedded, window, sock, key)
+            start_updates(embedded, window, sock, key, d + 1)
+            d += 1
         end
 
         rendered_next
     end |> preserve
 
+    d = depth
     for (key, embedded) in state["embedded_signals"]
-        start_updates(embedded, window, sock, key)
+        start_updates(embedded, window, sock, key, d + 1)
+        d += 1
     end
 end
 
 
 uisocket(dir) = (req) -> begin
+    println("uisocket")
+
     file = joinpath(abspath(dir), (req[:params][:file]))
 
     d = query_dict(req[:query])
@@ -159,6 +199,7 @@ uisocket(dir) = (req) -> begin
     # window dimensions and what not
 
     window = Window(dimension=(w*px, h*px))
+#    start_updates(flatten(tilestream, typ=Any), window, sock, "root")
 
     Reactive.foreach(asset -> write(sock, JSON.json(import_cmd(asset))),
          window.assets)

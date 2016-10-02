@@ -104,6 +104,11 @@ function teelog(x) {
       }
     }
     Escher.applyPatch = function (id, patch) {
+        console.log("Escher.applyPatch");
+        console.dir(Escher.subtrees);
+        console.log(id);
+        console.dir(patch);
+
         if (typeof(Escher.patches[id]) === "undefined") {
             Escher.patches[id] = []
         }
