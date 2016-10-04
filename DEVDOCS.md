@@ -7,7 +7,7 @@ Code contained in the `basics/` directory involves code required to bootstrap Es
 
 Firstly, it contains the definition of the Tile abstract type of which all renderable objects in Escher are subtypes. A Tile has the contract that it has a `render(tile, state)` method that produces a `Patchwork.Elem` object which represents its DOM rendition. This is the exact datastructure that gets replicated in the browser. The `state` object gets passed around when a Tile renders other tiles contained by it. It's just a plain dictionary, so the `render` methods can decide what to use it for.
 
-As user of Escher goes around creating `Tile` or `Signal{T<:Tile}` objects. A "Sinal of Tiles" gets rendered as a changing UI by the Escher server mechanism that is described in a later section. You can construct these signals using input signals from various sources, which are discussed in the "Interaction" subsection.
+As user of Escher goes around creating `Tile` or `Signal{T<:Tile}` objects. A "Signal of Tiles" gets rendered as a changing UI by the Escher server mechanism that is described in a later section. You can construct these signals using input signals from various sources, which are discussed in the "Interaction" subsection.
 
 
 Tile is the common currency which is used by all functionality in Escher. There are many functions in Escher which you can use to generate tiles from other Julia values (e.g. primitive types, DataFrames, plots), while the rest of the functions take Tiles as arguments and return either a modified version of the input (commonly when there is only one input), or a combined arrangement of the inputs (commonly in the case of multiple tiles being input). One could say that the Tile type forms a closure under these library functions.
@@ -25,7 +25,7 @@ end
 
 This expression generates a type whose name is `<TypeName>`, while the constructor itself will be named `<constructor_name>`. The convention in Escher is to use lower cased names for the actual constructors and CamelCased names for the types.
 
-The fields are defined by on or more `<arg_specifics>`. The annotation also includes information about how the filed figures as an arguement in the constructor. `<arg_specifics>` can be one of:
+The fields are defined by one or more `<arg_specifics>`. The annotation also includes information about how the filed figures as an arguement in the constructor. `<arg_specifics>` can be one of:
 
 - `arg(x::SomeType)`
   - **it becomes:** `x::Any` in all method signatures, argument will be converted to `SomeType` before construction.
@@ -144,7 +144,7 @@ Escher uses a bunch of custom HTML elements as well as an off-the-shelf library 
 - `escherd.html`
   - it defines the `Escher` object in JavaScript which acts like a namespace for Escher functionality in the browser
   - it also defines `EscherMixins.LifeCycle` polymer mixin, which is used by most of the other Escher elements. The main purpose of this mixin is to work around element-load event issues. Using this mixin allows custom elements to use the `domInit` method to define what happens when an element gets rendered on screen.
-  - it sets up event an listener for `signal-transport` events. `signal-transport` events are fired by Escher whenever some piece of data needs to be sent over to the Escher server to update a Reactive signal. The default event handler uses `Escher.send` to send the information, this itself is defined based on the existence of Blink or not so as to use the more appropriate channels for communication.
+  - it sets up an event listener for `signal-transport` events. `signal-transport` events are fired by Escher whenever some piece of data needs to be sent over to the Escher server to update a Reactive signal. The default event handler uses `Escher.send` to send the information, this itself is defined based on the existence of Blink or not so as to use the more appropriate channels for communication.
    - this file also has the definition of `signal-container` HTML custom element, which is used to render a signal of escher UIs. Every Escher page contains a `<signal-container signal-id="root"></signal-container>` element, which is where the UI gets rendered.
 - `signals.html`: the elements here correspond to those rendered by `basics/signal.jl` `signal-transport` element, which is used to annotate that another element would like to send some events to the server, is defined here for example.
   - it also defines `EscherMixins.ReactiveSignal` mixin, which is going to be used by all other elements that want to be able to communicate with the server.

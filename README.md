@@ -98,7 +98,7 @@ where:
 - as with any Julia function, if `return` keyword is missing, the last expression is returned.
 - the returned `UI_expression` is the one used to generate the UI, so everything you need to render needs to be inside it. One can build complex webpages using the layouts API to package the content, explained in the UI Build Guide.
 
-When your files get complicated, or you like to follow protocol, you may need to break the code into sections. Escher is inspired by [Elm language](http://elm-lang.org/) and borrows his file pattern:
+When your files get complicated, or you like to follow protocol, you may need to break the code into sections. Escher is inspired by [Elm language](http://elm-lang.org/) and borrows its file pattern:
 
 - **Model**  : the state af your application
 - **Update** : a way to update your state
@@ -143,7 +143,7 @@ A short explanation (for detailed explanation visit the links) of the technologi
 - Custom Elements are created from [HTML Templates](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).
 - Templates must be [loaded /imported](https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports) in the webpage, once per page, to provide de source code for Created Elements.
 - the webpages are stored on the Browser in a data structure called the [Document Object Model](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model), or DOM
-- to make the interaction between the server and the browser more efficient a copy of the DOM is saved on the server, in what is called a [Local /Shadow /Virtual DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM), and only the changes are sent to the browser.
+- to make the interaction between the server and the browser more efficient, a copy of the DOM is saved on the server, in what is called a [Local /Shadow /Virtual DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Shadow_DOM), and only the changes are sent to the browser.
 
 In Escher's case, the UI starts out as a `UI_expression` `Tile` object, then gets converted /rendered to a [Patchwork.jl](https://github.com/shashi/Patchwork.jl) `Elem` object in the `Virtual DOM`, and then, the changes are sent over the network to the Browser as [JSON](http://www.json.org/), where it gets rendered as the `DOM`.
 
@@ -167,7 +167,7 @@ For your reference, the default HTML content of the `assets/` folder is listed b
 | 4 | camera.html | camera widget custom element | - | user |
 | 5 | codemirror.html | codemirror HTML element | [Widgets](http://escher-jl.org/widgets-api.html) | user |
 | 6 | date.html | datepicker HTML element | [Widgets](http://escher-jl.org/widgets-api.html) | user |
-| 7 | escherd.html | it sets up the comunications with the browser side code | - | auto |
+| 7 | escherd.html | it sets up the communications with the browser side code | - | auto |
 | 8 | icons.html | icon and icon button elements | [Higher Order Layouts](http://escher-jl.org/layout2-api.html) | user |
 | 9 | layout2.html | advanced layout elements like menus, tabs, pages etc. | [Higher Order Layouts](http://escher-jl.org/layout2-api.html) | user |
 | 10 | signals.html | the elements here correspond to those rendered by basics/signal.jl signal-transport element, which is used to annotate that another element would like to send some events to the server. | [Signal](http://escher-jl.org/signal-api.html) | auto |
