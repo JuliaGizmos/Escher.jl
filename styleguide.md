@@ -10,7 +10,7 @@ woke up from troubled dreams
 """
     )
     ~~~
-    
+
 - Use the `@api` macro wherever possible.
 - Shorthand function expressions can be either:
    - One line (if the line does not exceed 80 characters)
@@ -18,7 +18,7 @@ woke up from troubled dreams
 - Multiline functions must start with a `begin`.
 - Anonymous functions should be one line if they do not overflow the line beyond 80 chars
     - Otherwise the arguments should come in the line as the assignment. e.g.
- 
+
         ~~~julia
         comm.on_msg = (msg) ->
             push!(sig, decodeJSON(sig, msg.content["data"]["value"]))
@@ -35,7 +35,7 @@ woke up from troubled dreams
 
   Notice the extra comma at the end. This is to keep diffs clean.
 - Long ternary expressions should be of the form:
- 
+
     ~~~julia
     foo(x) ?
         case1 :
