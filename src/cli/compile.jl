@@ -48,6 +48,7 @@ escher_make(file, output_dir; single_file=false, assets_dir="pkg/Escher", copy_a
 
     state = Dict()
     state["embedded_signals"] = Dict()
+    state["compiling"] = true
 
     open(opath, "w") do io
         write(io, """<!doctype html>
