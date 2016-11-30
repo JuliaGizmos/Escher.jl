@@ -110,11 +110,11 @@ Polymer({
     properties: {
       signals: {
         type: Array,
-        value: []
+        value: function () { return []; }
       },
       triggers: {
         type: Array,
-        value: []
+        value: function () { return []; }
       }
     },
     domInit: function () {
