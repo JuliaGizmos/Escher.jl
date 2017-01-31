@@ -256,5 +256,5 @@ function main(window)
         )
         """
         )
-        ) |> pad(2em)
+    ) |> pad(2em)
 end
