@@ -9,7 +9,7 @@ among other things as arguments, and return a `Tile` as the result.
 
 Tiles are immutable: once created there is no way to mutate them.
 """
-abstract Tile
+@compat abstract type Tile end
 
 render{T <: Tile}(x::T, state) =
     error("$T cannot be rendered.")

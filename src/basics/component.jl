@@ -11,7 +11,7 @@ export Component,
 """
 The abstract type for all Components
 """
-abstract Component
+@compat abstract type Component end
 
 """
 The view of a component
@@ -26,7 +26,7 @@ convert(::Type{Tile}, c::Component) = view(c)
 An action by/of a component - can be obtained from
 the intent set in the view
 """
-abstract Action <: Intent
+@compat abstract type Action <: Intent end
 
 """
 Given a `Component` and an `Action` transition to

@@ -55,7 +55,7 @@ wrapbehavior(w::IconButton) =
     clickable(w)
 
 
-abstract Selection <: Widget
+@compat abstract type Selection <: Widget end
 
 @api pages => (Pages <: Selection) begin #FIXME: Why is this a widget?
     doc("A set of pages. Only one selected page will be visible at any given time.")

@@ -136,8 +136,8 @@ container(w, h) =
 end
 
 # 1. Placing a Tile inside another
-abstract Position
-abstract Corner <: Position
+@compat abstract type Position end
+@compat abstract type Corner <: Position end
 
 @terms Corner begin
     topleft     => TopLeft
@@ -213,16 +213,16 @@ end
 
 # 2. Axes, Directions and Flow
 
-abstract Axis
+@compat abstract type Axis end
 
-abstract FixedAxis <: Axis
+@compat abstract type FixedAxis <: Axis end
 @terms FixedAxis begin
     horizontal => Horizontal
     vertical => Vertical
     depth => Depth
 end
 
-abstract  Side{Perpendicular <: Axis}
+@compat abstract type Side{Perpendicular <: Axis} end
 @terms Side{Horizontal} begin
     left => Left
     right => Right
@@ -245,7 +245,7 @@ end
 
 # TODO: render inward, outward flow
 
-abstract FlowRelativeAxis <: Axis
+@compat abstract type FlowRelativeAxis <: Axis end
 @terms FlowRelativeAxis begin
     mainaxis => MainAxis
     crossaxis => CrossAxis
@@ -261,7 +261,7 @@ end
     crossend => CrossEnd
 end
 
-abstract FlexContainer <: Tile
+@compat abstract type FlexContainer <: Tile end
 
 render(f::FlexContainer, state) =
     addclasses(render(f.tile, state), classes(f))
@@ -401,7 +401,7 @@ flex{T <: Real}(factor::AbstractVector{T}) = t -> flex(factor, t)
 end
 
 # Flow alignment
-abstract Packing
+@compat abstract type Packing end
 
 @terms Packing begin
     axisstart => AxisStart
@@ -494,7 +494,7 @@ end
 
 # Clipping
 
-abstract Overflow
+@compat abstract type Overflow end
 
 @terms Overflow begin
     hidden => Hidden

@@ -51,7 +51,7 @@ render(t::BorderWidth, state) =
     render(t.tile, state) &
         style(mapparts(allsides, t.sides, "border", "Width", t.width))
 
-abstract StrokeStyle
+@compat abstract type StrokeStyle end
 
 @terms StrokeStyle begin
     noborder => NoStroke

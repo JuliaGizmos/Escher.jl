@@ -24,7 +24,7 @@ The stream of values can be given intents, put into signals, used to trigger upd
 
 See `subscribe`, `intent`, `sampler` and `capture`
 """
-abstract Behavior <: Tile
+@compat abstract type Behavior <: Tile end
 
 
 ### Intent ###
@@ -42,7 +42,7 @@ For example, a simple intent is the pair with intent, if you have a list of butt
 
 Here the `clicks` signal will update to a tuple containing the index of the button clicked and the mouse button clicked whenever any of the buttons is clicked by the user.
 """
-abstract Intent
+@compat abstract type Intent end
 
 @api intent => WithIntent <: Behavior begin
     arg(intent::Intent, doc="The intent")

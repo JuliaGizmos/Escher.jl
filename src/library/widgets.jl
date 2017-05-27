@@ -14,7 +14,7 @@ export wrapbehavior,
 
 # A widget can be coerced into a behavior
 # by calling `wrapbehavior` on it.
-abstract Widget <: Behavior
+@compat abstract type Widget <: Behavior end
 
 subscribe(x::Signal, w::Widget) =
     subscribe(x, wrapbehavior(w))
