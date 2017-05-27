@@ -38,7 +38,7 @@ render(t::WithStates, state) =
             )
         )
 
-@doc "Watch for changes to an attribute/property." ->
+"Watch for changes to an attribute/property."
 function hasstate(tile::Tile; attr::AbstractString="value", trigger::AbstractString="change", selector::AbstractString="::parent")
     hasstates(tile; triggers=Dict(attr=>trigger), selector=selector)
 end

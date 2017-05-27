@@ -23,7 +23,7 @@ render_color(c) = string("#" * hex(c))
 
 boolattr(a) = a ? true : nothing # I know, this is insane
 
-@doc """
+"""
 Intersperse a value in between elements in a vector
 
 Optionally you can tell it to enclose the result in the seperator element.
@@ -36,7 +36,7 @@ intersperse(0, [1, 2, 3])
 intersperse(0, [1, 2, 3], true)
 # => [0, 1, 0, 2, 0, 3, 0]
 ```
-""" ->
+"""
 intersperse(x, xs, enclose=false) = begin
     if length(xs) > 1
         res = foldl((acc, nxt) -> vcat(acc, x, nxt),
@@ -82,7 +82,7 @@ render(c::Class, state) =
                            wrapmany(c.content, c.wrap, state),
                c.class)
 
-@doc """
+"""
 given a sentinal, vector of parts, prefix, suffix and a value,
 
 if the vector of parts is referentially equal to the sentinal, then returns
@@ -92,7 +92,7 @@ otherwise returns
 
 Can be used while rendering border/padding for different sides, or border
 radius for different corners etc.
-""" ->
+"""
 mapparts(sentinal, parts, prefix, suffix, value) =
    parts === sentinal ?
        @d(prefix * suffix => value) :

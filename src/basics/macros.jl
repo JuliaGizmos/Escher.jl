@@ -3,7 +3,7 @@ make_term(term, typ, parent) =
     [:(immutable $typ <: $parent end),
      :(const $(esc(term))  = $typ())]
 
-@doc """
+"""
 `@terms` allows you to create singleton types,
 create instances as constants.
 
@@ -28,7 +28,7 @@ results in
     immutable Z <: A end
     const z = Z()
 
-""" ->
+"""
 macro terms(parent, terms)
     args = filter(x -> x.head != :line, terms.args)
     Expr(:block,
@@ -36,21 +36,21 @@ macro terms(parent, terms)
             for arg in args])...)
 end
 
-@doc """
+"""
 separate out arguments and keyword arguments in a vector of field definitions
-""" ->
+"""
 argskwargs(exps) = begin
     kwargs = filter(exp -> exp.args[1] in [:kwarg, :typedkwarg], exps)
     args = filter(exp -> !(exp.args[1] in [:kwarg, :typedkwarg]), exps)
     args, kwargs
 end
 
-@doc """
+"""
 Convert a field definition into a field definition inside a type declaration
     e.g. arg(x::Number=42)
 will just become
     x::Number
-""" ->
+"""
 typebody(exp::Expr) = begin
     if exp.head == :call
         if exp.args[2].head == :(::)
@@ -62,32 +62,32 @@ typebody(exp::Expr) = begin
     error("Invalid API definition")
 end
 
-@doc """
+"""
 Convert a vector of field definition into a vector of field definition inside a type declaration
     e.g. [:(arg(x::Number=42)), :(typedarg(y::AbstractString="a")), :(kwarg(z::Complex=1+im))]
 will just become
     [:(x::Number), :(y::AbstractString), :(z::Complex)]
 
-""" ->
+"""
 typebody(args::AbstractArray) = begin
     map(typebody, args)
 end
 
-@doc """
+"""
 does this field definition contain a default value?
-""" ->
+"""
 hasdefault(exp) = exp.args[2].head == :kw
 
-@doc """
+"""
 What kind of a field is it?
 
 returns on of :arg, :typedarg, :kwarg, :typedkwarg
-""" ->
+"""
 argtype(exp) = exp.args[1]
 
-@doc """
+"""
 given a field definition, returns the name[::Type] to be used in method arguments
-""" ->
+"""
 getvar(exp) = begin
     decl = exp.args[2]
     hasdefault(exp) ?
@@ -95,18 +95,18 @@ getvar(exp) = begin
         (argtype(exp) === :typedarg ? decl : decl.args[1])
 end
 
-@doc """
+"""
 If given a (::), remove the type annotation and just return the name of the variable
-""" ->
+"""
 striptype(exp::Symbol) = exp
 striptype(exp) = exp.head == :(::) ? exp.args[1] : exp
 
-@doc """
+"""
 Given an expression possibly of the form x::T
 and a dictionary of type parameters e.g. Dict(:T => :Number)
 
 returns an expression of the form x::Number
-""" ->
+"""
 replaceparam(x::Symbol, params) = x
 replaceparam(x, params) = begin
     if x.head === :(::)
@@ -117,7 +117,7 @@ replaceparam(x, params) = begin
     end
 end
 
-@doc """
+"""
 Given an argument definition and a dictionary of type parameters,
 returns different states the arguments can be in in a method definition
 
@@ -125,7 +125,7 @@ the returned value is a Vector of 3-tuples with the following elements
 1. Bool: Should the argument be curried?
 2. Variable name (or a variable name with a type in case of typedarg)
 3. value to use while constructing the underlying type.
-""" ->
+"""
 states(arg, params) = begin
     var = replaceparam(getvar(arg), params)
 
@@ -143,18 +143,18 @@ states(arg, params) = begin
     end
 end
 
-@doc """
+"""
 Internal representation of the method definition sans kwargs
-""" ->
+"""
 immutable ApiMethod
     args
     lambda_args
     constructor_args
 end
 
-@doc """
+"""
 used by makeapimethods to prepend an argument to a method object
-""" ->
+"""
 
 prependarg(state, method) = begin
     curried, var, val = state
@@ -173,13 +173,13 @@ prependarg(state, method) = begin
     ApiMethod(args, lambda_args, constructor_args)
 end
 
-@doc """
+"""
 Given a list of field definitions (see @api) and a dictionary of type parameters
 (e.g. T <: Number would have an entry :T => :Number in the dict),
 returns a list of ApiMethod objects representing the various methods emerging from
 the API definition. Keyword arguments are to be added in when actually creating the
 method definitions.
-""" ->
+"""
 makeapimethods(arglist, params) = begin
     if length(arglist) == 0
         return Any[ApiMethod(Any[], Any[], Any[])]
@@ -191,7 +191,7 @@ makeapimethods(arglist, params) = begin
     end
 end
 
-@doc """
+"""
 Takes a field defintioin of the form
 
     typedkwarg(x::T=default)
@@ -205,8 +205,7 @@ or
     x=default
 
 respectively. The returned expression is of the form Expr(:kw, key, value)
-
-""" ->
+"""
 kwize(argdef) = begin
     @assert argdef.args[1] in [:typedkwarg, :kwarg]
 
@@ -247,9 +246,9 @@ paramdict(typ) =
         (typ.head === :(<:) ?
             paramdict(typ.args[1]) : Dict())
 
-@doc """
+"""
 From a field definition, generate metadata for documenting the field
-""" ->
+"""
 argdoc(arg, params, iskwarg=false) = begin
     name, typ = typebody(arg).args
     kws = filter(x-> isa(x, Expr) && x.head === :kw, arg.args[2:end])
@@ -276,17 +275,17 @@ argdoc(arg, params, iskwarg=false) = begin
     :(merge($dict, (@compat Dict(:doc=>$docstr))))
 end
 
-@doc """
+"""
 Given field definitions (both args and kwargs),
 return the documentation object for an API
-""" ->
+"""
 argdocs(args, kwargs, params) =
     Expr(:vcat, map(arg -> argdoc(arg, params), args)...,
                 map(kwarg -> argdoc(kwarg, params, true), kwargs)...)
 
 const escher_meta = Dict()
 
-@doc """
+"""
 `@api` is used to create new tile types and associated constructors
 
     @api border => (Bordered{T <: Side} <: Tile) begin
@@ -304,7 +303,7 @@ const escher_meta = Dict()
      border(side, tiles; color::Color=colorant"black") = Bordered(side, tiles, color)
      border(side; kwargs...) = tiles -> border(tiles; kwargs...)
 
-""" ->
+"""
 macro api(names, body)
 
     fn, typ = names.args
