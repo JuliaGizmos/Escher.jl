@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/shashi/Escher.jl.svg?branch=master)](https://travis-ci.org/shashi/Escher.jl)
 
-*This package is beta quality and has a large surface area for bugs. Do not use it for anything important.*
+*This package is now dormant. Please see (WebIO.jl)[https://github.com/JuliaGizmos/WebIO.jl] and other packages in the [JuliaGizmos](https://github.com/JuliaGizmos) organization for the future direction in interactive WebIOs.*
 
 **A web server for 2016.** Escher's built-in web server allows you to create interactive Julia UIs with very little code. It takes care of messaging between Julia and the browser under-the-hood. It can also hot-load code: you can see your UI evolve as you save your changes to it.
 
