@@ -45,7 +45,7 @@ export plaintext,
 
 plaintext(x) = Leaf(Elem(:div, string(x)))
 
-abstract FontSize
+@compat abstract type FontSize end
 # Note: I do not like these terms much. Could be irrational fear.
 @terms FontSize begin
     xxsmall => XXSmall
@@ -76,7 +76,7 @@ render{T <: Length}(t::WithFontSize{T}, state) =
 render{T <: FontSize}(t::WithFontSize{T}, state) =
     addclasses(wrapmany(t.tiles, :span, state), classes(t.size))
 
-abstract FontWeight
+@compat abstract type FontWeight end
 # These terms add to the explosion as well.
 @terms FontWeight begin
     bold => Bold
@@ -131,7 +131,7 @@ end
 render(t::FontFamily, state) =
     wrapmany(t.tile, :span, state) & style(@d(:fontFamily => t.family))
 
-abstract FontType
+@compat abstract type FontType end
 # TODO: Add serif and slab fonts
 @terms FontType begin
     serif => Serif
@@ -156,7 +156,7 @@ classes(::Monospace) = "font-monospace"
 render(t::WithFontType, state) =
     addclasses(wrapmany(t.tiles, :span, state), classes(t.typ))
 
-abstract FontStyle
+@compat abstract type FontStyle end
 
 @terms FontStyle begin
     normal => Normal
@@ -178,7 +178,7 @@ end
 render(t::WithFontStyle, state) =
     addclasses(wrapmany(t.tiles, :span, state), classes(t.style))
 
-abstract FontCase
+@compat abstract type FontCase end
 
 # This exists purely for themability. (as opposed to using string case functions from Julia)
 # e.g. .font-uppercase could sometimes use a different letter-spacing in a theme.
@@ -198,7 +198,7 @@ end
 render(t::WithFontCase, state) =
     addclasses(wrapmany(t.tiles, :span, state), classes(t.case))
 
-abstract TextAlignment
+@compat abstract type TextAlignment end
 
 @terms TextAlignment begin
     raggedright => RaggedRight

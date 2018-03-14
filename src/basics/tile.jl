@@ -2,14 +2,14 @@ export Tile, render
 
 import Base: convert, writemime
 
-@doc """
+"""
 A `Tile` is the basic currency in Escher.
 Most of the functions in the Escher API take `Tile`s
 among other things as arguments, and return a `Tile` as the result.
 
 Tiles are immutable: once created there is no way to mutate them.
-""" ->
-abstract Tile
+"""
+@compat abstract type Tile end
 
 render{T <: Tile}(x::T, state) =
     error("$T cannot be rendered.")
@@ -53,16 +53,16 @@ render{T}(x::T, state) =
         render_fallback(bestmime(x), x)
     end
 
-@doc """
+"""
 `Empty` is handy tile that is well... Empty.
 use `empty` constant exported by Escher in your code.
-""" ->
+"""
 immutable Empty <: Tile
 end
 
-@doc """
+"""
 An Empty element.
-""" ->
+"""
 const empty = Empty()
 
 render(t::Empty, state) = Elem(:div)

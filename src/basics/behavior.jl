@@ -38,7 +38,7 @@ render(t::WithStates, state) =
             )
         )
 
-@doc "Watch for changes to an attribute/property." ->
+"Watch for changes to an attribute/property."
 function hasstate(tile::Tile; attr::AbstractString="value", trigger::AbstractString="change", selector::AbstractString="::parent")
     hasstates(tile; triggers=Dict(attr=>trigger), selector=selector)
 end
@@ -74,7 +74,7 @@ default_intent(k::Keypress) = KeyIntent()
 interpret(::KeyIntent, d) =
     Key(d["key"], d["alt"], d["ctrl"], d["meta"], d["shift"])
 
-abstract MouseButton
+@compat abstract type MouseButton end
 
 @terms MouseButton begin
     nobutton => NoButton
@@ -145,7 +145,7 @@ default_intent(t::Selectable) = begin
 end
 
 
-abstract MouseState
+@compat abstract type MouseState end
 
 @terms MouseState begin
     mousedown => MouseDown

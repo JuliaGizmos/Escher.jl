@@ -11,7 +11,6 @@ else
 end
 
 export @md_str, @md_mstr
-#@docstrings
 
 using Compat
 using Patchwork

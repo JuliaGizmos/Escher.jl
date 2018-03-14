@@ -1,3 +1,1 @@
-abstract Theme <: Tile
-
-
+@compat abstract type Theme <: Tile end
