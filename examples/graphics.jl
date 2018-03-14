@@ -1,4 +1,4 @@
-include("helpers/listing.jl")
+include("user-guide/helpers/listing.jl")
 
 function main(window)
     push!(window.assets, "widgets")
