@@ -1,10 +1,15 @@
 language: julia
+os:
+  - linux
+  - osx
 julia:
-  - 0.4
-  - 0.5
-  - nightly
+  - 0.6
 notifications:
   email: false
 #script: # use the default script which is equivalent to the following
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.init(); Pkg.clone(pwd()); Pkg.test("Escher")'
+after_success:
+  - julia -e 'Pkg.add("Documenter")'
+  - julia -e 'Pkg.add("Literate")'
+  - julia -e 'cd(Pkg.dir("InteractBase")); include(joinpath("docs", "make.jl"))'

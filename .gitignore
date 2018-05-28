@@ -5,5 +5,6 @@
 assets/bower_components
 assets/build
 docs/build
-
+docs/site/
+docs/src/tutorial.md
 .DS_Store
