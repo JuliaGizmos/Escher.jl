@@ -121,9 +121,10 @@ display(ui)
 loadbutton = filepicker()
 columnbuttons = Observable{Any}(dom"div"())
 # `columnbuttons` is the `div` object that will contain all the relevant buttons. it is an `Observable` as we want its value to change over time.
-# To add behavior, we use the usual `on` technique:
+# To add behavior, we can use `map!`:
 using CSV, DataFrames
-data = map(CSV.read, observe(loadbutton))
+data = Observable{Any}(DataFrame)
+map!(CSV.read, data, observe(loadbutton))
 #
 # Now as soon as a file is uploaded, the `Observable` `data` gets updated with the correct value. Now, as soon as `data` is updated, we want to update our buttons.
 function makebuttons(df)
@@ -138,7 +139,7 @@ using Plots
 plt = Observable{Any}(plot()) # the container for our plot
 function makebuttons(df)
     buttons = button.(string.(names(df)))
-    for (btn, name) in (buttons, names(df))
+    for (btn, name) in zip(buttons, names(df))
         map!(t -> histogram(df[name]), plt, observe(btn))
     end
     dom"div"(hbox(buttons))
@@ -150,11 +151,11 @@ loadbutton = filepicker()
 columnbuttons = Observable{Any}(dom"div"())
 data = Observable{Any}(DataFrame)
 plt = Observable{Any}(plot())
-on(t -> data[] = CSV.read(t), observe(loadbutton))
+map!(CSV.read, data, observe(loadbutton))
 
 function makebuttons(df)
     buttons = button.(string.(names(df)))
-    for (btn, name) in (buttons, names(df))
+    for (btn, name) in zip(buttons, names(df))
         map!(t -> histogram(df[name]), plt, observe(btn))
     end
     dom"div"(hbox(buttons))
