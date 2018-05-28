@@ -1,15 +1,18 @@
-using Documenter, InteractBase, Literate
+using Documenter, Escher, Literate
 src = joinpath(@__DIR__, "src")
 Literate.markdown(joinpath(src, "tutorial.jl"), src, codefence = "```julia" => "```")
 
 makedocs(
     format = :html,
-    sitename = "InteractBase",
+    sitename = "Escher",
     authors = "JuliaGizmos",
     pages = [
         "Introduction" => "index.md",
+        "Observables" => "observables.md",
+        "Widgets" => "widgets.md",
+        "Layout" => "layout.md",
+        "Deploying the web app" => "deploying.md",
         "Tutorial" => "tutorial.md",
-        "API reference" => "api_reference.md",
     ]
 )
 

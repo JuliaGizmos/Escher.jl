@@ -1,4 +1,16 @@
-# API reference
+# Widgets
+
+Widgets are graphical elements that can take all sorts of input from the user, and update their `Observable` as soon as they receive such input. To access the `Observable` each widget uses to store its value, use `observe(widget)`.
+
+Widgets can be broadly categorized depending on the input they take:
+
+- [Text input](@ref) widgets take a string that's typed in by the user and can represent either a Julia string or a number.
+- [Type input](@ref) widgets take inputs that correspond to non-text Julia types (`Color`, `Date`, `Time` and `Bool`)
+- [File input](@ref) widget is a file selector
+- [Range input](@ref) widget is used to select a value within a range (via a slider)
+- [Callback input](@ref) widget is used to have a callback event, the actual value of the `Observable` is not relevant
+- [HTML5 input](@ref) is a way to access directly the HTML `<input>` tag, should only be relevant for advanced use
+- [Option input](@ref) is used to choose between options
 
 ## Text input
 
@@ -47,7 +59,7 @@ All of the inputs above are implemented wrapping the `input` tag of HTML5 which 
 InteractBase.input
 ```
 
-## Option widgets
+## Option input
 
 ```@docs
 dropdown

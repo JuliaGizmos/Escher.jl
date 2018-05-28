@@ -14,7 +14,7 @@
 # The basic behavior is as follows: Interact provides a series of widgets, each widgets has a primary observable that can be obtained with `observe(widget)` and adding listeners to that observable one can provide behavior. Let's see this in practice.
 #
 # ## Displaying a widget
-using InteractUIkit, WebIO
+using Escher
 ui = button()
 display(ui)
 
@@ -102,7 +102,7 @@ mp = @manipulate for freq1 in freqs, freq2 in slider(0.01:0.1:4π; label="freq2"
     plot(x, y)
 end
 
-# ## Layout
+# ## Widget layout
 #
 # To create a full blown web-app, you should learn the layout tools that the CSS framework you are using provides. Both [Bulma](https://bulma.io/) and [UIkit](https://getuikit.com/) have modern layout tools for responsive design (of course, use Bulma if you're working with InteractBulma and UIkit if you're working with InteractUIkit). You can use [WebIO](https://github.com/JuliaGizmos/WebIO.jl) to create from Julia the HTML required to create these layouts.
 #
