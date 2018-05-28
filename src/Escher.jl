@@ -2,6 +2,7 @@ module Escher
 
 using Reexport
 @reexport using InteractBase
+@reexport using DataStructures
 @reexport using Observables
 @reexport using Vue
 @reexport using CSSUtil
