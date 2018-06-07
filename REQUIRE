@@ -1,6 +1,6 @@
 julia 0.6
-InteractBase
-Interact
+InteractBase 0.3.0
+Interact 0.8
 WebIO
 Vue
 CSSUtil
