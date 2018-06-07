@@ -1,3 +1,5 @@
+__precompile__()
+
 module Escher
 
 using Reexport
