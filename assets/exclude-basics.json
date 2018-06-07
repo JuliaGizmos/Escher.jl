@@ -1,7 +1,0 @@
-{
-    "excludes": {
-        "imports": [
-            "polymer"
-        ]
-    }
-}

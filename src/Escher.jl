@@ -2,6 +2,7 @@ module Escher
 
 using Reexport
 @reexport using InteractBase
+import Interact # to load all available backends and allow switching among them
 @reexport using DataStructures
 @reexport using Observables
 @reexport using Vue
