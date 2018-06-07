@@ -12,4 +12,4 @@ notifications:
 after_success:
   - julia -e 'Pkg.add("Documenter")'
   - julia -e 'Pkg.add("Literate")'
-  - julia -e 'cd(Pkg.dir("InteractBase")); include(joinpath("docs", "make.jl"))'
+  - julia -e 'cd(Pkg.dir("Escher")); include(joinpath("docs", "make.jl"))'
