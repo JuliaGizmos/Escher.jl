@@ -1,7 +1,7 @@
 
 make_term(term, typ, parent) =
     [:(immutable $typ <: $parent end),
-     :(const $(esc(term))  = $typ())]
+     :($(esc(term))  = $typ())]
 
 @doc """
 `@terms` allows you to create singleton types,

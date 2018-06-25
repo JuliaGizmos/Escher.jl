@@ -370,10 +370,6 @@ render(p::PaperShadow, state) =
 
 # TODO: Migrate date picker to Polymer 1.0
 
-if VERSION < v"0.4.0-dev"
-    using Dates
-end
-
 
 @api dateselection => (DateSelection <: Behavior) begin
     arg(tile::Tile)

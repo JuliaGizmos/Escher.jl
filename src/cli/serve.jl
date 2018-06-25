@@ -199,7 +199,7 @@ uisocket(dir) = (req) -> begin
         end
         fw = watch_file(file)
         # wait and close are part of watch_file
-        if( VERSION < v"0.4.0-dev" )
+        if( false )
           wait(fw)
           close(fw)
         end
