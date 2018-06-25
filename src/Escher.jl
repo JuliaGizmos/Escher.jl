@@ -1,14 +1,6 @@
 module Escher
 
-if VERSION < v"0.4.0-dev"
-    using Docile
-end
-
-if VERSION < v"0.4.0-dev"
-    using Markdown
-else
-    using Base.Markdown
-end
+using Base.Markdown
 
 export @md_str, @md_mstr
 #@docstrings
@@ -49,11 +41,7 @@ include("deprecate.jl")
 # This will work on 0.3 automatically, when using 0.4 with precompilation,
 # an explicit call to conditional_setup is needed after loading the other packages.
 
-if VERSION >= v"0.4.0-"
-    external_setup() = include(joinpath(dirname(@__FILE__), "basics", "lazyload.jl"))
-else
-    external_setup() = nothing
-end
+external_setup() = include(joinpath(dirname(@__FILE__), "basics", "lazyload.jl"))
 
 serve(port=5555) =
     include(joinpath(dirname(@__FILE__), "cli", "serve.jl"))(port)
