@@ -1,5 +1,13 @@
 # Escher
 
-I have stopped developing Escher.jl. However, I am working to take what I learned in developing this package and building reusable and hacking-friendly pieces. See [WebIO.jl](https://github.com/JuliaGizmos/WebIO.jl) and other packages in the [JuliaGizmos](https://github.com/JuliaGizmos). You should definitely use those instead of trying to use Escher. In the future this package will become available again as a meta package to all the stuff we're building at JuliaGizmos org.
+Escher has been repurposed to be a metapackage around [Interact.jl](https://github.com/JuliaGizmos/Interact.jl) and other packages for web deployment (so far it includes [Mux.jl](https://github.com/JuliaWeb/Mux.jl) but more things may be added as they become available). Refer to the [Interact documentation](https://juliagizmos.github.io/Interact.jl/latest/) (in particular the [deployment section](https://juliagizmos.github.io/Interact.jl/latest/deploying.html)).
 
--- Shashi
+You can replace `using Interact, Mux` with `using Escher`, i.e.:
+
+```julia
+using Escher
+ui = @manipulate for i in 1:100
+    i
+end
+webio_serve(page("/", req -> ui))
+```
